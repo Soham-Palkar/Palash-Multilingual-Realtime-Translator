@@ -1,0 +1,9 @@
+PALASH TRANSLATION BENCHMARK
+Direction: Hindi -> Santali
+Sentences: 50
+Average: 609.44 ms
+P50: 409.00 ms
+P95: 1112.75 ms
+P99: 4886.14 ms
+Maximum: 8078.00 ms
+Success: 50/50

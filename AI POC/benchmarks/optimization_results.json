@@ -1,0 +1,28 @@
+{
+  "pytorch_fp32": {
+    "status": "OK",
+    "runs": 5,
+    "avg_ms": 612.49,
+    "p50_ms": 594.47,
+    "p95_ms": 678.45,
+    "max_ms": 678.45,
+    "ram_mb": 1356.84
+  },
+  "pytorch_int8": {
+    "status": "OK",
+    "runs": 5,
+    "avg_ms": 981.19,
+    "p50_ms": 975.85,
+    "p95_ms": 1054.17,
+    "max_ms": 1054.17,
+    "ram_mb": 2861.94
+  },
+  "ctranslate2_fp32": {
+    "status": "FAILED",
+    "error": "Loading ai4bharat/indictrans2-indic-indic-dist-320M requires you to execute the configuration file in that repo on your local machine. Make sure you have read the code there to avoid malicious use, then set the option `trust_remote_code=True` to remove this error."
+  },
+  "onnx_fp32": {
+    "status": "FAILED",
+    "error": "Trying to export a IndicTrans model, that is a custom or unsupported architecture, but no custom onnx configuration was passed as `custom_onnx_configs`. Please refer to https://huggingface.co/docs/optimum/main/en/exporters/onnx/usage_guides/export_a_model#custom-export-of-transformers-models for an example on how to export custom models. Please open an issue at https://github.com/huggingface/optimum/issues if you would like the model type IndicTrans to be supported natively in the ONNX export."
+  }
+}

@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+asr-env/
+
+# Model/cache files
+models/
+*.nemo
+*.onnx
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Hugging Face / ML caches
+.cache/
+.cache/
+huggingface/
+transformers/
+
+# Audio generated during testing
+*.wav
+*.mp3
+*.flac
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+
+# Logs
+*.log
+
+# Secrets
+.env
+.env.*

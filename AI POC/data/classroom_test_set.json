@@ -1,0 +1,252 @@
+[
+  {
+    "id": "greeting_001",
+    "category": "greeting",
+    "hindi": "नमस्ते बच्चों।"
+  },
+  {
+    "id": "instruction_001",
+    "category": "instruction",
+    "hindi": "अपनी किताब खोलो।"
+  },
+  {
+    "id": "instruction_002",
+    "category": "instruction",
+    "hindi": "बैठ जाओ।"
+  },
+  {
+    "id": "instruction_003",
+    "category": "instruction",
+    "hindi": "खड़े हो जाओ।"
+  },
+  {
+    "id": "reading_001",
+    "category": "reading",
+    "hindi": "इसे पढ़ो।"
+  },
+  {
+    "id": "writing_001",
+    "category": "writing",
+    "hindi": "इसे लिखो।"
+  },
+  {
+    "id": "counting_001",
+    "category": "counting",
+    "hindi": "इन फलों को गिनो।"
+  },
+  {
+    "id": "counting_002",
+    "category": "counting",
+    "hindi": "कितने फल हैं?"
+  },
+  {
+    "id": "color_001",
+    "category": "colours",
+    "hindi": "इसका रंग क्या है?"
+  },
+  {
+    "id": "repetition_001",
+    "category": "repetition",
+    "hindi": "मेरे पीछे बोलो।"
+  },
+  {
+    "id": "repetition_002",
+    "category": "repetition",
+    "hindi": "फिर से बोलो।"
+  },
+  {
+    "id": "question_001",
+    "category": "questions",
+    "hindi": "अपना नाम बताओ।"
+  },
+  {
+    "id": "encouragement_001",
+    "category": "encouragement",
+    "hindi": "बहुत अच्छा।"
+  },
+  {
+    "id": "instruction_004",
+    "category": "instruction",
+    "hindi": "ध्यान से सुनो।"
+  },
+  {
+    "id": "number_001",
+    "category": "numbers",
+    "hindi": "एक से दस तक गिनो।"
+  },
+  {
+    "id": "number_002",
+    "category": "numbers",
+    "hindi": "यह संख्या क्या है?"
+  },
+  {
+    "id": "assessment_001",
+    "category": "assessment",
+    "hindi": "क्या आपको समझ आया?"
+  },
+  {
+    "id": "assessment_002",
+    "category": "assessment",
+    "hindi": "उत्तर बताओ।"
+  },
+  {
+    "id": "activity_001",
+    "category": "activities",
+    "hindi": "चित्र में रंग भरो।"
+  },
+  {
+    "id": "activity_002",
+    "category": "activities",
+    "hindi": "चलो एक खेल खेलते हैं।"
+  },
+  {
+    "id": "management_001",
+    "category": "classroom management",
+    "hindi": "शांत हो जाओ।"
+  },
+  {
+    "id": "management_002",
+    "category": "classroom management",
+    "hindi": "कक्षा में ध्यान दो।"
+  },
+  {
+    "id": "management_003",
+    "category": "classroom management",
+    "hindi": "अपनी जगह पर जाओ।"
+  },
+  {
+    "id": "greeting_002",
+    "category": "greeting",
+    "hindi": "सुप्रभात बच्चों।"
+  },
+  {
+    "id": "shape_001",
+    "category": "shapes",
+    "hindi": "यह कौन सा आकार है?"
+  },
+  {
+    "id": "shape_002",
+    "category": "shapes",
+    "hindi": "एक वृत्त बनाओ।"
+  },
+  {
+    "id": "object_001",
+    "category": "objects",
+    "hindi": "पेन कहाँ है?"
+  },
+  {
+    "id": "object_002",
+    "category": "objects",
+    "hindi": "यह मेरी किताब है।"
+  },
+  {
+    "id": "clarification_001",
+    "category": "clarification",
+    "hindi": "क्या आपका कोई सवाल है?"
+  },
+  {
+    "id": "clarification_002",
+    "category": "clarification",
+    "hindi": "मुझे समझ नहीं आया।"
+  },
+  {
+    "id": "reading_002",
+    "category": "reading",
+    "hindi": "पहला पाठ खोलो।"
+  },
+  {
+    "id": "writing_002",
+    "category": "writing",
+    "hindi": "अपना नाम बोर्ड पर लिखो।"
+  },
+  {
+    "id": "encouragement_002",
+    "category": "encouragement",
+    "hindi": "शाबाश!"
+  },
+  {
+    "id": "management_004",
+    "category": "classroom management",
+    "hindi": "एक पंक्ति में खड़े हो जाओ।"
+  },
+  {
+    "id": "management_005",
+    "category": "classroom management",
+    "hindi": "बाहर मत देखो।"
+  },
+  {
+    "id": "instruction_005",
+    "category": "instruction",
+    "hindi": "हाथ ऊपर करो।"
+  },
+  {
+    "id": "instruction_006",
+    "category": "instruction",
+    "hindi": "हाथ नीचे करो।"
+  },
+  {
+    "id": "question_002",
+    "category": "questions",
+    "hindi": "तुम्हारा घर कहाँ है?"
+  },
+  {
+    "id": "color_002",
+    "category": "colours",
+    "hindi": "यह लाल रंग है।"
+  },
+  {
+    "id": "color_003",
+    "category": "colours",
+    "hindi": "आसमान नीला है।"
+  },
+  {
+    "id": "activity_003",
+    "category": "activities",
+    "hindi": "चलो एक कहानी सुनते हैं।"
+  },
+  {
+    "id": "activity_004",
+    "category": "activities",
+    "hindi": "गीत गाओ।"
+  },
+  {
+    "id": "greeting_003",
+    "category": "greeting",
+    "hindi": "कल मिलते हैं।"
+  },
+  {
+    "id": "greeting_004",
+    "category": "greeting",
+    "hindi": "कक्षा समाप्त हो गई है।"
+  },
+  {
+    "id": "reading_003",
+    "category": "reading",
+    "hindi": "जोर से पढ़ो।"
+  },
+  {
+    "id": "writing_003",
+    "category": "writing",
+    "hindi": "अपनी कॉपी में लिखो।"
+  },
+  {
+    "id": "object_003",
+    "category": "objects",
+    "hindi": "दरवाजा बंद करो।"
+  },
+  {
+    "id": "object_004",
+    "category": "objects",
+    "hindi": "खिड़की खोलो।"
+  },
+  {
+    "id": "assessment_003",
+    "category": "assessment",
+    "hindi": "आज का पाठ खत्म हुआ।"
+  },
+  {
+    "id": "encouragement_003",
+    "category": "encouragement",
+    "hindi": "तुमने बहुत अच्छा काम किया।"
+  }
+]

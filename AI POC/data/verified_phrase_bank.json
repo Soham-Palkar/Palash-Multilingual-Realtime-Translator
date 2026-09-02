@@ -1,0 +1,26 @@
+[
+  {
+    "id": "instruction_001",
+    "category": "instruction",
+    "hindi": "अपनी किताब खोलो।",
+    "machine_santali": "ᱟᱢᱟᱜ ᱯᱚᱛᱚᱵ ᱡᱷᱤᱡᱽ ᱢᱮ᱾",
+    "verified_santali": "ᱟᱢᱟᱜ ᱯᱚᱛᱚᱵ ᱡᱷᱤᱡᱽ ᱢᱮ᱾",
+    "verified": true
+  },
+  {
+    "id": "greeting_001",
+    "category": "greeting",
+    "hindi": "नमस्ते बच्चों।",
+    "machine_santali": "ᱡᱚᱦᱟᱨ ᱜᱤᱫᱽᱨᱟᱹ ᱠᱚ᱾",
+    "verified_santali": "ᱡᱚᱦᱟᱨ ᱜᱤᱫᱽᱨᱟᱹ ᱠᱚ᱾",
+    "verified": true
+  },
+  {
+    "id": "reading_001",
+    "category": "reading",
+    "hindi": "इसे पढ़ो।",
+    "machine_santali": "ᱱᱚᱶᱟ ᱯᱟᱲᱦᱟᱣ ᱢᱮ᱾",
+    "verified_santali": null,
+    "verified": false
+  }
+]
