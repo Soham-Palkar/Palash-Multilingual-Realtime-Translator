@@ -1,58 +1,170 @@
 import pyaudio
-import time
 from typing import List, Dict, Optional
+
 
 class Microphone:
     """
-    Abstration for a physical microphone using PyAudio.
-    Supports selecting an external or built-in microphone, opening a stream, and capturing PCM frames.
+    Physical microphone capture using PyAudio.
+
+    Audio format:
+        - PCM16
+        - Mono
+        - 16 kHz
+
+    Designed for the PALASH real-time voice pipeline.
     """
-    def __init__(self, rate: int = 16000, channels: int = 1, chunk_size: int = 1024):
+
+    def __init__(
+        self,
+        rate: int = 16000,
+        channels: int = 1,
+        chunk_size: int = 1024
+    ):
         self.rate = rate
         self.channels = channels
         self.chunk_size = chunk_size
         self.format = pyaudio.paInt16
+
         self.p = pyaudio.PyAudio()
         self.stream = None
-        self.selected_device_id = None
+        self.selected_device_id: Optional[int] = None
 
-    def list_audio_inputs(self) -> List[Dict[str, any]]:
-        """Enumerates available microphone input devices."""
+    # ---------------------------------------------------------
+    # DEVICE DISCOVERY
+    # ---------------------------------------------------------
+
+    def list_audio_inputs(self) -> List[Dict]:
+        """
+        Return all available physical microphone input devices.
+        """
+
         inputs = []
-        info = self.p.get_host_api_info_by_index(0)
-        numdevices = info.get('deviceCount')
-        
-        for i in range(numdevices):
-            dev_info = self.p.get_device_info_by_host_api_device_index(0, i)
-            if dev_info.get('maxInputChannels') > 0:
-                inputs.append({
-                    "id": i,
-                    "name": dev_info.get('name'),
-                    "channels": dev_info.get('maxInputChannels'),
-                    "sample_rate": int(dev_info.get('defaultSampleRate'))
-                })
+
+        for i in range(self.p.get_device_count()):
+            try:
+                dev_info = self.p.get_device_info_by_index(i)
+
+                if dev_info.get("maxInputChannels", 0) > 0:
+                    inputs.append({
+                        "id": i,
+                        "name": dev_info.get("name", "Unknown"),
+                        "channels": int(
+                            dev_info.get("maxInputChannels", 0)
+                        ),
+                        "sample_rate": int(
+                            dev_info.get("defaultSampleRate", 16000)
+                        ),
+                    })
+
+            except Exception as e:
+                print(f"[Microphone] Could not inspect device {i}: {e}")
+
         return inputs
 
+    def print_audio_inputs(self):
+        """Print available microphone devices."""
+
+        inputs = self.list_audio_inputs()
+
+        print("\nAvailable microphone inputs:")
+        print("-" * 60)
+
+        for device in inputs:
+            print(
+                f"ID {device['id']}: "
+                f"{device['name']} | "
+                f"channels={device['channels']} | "
+                f"default_rate={device['sample_rate']}"
+            )
+
+        print("-" * 60)
+
+    # ---------------------------------------------------------
+    # DEVICE SELECTION
+    # ---------------------------------------------------------
+
     def select_audio_input(self, device_id: Optional[int] = None):
-        """Selects the audio input device. Uses default if None."""
+        """
+        Select microphone.
+
+        If device_id is supplied:
+            use that exact device.
+
+        Otherwise:
+            prefer USB/external microphones.
+            fall back to the first available input.
+        """
+
+        inputs = self.list_audio_inputs()
+
+        if not inputs:
+            raise RuntimeError(
+                "No microphone input devices found."
+            )
+
+        # Explicit device selection
         if device_id is not None:
+
+            matching = [
+                d for d in inputs
+                if d["id"] == device_id
+            ]
+
+            if not matching:
+                raise ValueError(
+                    f"Microphone device ID {device_id} "
+                    f"was not found."
+                )
+
             self.selected_device_id = device_id
+
         else:
-            inputs = self.list_audio_inputs()
-            if not inputs:
-                raise RuntimeError("No microphone input devices found.")
-            # Prefer external mics (often have USB or external in name), otherwise default to first
-            external = [d for d in inputs if 'USB' in d['name'] or 'External' in d['name']]
-            self.selected_device_id = external[0]['id'] if external else inputs[0]['id']
-            
-        dev_info = self.p.get_device_info_by_host_api_device_index(0, self.selected_device_id)
-        print(f"Selected Microphone: {dev_info.get('name')} (ID: {self.selected_device_id})")
+
+            # Prefer external / USB microphones
+            external_keywords = (
+                "USB",
+                "External",
+                "Headset",
+                "Microphone"
+            )
+
+            external = [
+                d for d in inputs
+                if any(
+                    keyword.lower() in d["name"].lower()
+                    for keyword in external_keywords
+                )
+            ]
+
+            if external:
+                self.selected_device_id = external[0]["id"]
+            else:
+                self.selected_device_id = inputs[0]["id"]
+
+        selected = next(
+            d for d in inputs
+            if d["id"] == self.selected_device_id
+        )
+
+        print(
+            f"[Microphone] Selected: "
+            f"{selected['name']} "
+            f"(ID {selected['id']})"
+        )
+
+    # ---------------------------------------------------------
+    # STREAM
+    # ---------------------------------------------------------
 
     def start(self):
-        """Opens the microphone stream and starts recording."""
+        """Open the physical microphone stream."""
+
+        if self.stream is not None:
+            return
+
         if self.selected_device_id is None:
             self.select_audio_input()
-            
+
         try:
             self.stream = self.p.open(
                 format=self.format,
@@ -60,31 +172,87 @@ class Microphone:
                 rate=self.rate,
                 input=True,
                 input_device_index=self.selected_device_id,
-                frames_per_buffer=self.chunk_size
+                frames_per_buffer=self.chunk_size,
             )
-            print("Microphone stream started.")
+
+            print(
+                f"[Microphone] Stream started "
+                f"({self.rate} Hz, "
+                f"{self.channels} channel, "
+                f"PCM16)"
+            )
+
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize microphone: {e}")
+            self.stream = None
+
+            raise RuntimeError(
+                f"Failed to initialize microphone: {e}"
+            )
+
+    def is_active(self) -> bool:
+        """Return True if microphone stream is active."""
+
+        return (
+            self.stream is not None
+            and self.stream.is_active()
+        )
 
     def read_chunk(self) -> bytes:
-        """Reads a chunk of PCM audio from the microphone."""
-        if not self.stream or not self.stream.is_active():
-            raise RuntimeError("Microphone stream is not active.")
-        # exception_on_overflow=False prevents crashes if we don't read fast enough
-        return self.stream.read(self.chunk_size, exception_on_overflow=False)
+        """
+        Read one PCM16 audio chunk.
+
+        Returns:
+            bytes
+        """
+
+        if not self.is_active():
+            raise RuntimeError(
+                "Microphone stream is not active."
+            )
+
+        return self.stream.read(
+            self.chunk_size,
+            exception_on_overflow=False
+        )
+
+    # ---------------------------------------------------------
+    # CLEANUP
+    # ---------------------------------------------------------
 
     def stop(self):
-        """Cleanly stops and releases the microphone stream."""
-        if self.stream:
-            self.stream.stop_stream()
-            self.stream.close()
+        """Stop the microphone stream."""
+
+        if self.stream is not None:
+
+            try:
+                self.stream.stop_stream()
+                self.stream.close()
+            except Exception as e:
+                print(
+                    f"[Microphone] Stop warning: {e}"
+                )
+
             self.stream = None
-            print("Microphone stream stopped.")
-            
+
+            print(
+                "[Microphone] Stream stopped."
+            )
+
     def close(self):
-        """Terminates the PyAudio instance."""
+        """Release all PyAudio resources."""
+
         self.stop()
-        self.p.terminate()
+
+        if self.p is not None:
+            try:
+                self.p.terminate()
+            except Exception:
+                pass
+
+            self.p = None
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except Exception:
+            pass
