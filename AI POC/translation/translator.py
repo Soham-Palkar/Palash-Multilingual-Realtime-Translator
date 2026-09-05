@@ -344,7 +344,7 @@ class Translator:
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
 
-        start_time = time.time()
+        start_time = time.perf_counter()
 
         result = {
             "source_text": text,
@@ -366,7 +366,7 @@ class Translator:
             result["error"] = "Empty input text"
 
             result["latency_ms"] = int(
-                (time.time() - start_time) * 1000
+                (time.perf_counter() - start_time) * 1000
             )
 
             return result
@@ -379,7 +379,7 @@ class Translator:
             )
 
             result["latency_ms"] = int(
-                (time.time() - start_time) * 1000
+                (time.perf_counter() - start_time) * 1000
             )
 
             return result
@@ -415,7 +415,7 @@ class Translator:
                 result["success"] = True
 
                 result["latency_ms"] = int(
-                    (time.time() - start_time) * 1000
+                    (time.perf_counter() - start_time) * 1000
                 )
 
                 return result
@@ -457,7 +457,7 @@ class Translator:
             # TRANSLATION INFERENCE
             # -------------------------------------------------
 
-            with torch.no_grad():
+            with torch.inference_mode():
 
                 generated_tokens = self.model.generate(
                     **inputs,
@@ -467,8 +467,8 @@ class Translator:
                     # Prevent pathological long generation.
                     max_length=max_generation_length,
 
-                    # Beam search.
-                    num_beams=5,
+                    # Optimized beam search (num_beams=1 for high-speed greedy search)
+                    num_beams=1,
                     num_return_sequences=1,
 
                     # Encourage generation to stop naturally.
@@ -560,7 +560,7 @@ class Translator:
         # -----------------------------------------------------
 
         result["latency_ms"] = int(
-            (time.time() - start_time) * 1000
+            (time.perf_counter() - start_time) * 1000
         )
 
         return result

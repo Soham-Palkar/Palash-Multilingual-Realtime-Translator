@@ -4,10 +4,48 @@ import base64
 import tempfile
 import os
 import wave
+import time
 from pathlib import Path
+
+# ---------------------------------------------------------
+# IPC PROTOCOL ENFORCEMENT (P0 STRICT RULE)
+#
+# The raw IPC stdout stream is saved FIRST before any redirect.
+# Python-level redirect: sys.stdout = sys.stderr
+#   → all Python print() calls go to stderr.
+#
+# NOTE: os.dup2 is intentionally NOT used here.
+# os.dup2(stderr_fd, 1) would destroy fd 1 — which is the Popen stdout=PIPE
+# pipe that the Windows client reads from. After dup2, _ipc_stdout_stream.fileno()
+# would still be 1 but fd 1 would point to stderr, making all IPC writes
+# silently go to stderr instead of the pipe. The Windows reader thread would
+# starve and never receive the ready message.
+#
+# Python-level redirect is sufficient: it covers all Python print() calls.
+# C-extension writes to fd 1 are handled by the separate stderr=PIPE capture
+# on the Windows client side (non-JSON lines are discarded/logged).
+# ---------------------------------------------------------
+
+_ipc_stdout_stream = sys.stdout
+
+# Python level only — do NOT touch fd 1 / os.dup2
+sys.stdout = sys.stderr
+
+
+def send_ipc_response(payload: dict):
+    """Write pure un-contaminated JSON response to the IPC stdout stream."""
+    json_str = json.dumps(payload, ensure_ascii=False) + "\n"
+    _ipc_stdout_stream.write(json_str)
+    _ipc_stdout_stream.flush()
+
 
 import torch
 import nemo.collections.asr as nemo_asr
+try:
+    from nemo.utils import logging as nemo_logging
+    nemo_logging.set_verbosity(nemo_logging.ERROR)
+except ImportError:
+    pass
 
 
 # ---------------------------------------------------------
@@ -21,21 +59,17 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 from translation.translator import Translator
+from voice.indic_parler_tts import IndicParlerTTSBackend
 
 
 # ---------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------
 
-MODEL_NAME = (
-    "ai4bharat/"
-    "indicconformer_stt_hi_hybrid_rnnt_large"
-)
-
+MODEL_NAME = "ai4bharat/indicconformer_stt_hi_hybrid_rnnt_large"
 SAMPLE_RATE = 16000
-
-SOURCE_LANGUAGE = "hin_Deva"
-TARGET_LANGUAGE = "sat_Olck"
+DEFAULT_SOURCE_LANGUAGE = "hin_Deva"
+DEFAULT_TARGET_LANGUAGE = "sat_Olck"
 
 
 # ---------------------------------------------------------
@@ -43,18 +77,8 @@ TARGET_LANGUAGE = "sat_Olck"
 # ---------------------------------------------------------
 
 def log(message: str):
-    """
-    Write logs to stderr.
-
-    stdout is reserved for JSON communication
-    with the Windows client.
-    """
-
-    print(
-        message,
-        file=sys.stderr,
-        flush=True
-    )
+    """Write debug logs to stderr."""
+    print(message, file=sys.stderr, flush=True)
 
 
 # ---------------------------------------------------------
@@ -63,64 +87,45 @@ def log(message: str):
 
 def load_models():
     """
-    Load IndicConformer ASR and PALASH Translator.
-
-    Both remain loaded for the lifetime of this worker.
+    Load IndicConformer ASR, IndicTrans2 Translator, and Indic Parler-TTS once.
+    All models remain loaded in CUDA memory for the lifetime of the worker.
     """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    device = torch.device(
-        "cuda"
-        if torch.cuda.is_available()
-        else "cpu"
-    )
+    # 1. ASR
+    log(f"[ASR] Loading Hindi model {MODEL_NAME}...")
+    log(f"[ASR] Device: {device}")
+    asr_start = time.perf_counter()
 
-    # -----------------------------------------------------
-    # ASR
-    # -----------------------------------------------------
-
-    log(
-        "[WSL ASR] Loading "
-        f"{MODEL_NAME}"
-    )
-
-    log(
-        f"[WSL ASR] Device: {device}"
-    )
-
-    asr_model = (
-        nemo_asr.models.ASRModel
-        .from_pretrained(MODEL_NAME)
-    )
-
+    asr_model = nemo_asr.models.ASRModel.from_pretrained(MODEL_NAME)
     asr_model.freeze()
-
     asr_model = asr_model.to(device)
-
-    # Use CTC decoder for current pipeline.
     asr_model.cur_decoder = "ctc"
+    asr_model.eval()
+    asr_load_ms = round((time.perf_counter() - asr_start) * 1000, 2)
+    log(f"[ASR] Ready ({asr_load_ms} ms)")
 
-    log(
-        "[WSL ASR] IndicConformer "
-        "loaded successfully."
-    )
-
-    # -----------------------------------------------------
-    # TRANSLATOR
-    # -----------------------------------------------------
-
-    log(
-        "[WSL Translation] "
-        "Loading Translator..."
-    )
-
+    # 2. TRANSLATOR
+    log("[TRANSLATION] Loading IndicTrans2...")
+    trans_start = time.perf_counter()
     translator = Translator()
+    trans_load_ms = round((time.perf_counter() - trans_start) * 1000, 2)
+    log(f"[TRANSLATION] Ready ({trans_load_ms} ms)")
 
-    log(
-        "[WSL Translation] "
-        "Translator loaded successfully."
-    )
+    # 3. TTS
+    log("[TTS] Loading Indic Parler-TTS...")
+    tts_start = time.perf_counter()
+    tts_backend = None
+    try:
+        tts_backend = IndicParlerTTSBackend(device=str(device), lazy_load=False)
+        tts_load_ms = round((time.perf_counter() - tts_start) * 1000, 2)
+        log(f"[TTS] Ready ({tts_load_ms} ms)")
+    except Exception as e:
+        log(f"[TTS WARNING] Indic Parler-TTS failed to initialize: {e}")
+        log("[MODEL MISSING] Run setup/download first.")
 
-    return asr_model, translator, device
+    log("[WORKER] Ready")
+    return asr_model, translator, tts_backend, device
 
 
 # ---------------------------------------------------------
@@ -128,252 +133,93 @@ def load_models():
 # ---------------------------------------------------------
 
 def clean_asr_result(raw_result) -> str:
-    """
-    Convert the different result formats returned by
-    NeMo into clean Hindi text.
-
-    Examples:
-
-        ['मेरा नाम सोहम है']
-            ->
-        मेरा नाम सोहम है
-
-        "मेरा नाम सोहम है"
-            ->
-        मेरा नाम सोहम है
-
-        ['मेरा', 'नाम', 'सोहम', 'है']
-            ->
-        मेरा नाम सोहम है
-    """
-
+    """Convert raw NeMo result output into clean Hindi text."""
     if raw_result is None:
         return ""
 
-    # -----------------------------------------------------
-    # Actual list/tuple returned by NeMo
-    # -----------------------------------------------------
-
     if isinstance(raw_result, (list, tuple)):
-
-        parts = []
-
-        for item in raw_result:
-
-            if item is None:
-                continue
-
-            item_text = str(item).strip()
-
-            if item_text:
-                parts.append(item_text)
-
+        parts = [str(item).strip() for item in raw_result if item is not None and str(item).strip()]
         text = " ".join(parts)
-
     else:
-
         text = str(raw_result).strip()
 
-    text = text.strip()
-
-    # -----------------------------------------------------
-    # Handle string representation of a Python list
-    #
-    # Example:
-    # "['मेरा नाम सोहम है']"
-    # -----------------------------------------------------
-
-    if (
-        text.startswith("[")
-        and text.endswith("]")
-    ):
-
+    if text.startswith("[") and text.endswith("]"):
         text = text[1:-1].strip()
-
-        # Remove surrounding single quotes.
-        if (
-            len(text) >= 2
-            and text.startswith("'")
-            and text.endswith("'")
-        ):
-            text = text[1:-1]
-
-        # Remove surrounding double quotes.
-        elif (
-            len(text) >= 2
-            and text.startswith('"')
-            and text.endswith('"')
-        ):
+        if len(text) >= 2 and text[0] in ("'", '"') and text[-1] == text[0]:
             text = text[1:-1]
 
     return text.strip()
 
 
 # ---------------------------------------------------------
-# ASR
+# ASR TRANSCRIBE
 # ---------------------------------------------------------
 
-def transcribe(
-    asr_model,
-    pcm_bytes: bytes
-) -> str:
-    """
-    Transcribe PCM16 mono 16kHz audio.
-
-    Input:
-        Raw PCM16 bytes.
-
-    Output:
-        Recognized Hindi text.
-    """
-
+def transcribe(asr_model, pcm_bytes: bytes, language_id: str = "hi") -> tuple[str, float]:
+    """Transcribe PCM16 mono 16kHz audio using IndicConformer."""
     if not pcm_bytes:
-        return ""
+        return "", 0.0
 
     temp_path = None
+    t0 = time.perf_counter()
 
     try:
-
-        # -------------------------------------------------
-        # Create temporary WAV for NeMo
-        # -------------------------------------------------
-
-        with tempfile.NamedTemporaryFile(
-            suffix=".wav",
-            delete=False
-        ) as temp_audio:
-
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio:
             temp_path = temp_audio.name
 
-        with wave.open(
-            temp_path,
-            "wb"
-        ) as wav_file:
-
+        with wave.open(temp_path, "wb") as wav_file:
             wav_file.setnchannels(1)
-
-            # PCM16 = 2 bytes/sample
             wav_file.setsampwidth(2)
+            wav_file.setframerate(SAMPLE_RATE)
+            wav_file.writeframes(pcm_bytes)
 
-            wav_file.setframerate(
-                SAMPLE_RATE
+        log("[WSL ASR] Running IndicConformer inference...")
+        with torch.inference_mode():
+            results = asr_model.transcribe(
+                [temp_path],
+                batch_size=1,
+                logprobs=False,
+                language_id=language_id,
+                verbose=False,
             )
 
-            wav_file.writeframes(
-                pcm_bytes
-            )
-
-        # -------------------------------------------------
-        # IndicConformer inference
-        # -------------------------------------------------
-
-        log(
-            "[WSL ASR] Running "
-            "IndicConformer inference..."
-        )
-
-        results = asr_model.transcribe(
-            [temp_path],
-            batch_size=1,
-            logprobs=False,
-            language_id="hi",
-            verbose=False,
-        )
+        asr_ms = round((time.perf_counter() - t0) * 1000, 2)
 
         if not results:
             log("[WSL ASR] No result returned.")
-            return ""
+            return "", asr_ms
 
-        # -------------------------------------------------
-        # CLEAN NE Mo RESULT
-        # -------------------------------------------------
-
-        raw_result = results[0]
-
-        text = clean_asr_result(
-            raw_result
-        )
-
-        log(
-            f"[WSL ASR] Result: {text}"
-        )
-
-        return text
+        text = clean_asr_result(results[0])
+        log(f"[WSL ASR] Result ({asr_ms} ms): {text}")
+        return text, asr_ms
 
     finally:
-
-        # -------------------------------------------------
-        # Remove temporary WAV
-        # -------------------------------------------------
-
-        if (
-            temp_path
-            and os.path.exists(temp_path)
-        ):
-
+        if temp_path and os.path.exists(temp_path):
             try:
                 os.remove(temp_path)
-
             except OSError as e:
-
-                log(
-                    "[WSL ASR] Warning: "
-                    f"Could not remove temporary WAV: {e}"
-                )
+                log(f"[WSL ASR] Warning: Could not remove temp WAV: {e}")
 
 
 # ---------------------------------------------------------
 # TRANSLATION
 # ---------------------------------------------------------
 
-def translate_text(
-    translator,
-    text: str
-):
-    """
-    Translate Hindi text to Santali
-    using the existing PALASH translation layer.
-    """
-
+def translate_text(translator, text: str, source_lang: str, target_lang: str) -> dict:
+    """Translate text using PALASH Translator layer."""
     text = text.strip()
 
     if not text:
-
         return {
             "translated_text": "",
             "translation_source": None,
             "latency_ms": 0,
             "success": False,
-            "error": "Empty ASR text"
+            "error": "Empty input text for translation"
         }
 
-    log(
-        "[WSL Translation] "
-        f"Translating: {text}"
-    )
-
-    result = translator.translate(
-        text,
-        SOURCE_LANGUAGE,
-        TARGET_LANGUAGE
-    )
-
-    if result["success"]:
-
-        log(
-            "[WSL Translation] "
-            f"Result: "
-            f"{result['translated_text']}"
-        )
-
-    else:
-
-        log(
-            "[WSL Translation] "
-            f"FAILED: {result['error']}"
-        )
-
-    return result
+    log(f"[WSL Translation] Translating ({source_lang} -> {target_lang}): {text}")
+    return translator.translate(text, source_lang, target_lang)
 
 
 # ---------------------------------------------------------
@@ -381,281 +227,216 @@ def translate_text(
 # ---------------------------------------------------------
 
 def main():
+    asr_model, translator, tts_backend, device = load_models()
 
-    # -----------------------------------------------------
-    # Load models ONCE
-    # -----------------------------------------------------
-
-    asr_model, translator, device = (
-        load_models()
+    # Handshake ready notification to Windows client over pure JSON IPC pipe
+    send_ipc_response(
+        {
+            "type": "ready",
+            "model": MODEL_NAME,
+            "device": str(device),
+            "source_language": DEFAULT_SOURCE_LANGUAGE,
+            "target_language": DEFAULT_TARGET_LANGUAGE,
+            "tts_available": tts_backend is not None
+        }
     )
-
-    # -----------------------------------------------------
-    # Tell Windows worker is ready
-    # -----------------------------------------------------
-
-    print(
-        json.dumps(
-            {
-                "type": "ready",
-                "model": MODEL_NAME,
-                "device": str(device),
-                "source_language": SOURCE_LANGUAGE,
-                "target_language": TARGET_LANGUAGE
-            },
-            ensure_ascii=False
-        ),
-        flush=True
-    )
-
-    # -----------------------------------------------------
-    # Wait for Windows requests
-    # -----------------------------------------------------
 
     for line in sys.stdin:
-
         line = line.strip()
-
         if not line:
             continue
 
         try:
-
             request = json.loads(line)
-
-            request_type = request.get(
-                "type"
-            )
-
-            # =================================================
-            # TRANSCRIBE + TRANSLATE
-            # =================================================
+            request_type = request.get("type")
 
             if request_type == "transcribe":
+                source_lang = request.get("source_language", DEFAULT_SOURCE_LANGUAGE)
+                target_lang = request.get("target_language", DEFAULT_TARGET_LANGUAGE)
+                enable_tts = request.get("enable_tts", True)
+                audio_b64 = request.get("audio", "")
 
-                audio_b64 = request.get(
-                    "audio",
-                    ""
-                )
-
-                if not audio_b64:
-
-                    print(
-                        json.dumps(
-                            {
-                                "type": "result",
-                                "recognized_text": "",
-                                "translated_text": "",
-                                "translation_source": None,
-                                "translation_latency_ms": 0,
-                                "success": False,
-                                "error": (
-                                    "No audio data received."
-                                )
-                            },
-                            ensure_ascii=False
-                        ),
-                        flush=True
-                    )
-
-                    continue
-
-                # -----------------------------------------
-                # Decode audio
-                # -----------------------------------------
-
-                try:
-
-                    pcm_bytes = base64.b64decode(
-                        audio_b64
-                    )
-
-                except Exception as e:
-
-                    print(
-                        json.dumps(
-                            {
-                                "type": "result",
-                                "recognized_text": "",
-                                "translated_text": "",
-                                "translation_source": None,
-                                "translation_latency_ms": 0,
-                                "success": False,
-                                "error": (
-                                    f"Invalid audio data: {e}"
-                                )
-                            },
-                            ensure_ascii=False
-                        ),
-                        flush=True
-                    )
-
-                    continue
-
-                log(
-                    "[WSL ASR] Received "
-                    f"{len(pcm_bytes)} bytes"
-                )
-
-                # -----------------------------------------
-                # ASR
-                # -----------------------------------------
-
-                recognized_text = transcribe(
-                    asr_model,
-                    pcm_bytes
-                )
-
-                if not recognized_text:
-
-                    print(
-                        json.dumps(
-                            {
-                                "type": "result",
-                                "recognized_text": "",
-                                "translated_text": "",
-                                "translation_source": None,
-                                "translation_latency_ms": 0,
-                                "success": False,
-                                "error": (
-                                    "ASR returned empty text."
-                                )
-                            },
-                            ensure_ascii=False
-                        ),
-                        flush=True
-                    )
-
-                    continue
-
-                # -----------------------------------------
-                # Translation
-                # -----------------------------------------
-
-                translation_result = (
-                    translate_text(
-                        translator,
-                        recognized_text
-                    )
-                )
-
-                # -----------------------------------------
-                # Return result to Windows
-                # -----------------------------------------
-
-                print(
-                    json.dumps(
+                # Direction validation: Santali ASR check
+                if source_lang in ("sat_Olck", "sat"):
+                    send_ipc_response(
                         {
                             "type": "result",
-
-                            "recognized_text":
-                                recognized_text,
-
-                            "translated_text":
-                                translation_result.get(
-                                    "translated_text",
-                                    ""
-                                ),
-
-                            "translation_source":
-                                translation_result.get(
-                                    "translation_source"
-                                ),
-
-                            "translation_latency_ms":
-                                translation_result.get(
-                                    "latency_ms",
-                                    0
-                                ),
-
-                            "success":
-                                translation_result.get(
-                                    "success",
-                                    False
-                                ),
-
-                            "error":
-                                translation_result.get(
-                                    "error"
-                                )
-                        },
-                        ensure_ascii=False
-                    ),
-                    flush=True
-                )
-
-            # =================================================
-            # SHUTDOWN
-            # =================================================
-
-            elif request_type == "shutdown":
-
-                log(
-                    "[WSL ASR] "
-                    "Shutdown requested."
-                )
-
-                print(
-                    json.dumps(
-                        {
-                            "type": "shutdown",
-                            "success": True
-                        },
-                        ensure_ascii=False
-                    ),
-                    flush=True
-                )
-
-                break
-
-            # =================================================
-            # UNKNOWN REQUEST
-            # =================================================
-
-            else:
-
-                print(
-                    json.dumps(
-                        {
-                            "type": "error",
+                            "recognized_text": "",
+                            "translated_text": "",
+                            "translation_source": None,
+                            "asr_latency_ms": 0,
+                            "translation_latency_ms": 0,
+                            "tts_latency_ms": 0,
+                            "audio_tts": None,
                             "success": False,
-                            "error": (
-                                "Unknown request type: "
-                                f"{request_type}"
-                            )
-                        },
-                        ensure_ascii=False
-                    ),
-                    flush=True
+                            "error": "Santali ASR pending model integration"
+                        }
+                    )
+                    continue
+
+                if not audio_b64:
+                    send_ipc_response(
+                        {
+                            "type": "result",
+                            "recognized_text": "",
+                            "translated_text": "",
+                            "translation_source": None,
+                            "asr_latency_ms": 0,
+                            "translation_latency_ms": 0,
+                            "tts_latency_ms": 0,
+                            "audio_tts": None,
+                            "success": False,
+                            "error": "No audio data received."
+                        }
+                    )
+                    continue
+
+                try:
+                    pcm_bytes = base64.b64decode(audio_b64)
+                except Exception as e:
+                    send_ipc_response(
+                        {
+                            "type": "result",
+                            "recognized_text": "",
+                            "translated_text": "",
+                            "translation_source": None,
+                            "asr_latency_ms": 0,
+                            "translation_latency_ms": 0,
+                            "tts_latency_ms": 0,
+                            "audio_tts": None,
+                            "success": False,
+                            "error": f"Invalid audio data: {e}"
+                        }
+                    )
+                    continue
+
+                log(f"[WSL ASR] Received audio frame: {len(pcm_bytes)} bytes")
+
+                # 1. ASR
+                recognized_text, asr_ms = transcribe(asr_model, pcm_bytes, language_id="hi")
+
+                if not recognized_text:
+                    send_ipc_response(
+                        {
+                            "type": "result",
+                            "recognized_text": "",
+                            "translated_text": "",
+                            "translation_source": None,
+                            "asr_latency_ms": asr_ms,
+                            "translation_latency_ms": 0,
+                            "tts_latency_ms": 0,
+                            "audio_tts": None,
+                            "success": False,
+                            "error": "ASR returned empty text."
+                        }
+                    )
+                    continue
+
+                # 2. Translation
+                translation_result = translate_text(translator, recognized_text, source_lang, target_lang)
+                translated_text = translation_result.get("translated_text", "")
+                trans_ms = translation_result.get("latency_ms", 0)
+
+                # 3. TTS
+                audio_tts_b64 = None
+                tts_ms = 0.0
+
+                if enable_tts and translated_text and tts_backend:
+                    t_tts_start = time.perf_counter()
+                    pcm_tts = tts_backend.synthesize(translated_text, language=target_lang)
+                    tts_ms = round((time.perf_counter() - t_tts_start) * 1000, 2)
+
+                    if pcm_tts:
+                        audio_tts_b64 = base64.b64encode(pcm_tts).decode("ascii")
+
+                # Send complete pipeline result to Windows client over pure JSON IPC pipe
+                send_ipc_response(
+                    {
+                        "type": "result",
+                        "recognized_text": recognized_text,
+                        "translated_text": translated_text,
+                        "translation_source": translation_result.get("translation_source"),
+                        "asr_latency_ms": asr_ms,
+                        "translation_latency_ms": trans_ms,
+                        "tts_latency_ms": tts_ms,
+                        "tts_success": audio_tts_b64 is not None,
+                        "audio_format": "wav" if audio_tts_b64 else None,
+                        "audio_base64": audio_tts_b64,
+                        # Legacy field kept for backwards compat
+                        "audio_tts": audio_tts_b64,
+                        "success": translation_result.get("success", False),
+                        "error": translation_result.get("error")
+                    }
                 )
 
-        except Exception as e:
+            elif request_type == "synthesize":
+                text = request.get("text", "").strip()
+                lang = request.get("language", DEFAULT_TARGET_LANGUAGE)
+                audio_tts_b64 = None
+                tts_ms = 0.0
+                err = None
 
-            log(
-                "[WSL Worker] Error: "
-                f"{type(e).__name__}: {e}"
-            )
+                if text and tts_backend:
+                    t_tts_start = time.perf_counter()
+                    pcm_tts = tts_backend.synthesize(text, language=lang)
+                    tts_ms = round((time.perf_counter() - t_tts_start) * 1000, 2)
+                    if pcm_tts:
+                        audio_tts_b64 = base64.b64encode(pcm_tts).decode("ascii")
+                    else:
+                        err = "TTS synthesis returned None"
+                else:
+                    err = "Empty text or TTS backend unavailable"
 
-            print(
-                json.dumps(
+                send_ipc_response(
                     {
                         "type": "result",
                         "recognized_text": "",
-                        "translated_text": "",
-                        "translation_source": None,
+                        "translated_text": text,
+                        "translation_source": "direct_tts",
+                        "asr_latency_ms": 0,
                         "translation_latency_ms": 0,
+                        "tts_latency_ms": tts_ms,
+                        "tts_success": audio_tts_b64 is not None,
+                        "audio_format": "wav" if audio_tts_b64 else None,
+                        "audio_base64": audio_tts_b64,
+                        # Legacy field kept for backwards compat
+                        "audio_tts": audio_tts_b64,
+                        "success": audio_tts_b64 is not None,
+                        "error": err
+                    }
+                )
+
+            elif request_type == "shutdown":
+                log("[WSL Worker] Shutdown requested.")
+                send_ipc_response({"type": "shutdown", "success": True})
+                break
+
+            else:
+                send_ipc_response(
+                    {
+                        "type": "error",
                         "success": False,
-                        "error": str(e)
-                    },
-                    ensure_ascii=False
-                ),
-                flush=True
+                        "error": f"Unknown request type: {request_type}"
+                    }
+                )
+
+        except Exception as e:
+            log(f"[WSL Worker] Exception: {type(e).__name__}: {e}")
+            send_ipc_response(
+                {
+                    "type": "result",
+                    "recognized_text": "",
+                    "translated_text": "",
+                    "translation_source": None,
+                    "asr_latency_ms": 0,
+                    "translation_latency_ms": 0,
+                    "tts_latency_ms": 0,
+                    "audio_tts": None,
+                    "success": False,
+                    "error": str(e)
+                }
             )
 
-
-# ---------------------------------------------------------
-# ENTRY POINT
-# ---------------------------------------------------------
 
 if __name__ == "__main__":
     main()

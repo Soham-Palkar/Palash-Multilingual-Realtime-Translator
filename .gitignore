@@ -40,3 +40,6 @@ transformers/
 # Secrets
 .env
 .env.*
+
+# Local source clones
+NeMo/

@@ -3,8 +3,7 @@ import os
 import time
 import threading
 import queue
-
-import pyaudio
+from typing import Optional, Dict, Any
 
 # Allow imports from AI POC/
 sys.path.append(
@@ -17,44 +16,49 @@ from voice.microphone import Microphone
 from voice.audio_buffer import AudioBuffer
 from voice.vad import VoiceActivityDetector, VADState
 from voice.asr_interface import ASREngine
-from voice.indicconformer_asr import IndicConformerASRBackend
+from voice.wsl_asr_client import WSLIndicConformerASR
 from voice.tts_interface import TTSEngine, DummyTTSBackend
-from translation.translator import Translator
+from voice.audio_output import AudioOutput
+try:
+    from translation.translator import Translator
+except ImportError:
+    Translator = None
 
 
 class VoicePipeline:
     """
-    Real-time voice translation pipeline.
+    Offline Bidirectional Classroom Voice Translation Pipeline.
 
     Flow:
-        Microphone
-            ↓
-        VAD
-            ↓
-        ASR
-            ↓
-        Translation
-            ↓
-        TTS
-            ↓
-        Speaker
+        Physical Microphone (Windows Host)
+             ↓
+        VAD (Energy-based speech segmentation)
+             ↓
+        ASR (IndicConformer in WSL / CUDA)
+             ↓
+        Translation (IndicTrans2 hin_Deva ↔ sat_Olck)
+             ↓
+        TTS (Indic Parler-TTS speech synthesis)
+             ↓
+        Speaker (AudioOutput PyAudio on Windows Host)
 
-    The microphone runs on a dedicated background thread so
-    audio capture is separated from ASR/translation/TTS processing.
+    High-Resolution Latency Tracking & Non-blocking Capture Architecture.
     """
 
     def __init__(
         self,
         source_language: str = "hin_Deva",
         target_language: str = "sat_Olck",
-        asr_engine: ASREngine = None,
-        tts_engine: TTSEngine = None,
-        translator: Translator = None,
-        phrase_bank_path: str = None,
-        energy_threshold: int = 500,
+        asr_engine: Optional[ASREngine] = None,
+        tts_engine: Optional[TTSEngine] = None,
+        translator: Optional[Translator] = None,
+        audio_output: Optional[AudioOutput] = None,
+        phrase_bank_path: Optional[str] = None,
+        energy_threshold: int = 800,
         sample_rate: int = 16000,
+        wsl_script: Optional[str] = None,
+        wsl_python: Optional[str] = None,
     ):
-
         self.source_language = source_language
         self.target_language = target_language
         self.sample_rate = sample_rate
@@ -62,7 +66,6 @@ class VoicePipeline:
         # --------------------------------------------------
         # Components
         # --------------------------------------------------
-
         self.microphone = Microphone(
             rate=sample_rate,
             channels=1,
@@ -74,506 +77,319 @@ class VoicePipeline:
         )
 
         self.vad = VoiceActivityDetector(
-            energy_threshold=energy_threshold
+            energy_threshold=energy_threshold,
+            sample_rate=sample_rate
         )
 
-        # Use real IndicConformer ASR by default.
-        # A different ASR backend can still be injected.
-        self.asr = asr_engine or IndicConformerASRBackend(
-            language_id=self._get_asr_language_id(source_language),
-            sample_rate=sample_rate,
-            decoder="ctc",
-        )
+        # Default ASR: Use persistent WSL worker client if parameters provided
+        if asr_engine:
+            self.asr = asr_engine
+        elif wsl_script and wsl_python:
+            self.asr = WSLIndicConformerASR(
+                wsl_script=wsl_script,
+                wsl_python=wsl_python,
+                sample_rate=sample_rate,
+                source_language=source_language,
+                target_language=target_language
+            )
+        else:
+            raise RuntimeError(
+                "No ASR engine provided. Pass asr_engine= or wsl_script=/wsl_python=."
+            )
 
-        # TTS will be replaced with a real offline backend later.
         self.tts = tts_engine or DummyTTSBackend()
+        if translator:
+            self.translator = translator
+        elif Translator is not None:
+            self.translator = Translator(phrase_bank_path=phrase_bank_path)
+        else:
+            self.translator = None
 
-        # Use existing translation engine.
-        self.translator = translator or Translator(
-            phrase_bank_path=phrase_bank_path
-        )
+        self.audio_output = audio_output or AudioOutput(sample_rate=sample_rate)
 
         # --------------------------------------------------
-        # State
+        # State & Queues
         # --------------------------------------------------
-
         self.running = False
         self._capture_thread = None
-        self._audio_queue = queue.Queue()
+        self._audio_queue = queue.Queue(maxsize=100) # Bounded queue to avoid memory leak
+        self.utterance_counter = 0
 
-        # --------------------------------------------------
-        # Latency tracking
-        # --------------------------------------------------
-
-        self.last_latency = {
-            "vad_ms": 0,
-            "asr_ms": 0,
-            "translation_ms": 0,
-            "tts_ms": 0,
-            "total_end_to_end_ms": 0,
+        # High-resolution Latency Breakdown
+        self.last_latency: Dict[str, Any] = {
+            "utterance_id": 0,
+            "speech_duration_s": 0.0,
+            "asr_ms": 0.0,
+            "translation_ms": 0.0,
+            "tts_ms": 0.0,
+            "audio_prepare_ms": 0.0,
+            "speech_end_to_playback_start_ms": 0.0,
+            "total_pipeline_ms": 0.0,
         }
 
-    # ======================================================
-    # Language handling
-    # ======================================================
-
-    def _get_asr_language_id(self, language_code: str) -> str:
+    def set_direction(
+        self,
+        source_language: str,
+        target_language: str,
+    ):
         """
-        Convert PALASH language codes to IndicConformer
-        language IDs.
+        Set or switch translation direction. Defensive capability check for Santali ASR.
         """
+        if hasattr(self.asr, "supports_language"):
+            if not self.asr.supports_language(source_language):
+                err_msg = (
+                    f"Cannot set direction {source_language} -> {target_language}: "
+                    f"Santali ASR pending model integration."
+                )
+                print(f"[Pipeline ERROR] {err_msg}")
+                raise NotImplementedError(err_msg)
 
-        mapping = {
-            "hin_Deva": "hi",
-            "sat_Olck": "sat",
-        }
+        self.source_language = source_language
+        self.target_language = target_language
 
-        if language_code not in mapping:
-            raise ValueError(
-                f"Unsupported ASR language: {language_code}"
-            )
+        if hasattr(self.asr, "set_direction"):
+            self.asr.set_direction(source_language, target_language)
 
-        return mapping[language_code]
-
-    # ======================================================
-    # Direction
-    # ======================================================
-
-    def set_direction(self, source: str, target: str):
-        """
-        Change translation direction.
-
-        Example:
-            hin_Deva -> sat_Olck
-            sat_Olck -> hin_Deva
-
-        NOTE:
-        The ASR backend is not recreated here yet.
-        Bidirectional ASR model switching will be added
-        when Santali ASR is integrated.
-        """
-
-        self.source_language = source
-        self.target_language = target
-
-        print(
-            f"Direction set: "
-            f"{source} -> {target}"
-        )
-
-    # ======================================================
-    # Microphone capture
-    # ======================================================
+        print(f"[Pipeline] Direction set: {source_language} -> {target_language}")
 
     def _capture_loop(self):
-        """
-        Continuously read microphone audio in a background
-        thread and put chunks into the processing queue.
-        """
-
+        """Background loop reading physical microphone audio into bounded queue."""
         while self.running:
-
             try:
                 chunk = self.microphone.read_chunk()
-
                 if chunk:
-                    self._audio_queue.put(chunk)
-
+                    try:
+                        self._audio_queue.put(chunk, block=False)
+                    except queue.Full:
+                        pass # Drop oldest or ignore overflow cleanly
             except Exception as e:
-
                 if self.running:
-                    print(
-                        f"[Microphone] Capture error: {e}"
-                    )
-
+                    print(f"[Microphone ERROR] Capture error: {e}")
                 break
 
-    # ======================================================
-    # Start pipeline
-    # ======================================================
+    def process_utterance(self, speech_audio: bytes, speech_start_perf: float, speech_end_perf: float):
+        """
+        Process a complete utterance detected by VAD through ASR, Translation, TTS, and Speaker output.
+        Accurately records high-resolution timing using time.perf_counter().
+        """
+        if not speech_audio:
+            return
+
+        self.utterance_counter += 1
+        utt_id = self.utterance_counter
+        speech_dur_s = round(speech_end_perf - speech_start_perf, 3)
+
+        print(f"\n[Pipeline Utterance #{utt_id}] Speech duration: {speech_dur_s} s | Processing pipeline...")
+
+        # 1. ASR, Translation, TTS Execution via WSL IPC Worker
+        ipc_start = time.perf_counter()
+        
+        if isinstance(self.asr, WSLIndicConformerASR):
+            self.asr.start_stream()
+            self.asr.accept_audio(speech_audio)
+            asr_res = self.asr.get_final_result(enable_tts=True)
+            ipc_end = time.perf_counter()
+            ipc_total_ms = round((ipc_end - ipc_start) * 1000, 2)
+
+            recognized_text = asr_res.text.strip()
+            wsl_meta = self.asr.last_result_metadata
+
+            if not recognized_text:
+                print(f"[ASR #{utt_id}] No speech recognized.")
+                return
+
+            asr_ms = round(wsl_meta.get("asr_latency_ms", 0.0), 2)
+            print(f"[ASR #{utt_id}] Recognized ({asr_ms} ms): '{recognized_text}'")
+
+            translated_text = wsl_meta.get("translated_text", "")
+            trans_source = wsl_meta.get("translation_source", "indictrans2")
+            trans_ms = round(wsl_meta.get("translation_latency_ms", 0.0), 2)
+            print(f"[Translation #{utt_id}] Target: '{translated_text}' ({trans_source}, {trans_ms} ms)")
+
+            tts_audio = wsl_meta.get("audio_tts")
+            tts_ms = round(wsl_meta.get("tts_latency_ms", 0.0), 2)
+            ipc_overhead_ms = max(0.0, round(ipc_total_ms - (asr_ms + trans_ms + tts_ms), 2))
+            if tts_audio:
+                print(f"[TTS #{utt_id}] Synthesized {len(tts_audio)} WAV bytes "
+                      f"({tts_ms} ms | IPC Overhead: {ipc_overhead_ms} ms)")
+            else:
+                tts_err = wsl_meta.get("error") or "(no error reported)"
+                print(f"[TTS #{utt_id}] NO AUDIO — tts_success={wsl_meta.get('tts_success')} "
+                      f"translated='{translated_text[:40]}' error={tts_err}")
+        else:
+            # Standalone fallback engine pipeline
+            self.asr.start_stream()
+            self.asr.accept_audio(speech_audio)
+            asr_res = self.asr.get_final_result()
+            asr_end = time.perf_counter()
+            asr_ms = round((asr_end - ipc_start) * 1000, 2)
+            ipc_overhead_ms = 0.0
+
+            recognized_text = asr_res.text.strip()
+            if not recognized_text:
+                print(f"[ASR #{utt_id}] No speech recognized.")
+                return
+
+            print(f"[ASR #{utt_id}] Recognized ({asr_ms} ms): '{recognized_text}'")
+
+            # Translation
+            trans_start = time.perf_counter()
+            trans_res = self.translator.translate(
+                recognized_text, self.source_language, self.target_language
+            )
+            trans_end = time.perf_counter()
+            trans_ms = round((trans_end - trans_start) * 1000, 2)
+
+            if not trans_res["success"]:
+                print(f"[Translation ERROR #{utt_id}] {trans_res.get('error')}")
+                return
+
+            translated_text = trans_res["translated_text"]
+            print(f"[Translation #{utt_id}] '{translated_text}' ({trans_res['translation_source']}, {trans_ms} ms)")
+
+            # TTS
+            tts_start = time.perf_counter()
+            tts_audio = self.tts.synthesize(translated_text, self.target_language)
+            tts_end = time.perf_counter()
+            tts_ms = round((tts_end - tts_start) * 1000, 2)
+
+        # Audio Preparation & Speaker Playback
+        playback_start_perf = time.perf_counter()
+        speech_end_to_playback_start_ms = round((playback_start_perf - speech_end_perf) * 1000, 2)
+        speech_end_to_playback_start_s = speech_end_to_playback_start_ms / 1000.0
+
+        if tts_audio:
+            # sample_rate omitted — AudioOutput reads it from the WAV RIFF header
+            play_res = self.audio_output.play(tts_audio)
+            if play_res.get("success"):
+                print(
+                    f"[Speaker #{utt_id}] Playback complete | "
+                    f"device={play_res.get('device')} | "
+                    f"rate={play_res.get('sample_rate')} Hz | "
+                    f"duration={play_res.get('duration_ms')} ms | "
+                    f"rms={play_res.get('rms', 0):.4f} | "
+                    f"peak={play_res.get('peak', 0):.4f} | "
+                    f"time-to-playback={speech_end_to_playback_start_s:.3f} s"
+                )
+            else:
+                print(f"[Speaker #{utt_id}] Playback FAILED: {play_res.get('error')}")
+        else:
+            print(f"[TTS #{utt_id}] No audio generated for playback.")
+
+        total_pipeline_ms = round((time.perf_counter() - speech_start_perf) * 1000, 2)
+
+        # Update Metrics Structure
+        self.last_latency = {
+            "utterance_id": utt_id,
+            "speech_duration_s": speech_dur_s,
+            "asr_ms": asr_ms,
+            "translation_ms": trans_ms,
+            "tts_ms": tts_ms,
+            "ipc_overhead_ms": ipc_overhead_ms,
+            "speech_end_to_playback_start_ms": speech_end_to_playback_start_ms,
+            "total_pipeline_ms": total_pipeline_ms,
+        }
+
+        print("\n" + "=" * 60)
+        print(f"[PERFORMANCE REPORT — UTTERANCE #{utt_id}]")
+        print(f"  Speech Duration:               {speech_dur_s} s")
+        print(f"  ASR Inference:                 {asr_ms} ms")
+        print(f"  Translation Inference:         {trans_ms} ms")
+        print(f"  TTS Synthesis:                 {tts_ms} ms")
+        print(f"  IPC / Buffer Overhead:         {ipc_overhead_ms} ms")
+        print(f"  Speech-End -> Playback Start:  {speech_end_to_playback_start_s:.3f} s  (Target <= 4-5s)")
+        print(f"  Total Pipeline Duration:       {total_pipeline_ms} ms")
+        print("=" * 60 + "\n")
 
     def start(self):
-        """
-        Start the real-time voice pipeline.
-        """
+        """Start the real-time voice translation pipeline."""
+        print("=" * 70)
+        print("PALASH VOICE TRANSLATION PIPELINE STARTING")
+        print(f"Direction: {self.source_language} -> {self.target_language}")
+        print("=" * 70)
 
-        print("=" * 60)
-        print("PALASH Voice Pipeline — Starting")
-        print(
-            f"Direction: "
-            f"{self.source_language} -> "
-            f"{self.target_language}"
-        )
-        print("=" * 60)
-
+        # Check direction capability before opening mic
         try:
+            self.set_direction(self.source_language, self.target_language)
+        except NotImplementedError as nie:
+            print(f"[Pipeline ABORTED] {nie}")
+            return
 
-            # --------------------------------------------------
-            # Microphone
-            # --------------------------------------------------
+        self.microphone.select_audio_input()
+        self.microphone.start()
 
-            self.microphone.select_audio_input()
-            self.microphone.start()
-
-            # --------------------------------------------------
-            # ASR
-            # --------------------------------------------------
-
+        if hasattr(self.asr, "start_stream"):
             self.asr.start_stream()
 
-            # --------------------------------------------------
-            # Start capture
-            # --------------------------------------------------
+        self.running = True
+        self._capture_thread = threading.Thread(
+            target=self._capture_loop,
+            daemon=True,
+            name="MicCaptureThread"
+        )
+        self._capture_thread.start()
 
-            self.running = True
+        print("[PIPELINE] Ready. Listening on physical microphone...")
 
-            self._capture_thread = threading.Thread(
-                target=self._capture_loop,
-                daemon=True
-            )
+        speech_audio = bytearray()
+        speech_start_perf = None
 
-            self._capture_thread.start()
-
-            speech_audio = bytearray()
-            utterance_start = None
-
-            # --------------------------------------------------
-            # Main processing loop
-            # --------------------------------------------------
-
+        try:
             while self.running:
-
                 try:
-                    chunk = self._audio_queue.get(
-                        timeout=0.1
-                    )
-
+                    chunk = self._audio_queue.get(timeout=0.05)
                 except queue.Empty:
                     continue
 
-                # ==================================================
-                # VAD
-                # ==================================================
-
-                t_vad = time.time()
-
                 state = self.vad.process(chunk)
 
-                vad_ms = (
-                    time.time() - t_vad
-                ) * 1000
-
-                # ==================================================
-                # Speech detected / recording
-                # ==================================================
-
-                if state in (
-                    VADState.SPEECH_DETECTED,
-                    VADState.RECORDING,
-                ):
-
-                    if utterance_start is None:
-                        utterance_start = time.time()
-
+                if state in (VADState.SPEECH_DETECTED, VADState.RECORDING):
+                    if speech_start_perf is None:
+                        speech_start_perf = time.perf_counter()
                     speech_audio.extend(chunk)
 
-                    # Feed audio to ASR backend.
-                    self.asr.accept_audio(chunk)
-
-                # ==================================================
-                # End of speech
-                # ==================================================
-
-                elif (
-                    state == VADState.END_OF_SPEECH
-                    and len(speech_audio) > 0
-                ):
-
-                    print(
-                        "\n[VAD] Speech ended. Processing..."
-                    )
-
-                    # --------------------------------------------------
-                    # ASR
-                    # --------------------------------------------------
-
-                    t_asr = time.time()
-
-                    asr_result = (
-                        self.asr.get_final_result()
-                    )
-
-                    asr_ms = (
-                        time.time() - t_asr
-                    ) * 1000
-
-                    recognized_text = (
-                        asr_result.text.strip()
-                    )
-
-                    if not recognized_text:
-
-                        print(
-                            "[ASR] Empty result, skipping."
-                        )
-
-                        speech_audio.clear()
-                        utterance_start = None
-
-                        self.asr.start_stream()
-
-                        continue
-
-                    print(
-                        f"[ASR] Recognized: "
-                        f"{recognized_text}"
-                    )
-
-                    # --------------------------------------------------
-                    # Translation
-                    # --------------------------------------------------
-
-                    t_trans = time.time()
-
-                    translation_result = (
-                        self.translator.translate(
-                            recognized_text,
-                            self.source_language,
-                            self.target_language,
-                        )
-                    )
-
-                    translation_ms = (
-                        time.time() - t_trans
-                    ) * 1000
-
-                    if translation_result["success"]:
-
-                        translated_text = (
-                            translation_result[
-                                "translated_text"
-                            ]
-                        )
-
-                        print(
-                            f"[Translation] "
-                            f"{translated_text} "
-                            f"("
-                            f"{translation_result['translation_source']}, "
-                            f"{translation_ms:.0f}ms"
-                            f")"
-                        )
-
-                    else:
-
-                        print(
-                            "[Translation] FAILED: "
-                            f"{translation_result['error']}"
-                        )
-
-                        speech_audio.clear()
-                        utterance_start = None
-
-                        self.asr.start_stream()
-
-                        continue
-
-                    # --------------------------------------------------
-                    # TTS
-                    # --------------------------------------------------
-
-                    t_tts = time.time()
-
-                    tts_audio = self.tts.synthesize(
-                        translated_text,
-                        self.target_language
-                    )
-
-                    tts_ms = (
-                        time.time() - t_tts
-                    ) * 1000
-
-                    # --------------------------------------------------
-                    # Playback
-                    # --------------------------------------------------
-
-                    if tts_audio:
-                        self._play_audio(tts_audio)
-
-                    # --------------------------------------------------
-                    # Latency
-                    # --------------------------------------------------
-
-                    total_ms = (
-                        (
-                            time.time()
-                            - utterance_start
-                        ) * 1000
-                        if utterance_start
-                        else 0
-                    )
-
-                    self.last_latency = {
-                        "vad_ms": round(
-                            vad_ms, 2
-                        ),
-                        "asr_ms": round(
-                            asr_ms, 2
-                        ),
-                        "translation_ms": round(
-                            translation_ms, 2
-                        ),
-                        "tts_ms": round(
-                            tts_ms, 2
-                        ),
-                        "total_end_to_end_ms": round(
-                            total_ms, 2
-                        ),
-                    }
-
-                    print(
-                        f"[Latency] "
-                        f"{self.last_latency}"
-                    )
-
-                    # --------------------------------------------------
-                    # Reset for next utterance
-                    # --------------------------------------------------
+                elif state == VADState.END_OF_SPEECH and len(speech_audio) > 0:
+                    speech_end_perf = time.perf_counter()
+                    utterance_data = bytes(speech_audio)
+                    start_perf = speech_start_perf or speech_end_perf
 
                     speech_audio.clear()
-                    utterance_start = None
+                    speech_start_perf = None
+                    self.vad.reset()
 
-                    self.asr.start_stream()
+                    # Process utterance
+                    self.process_utterance(utterance_data, start_perf, speech_end_perf)
+                    print("Listening on physical microphone...")
 
         except KeyboardInterrupt:
-
-            print(
-                "\n[Pipeline] Interrupted by user."
-            )
-
+            print("\n[Pipeline] Stopped by user (Ctrl+C).")
         except Exception as e:
-
-            print(
-                f"\n[Pipeline] Error: {e}"
-            )
-
+            print(f"\n[Pipeline ERROR] {type(e).__name__}: {e}")
         finally:
-
             self.stop()
 
-    # ======================================================
-    # Speaker
-    # ======================================================
-
-    def _play_audio(self, pcm_data: bytes):
-        """
-        Play PCM16 mono audio through system speaker.
-        """
-
-        try:
-
-            p = pyaudio.PyAudio()
-
-            stream = p.open(
-                format=pyaudio.paInt16,
-                channels=1,
-                rate=self.sample_rate,
-                output=True,
-            )
-
-            stream.write(pcm_data)
-
-            stream.stop_stream()
-            stream.close()
-
-            p.terminate()
-
-        except Exception as e:
-
-            print(
-                f"[Speaker] Playback error: {e}"
-            )
-
-    # ======================================================
-    # Stop
-    # ======================================================
-
     def stop(self):
-        """
-        Stop pipeline and release resources.
-        """
-
+        """Stop pipeline and release physical resources."""
         self.running = False
-
         if self._capture_thread:
-
-            self._capture_thread.join(
-                timeout=2
-            )
-
+            self._capture_thread.join(timeout=2)
             self._capture_thread = None
 
         try:
-            self.asr.stop_stream()
+            self.microphone.stop()
+            self.microphone.close()
         except Exception:
             pass
 
         try:
-            self.microphone.stop()
+            self.audio_output.close()
         except Exception:
             pass
 
-        print(
-            "[Pipeline] Stopped."
-        )
+        if hasattr(self.asr, "close"):
+            try:
+                self.asr.close()
+            except Exception:
+                pass
 
-
-# ==========================================================
-# CLI
-# ==========================================================
-
-if __name__ == "__main__":
-
-    import argparse
-
-    parser = argparse.ArgumentParser(
-        description=(
-            "PALASH Real-Time Voice Translation Pipeline"
-        )
-    )
-
-    parser.add_argument(
-        "--source",
-        default="hin_Deva",
-        help="Source language code"
-    )
-
-    parser.add_argument(
-        "--target",
-        default="sat_Olck",
-        help="Target language code"
-    )
-
-    parser.add_argument(
-        "--energy",
-        type=int,
-        default=500,
-        help="VAD energy threshold"
-    )
-
-    parser.add_argument(
-        "--phrase-bank",
-        default=None,
-        help="Path to verified phrase bank JSON"
-    )
-
-    args = parser.parse_args()
-
-    pipeline = VoicePipeline(
-        source_language=args.source,
-        target_language=args.target,
-        energy_threshold=args.energy,
-        phrase_bank_path=args.phrase_bank,
-    )
-
-    pipeline.start()
+        print("[Pipeline] Stopped.")

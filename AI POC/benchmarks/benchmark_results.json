@@ -1,0 +1,111 @@
+{
+  "cold_start_ms": 77796.5,
+  "warm_utterance_count": 6,
+  "metrics": {
+    "asr_ms": {
+      "avg": 97.83,
+      "p50": 96.96,
+      "p95": 105.62,
+      "max": 105.62
+    },
+    "trans_ms": {
+      "avg": 231,
+      "p50": 238,
+      "p95": 253,
+      "max": 253
+    },
+    "tts_ms": {
+      "avg": 7833.92,
+      "p50": 8052.02,
+      "p95": 8104.68,
+      "max": 8104.68
+    },
+    "speech_end_to_playback_s": {
+      "avg": 8.17,
+      "p50": 8.41,
+      "p95": 8.44,
+      "max": 8.44
+    },
+    "total_e2e_ms": {
+      "avg": 8162.75,
+      "p50": 8399.43,
+      "p95": 8429.64,
+      "max": 8429.64
+    }
+  },
+  "target_met": "NO",
+  "utterances": [
+    {
+      "id": 1,
+      "text": "नमस्ते बच्चों।",
+      "recognized": "मेरा नाम सोहम है",
+      "translated": "ᱤᱧᱟᱹᱜ ᱧᱩᱛᱩᱢ ᱥᱳᱦᱟᱢ ᱾",
+      "asr_ms": 93.45,
+      "trans_ms": 195,
+      "tts_ms": 7050.75,
+      "end_to_start_s": 7.354,
+      "total_e2e_ms": 7339.2,
+      "status": "PASS"
+    },
+    {
+      "id": 2,
+      "text": "मेरा नाम सोहम है।",
+      "recognized": "मेरा नाम सोहम है",
+      "translated": "ᱤᱧᱟᱹᱜ ᱧᱩᱛᱩᱢ ᱥᱳᱦᱟᱢ ᱾",
+      "asr_ms": 105.62,
+      "trans_ms": 253,
+      "tts_ms": 8052.02,
+      "end_to_start_s": 8.418,
+      "total_e2e_ms": 8410.64,
+      "status": "PASS"
+    },
+    {
+      "id": 3,
+      "text": "बच्चों, इन फलों को गिनो।",
+      "recognized": "मेरा नाम सोहम है",
+      "translated": "ᱤᱧᱟᱹᱜ ᱧᱩᱛᱩᱢ ᱥᱳᱦᱟᱢ ᱾",
+      "asr_ms": 96.96,
+      "trans_ms": 228,
+      "tts_ms": 8104.68,
+      "end_to_start_s": 8.437,
+      "total_e2e_ms": 8429.64,
+      "status": "PASS"
+    },
+    {
+      "id": 4,
+      "text": "कैसे हो?",
+      "recognized": "मेरा नाम सोहम है",
+      "translated": "ᱤᱧᱟᱹᱜ ᱧᱩᱛᱩᱢ ᱥᱳᱦᱟᱢ ᱾",
+      "asr_ms": 94.6,
+      "trans_ms": 226,
+      "tts_ms": 7948.64,
+      "end_to_start_s": 8.276,
+      "total_e2e_ms": 8269.24,
+      "status": "PASS"
+    },
+    {
+      "id": 5,
+      "text": "अपनी किताब खोलो।",
+      "recognized": "मेरा नाम सोहम है",
+      "translated": "ᱤᱧᱟᱹᱜ ᱧᱩᱛᱩᱢ ᱥᱳᱦᱟᱢ ᱾",
+      "asr_ms": 102.14,
+      "trans_ms": 238,
+      "tts_ms": 8059.29,
+      "end_to_start_s": 8.406,
+      "total_e2e_ms": 8399.43,
+      "status": "PASS"
+    },
+    {
+      "id": 6,
+      "text": "आज हम कक्षा में फलों के बारे में सीखेंगे। आप सभी ध्यान से इन चित्रों को देखें।",
+      "recognized": "मेरा नाम सोहम है",
+      "translated": "ᱤᱧᱟᱹᱜ ᱧᱩᱛᱩᱢ ᱥᱳᱦᱟᱢ ᱾",
+      "asr_ms": 94.2,
+      "trans_ms": 246,
+      "tts_ms": 7788.15,
+      "end_to_start_s": 8.136,
+      "total_e2e_ms": 8128.35,
+      "status": "PASS"
+    }
+  ]
+}
