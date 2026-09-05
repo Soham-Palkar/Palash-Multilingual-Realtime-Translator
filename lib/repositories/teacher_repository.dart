@@ -78,9 +78,11 @@ class TeacherRepository extends ChangeNotifier {
   Future<void> publishAIContent(AIGeneratedContent content) async {
     // 1. Update status to published
     await _db.updateAIContentState(content.id, ContentState.published);
-    await _syncService.uploadAIContent(content);
+    // 2. Upload the AI content with published state
+    final publishedContent = content.copyWith(state: ContentState.published);
+    await _syncService.uploadAIContent(publishedContent);
 
-    // 2. Publish any generated flashcards into student offline database
+    // 3. Publish any generated flashcards into student offline database
     for (var fc in content.flashcards) {
       final publishedFc = fc.copyWith(isPublished: true, isTeacherCreated: true);
       await _db.insertFlashcard(publishedFc);
@@ -92,8 +94,10 @@ class TeacherRepository extends ChangeNotifier {
 
   // Teacher Flashcard Creator
   Future<void> createManualFlashcard(FlashcardItem item) async {
-    await _db.insertFlashcard(item);
-    await _syncService.uploadFlashcard(item);
+    // Ensure manual teacher-created flashcards have correct flags
+    final adjusted = item.copyWith(isTeacherCreated: true, isPublished: false);
+    await _db.insertFlashcard(adjusted);
+    await _syncService.uploadFlashcard(adjusted);
     notifyListeners();
   }
 

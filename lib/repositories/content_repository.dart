@@ -25,6 +25,12 @@ class ContentRepository extends ChangeNotifier {
     return all.where((f) => f.isPublished).toList();
   }
 
+  // Published Notes
+  Future<List<TeacherNote>> getPublishedNotes() async {
+    final all = await _db.getAllNotes();
+    return all.where((n) => n.isPublished).toList();
+  }
+
   // Curriculum & Lessons
   Future<List<CurriculumLesson>> getCurriculumByClassAndSubject(int gradeClass, String subject) async {
     final all = await _db.getCurriculum();
