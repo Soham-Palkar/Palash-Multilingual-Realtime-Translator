@@ -9,10 +9,10 @@ import '../services/ai_content_service.dart';
 import '../services/auth_service.dart';
 import '../services/mock_ai_content_service.dart';
 import '../services/firebase_auth_service.dart';
-import '../services/mock_sync_service.dart';
+
 import '../services/mock_translation_service.dart';
 import '../services/sync_service.dart';
-import '../services/sync_service_factory.dart';
+import '../services/firebase_sync_service.dart';
 import '../services/translation_service.dart';
 import 'routes.dart';
 import 'theme.dart';
@@ -33,7 +33,7 @@ class PalashApp extends StatelessWidget {
         Provider<AuthService>(create: (_) => FirebaseAuthService()),
         Provider<AIContentService>(create: (_) => MockAIContentService()),
         Provider<TranslationService>(create: (_) => MockTranslationService()),
-        Provider<SyncService>(create: (_) => MockSyncService()),
+        Provider<SyncService>(create: (_) => FirebaseSyncService()),
 
         // Repositories backed by SQLite/Drift Data-Access Layer
         ChangeNotifierProvider(create: (_) => ContentRepository(database)),
