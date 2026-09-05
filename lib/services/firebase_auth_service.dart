@@ -1,63 +1,98 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/auth_model.dart';
 import 'auth_service.dart';
 
 class FirebaseAuthService implements AuthService {
-  // ---- Configuration -----------------------------------------------------
-  // Replace the placeholder with the actual Web OAuth client ID from Firebase console.
-  // This value is public (not a secret) and is required for Android.
-  static const String _webClientId = '<YOUR_WEB_CLIENT_ID>'; // TODO: set this value
+  // GoogleSignIn is initialized only once.
   static bool _googleInitialized = false;
 
   final StreamController<TeacherUser?> _controller =
       StreamController<TeacherUser?>.broadcast();
+
   TeacherUser? _currentUser;
 
   FirebaseAuthService() {
-    // Listen to Firebase auth state changes.
-    fb.FirebaseAuth.instance.authStateChanges().listen(_handleFirebaseUser);
+    // Listen for Firebase authentication state changes.
+    fb.FirebaseAuth.instance.authStateChanges().listen(
+      _handleFirebaseUser,
+    );
   }
 
-  // Private helper to process Firebase User
+  // -------------------------------------------------------------------------
+  // FIREBASE AUTH STATE
+  // -------------------------------------------------------------------------
+
   Future<void> _handleFirebaseUser(fb.User? fbUser) async {
     if (fbUser == null) {
       _currentUser = null;
-      _controller.add(null);
+
+      if (!_controller.isClosed) {
+        _controller.add(null);
+      }
+
       return;
     }
+
     try {
       final teacher = await _mapFirebaseUserToTeacher(fbUser);
+
       _currentUser = teacher;
-      _controller.add(teacher);
+
+      if (!_controller.isClosed) {
+        _controller.add(teacher);
+      }
     } catch (e) {
-      // If mapping fails (e.g., missing profile or wrong role), sign out.
-      await signOut();
-      rethrow;
+      // User is authenticated in Firebase but is not an authorized teacher.
+      await _signOutInternal();
     }
   }
 
-  // Fetch Firestore teacher document and map to TeacherUser
-  Future<TeacherUser> _mapFirebaseUserToTeacher(fb.User fbUser) async {
+  // -------------------------------------------------------------------------
+  // FIRESTORE TEACHER PROFILE
+  // -------------------------------------------------------------------------
+
+  Future<TeacherUser> _mapFirebaseUserToTeacher(
+    fb.User fbUser,
+  ) async {
     final doc = await FirebaseFirestore.instance
         .collection('teachers')
         .doc(fbUser.uid)
         .get();
+
     if (!doc.exists) {
-      throw Exception('अधिकृत शिक्षक प्रोफ़ाइल नहीं मिली (Teacher profile not found).');
+      throw Exception(
+        'अधिकृत शिक्षक प्रोफ़ाइल नहीं मिली '
+        '(Teacher profile not found).',
+      );
     }
-    final data = doc.data()!;
+
+    final data = doc.data();
+
+    if (data == null) {
+      throw Exception(
+        'शिक्षक प्रोफ़ाइल डेटा नहीं मिला '
+        '(Teacher profile data not found).',
+      );
+    }
+
+    // Only users with role = teacher are allowed.
     if (data['role'] != 'teacher') {
-      throw Exception('इस उपयोगकर्ता को शिक्षक के रूप में अधिकृत नहीं किया गया है (User not authorized as teacher).');
+      throw Exception(
+        'इस उपयोगकर्ता को शिक्षक के रूप में अधिकृत नहीं किया गया है '
+        '(User not authorized as teacher).',
+      );
     }
+
     return TeacherUser(
       uid: fbUser.uid,
       email: data['email'] as String? ?? fbUser.email ?? '',
-      displayName: data['name'] as String? ?? fbUser.displayName ?? '',
+      displayName:
+          data['name'] as String? ?? fbUser.displayName ?? '',
       schoolName: data['school'] as String? ?? '',
       district: data['district'] as String? ?? '',
       photoUrl: fbUser.photoURL ?? '',
@@ -65,99 +100,296 @@ class FirebaseAuthService implements AuthService {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // AUTH STATE STREAM
+  // -------------------------------------------------------------------------
+
   @override
   Stream<TeacherUser?> get authStateChanges => _controller.stream;
 
   @override
   TeacherUser? get currentUser => _currentUser;
 
+  // -------------------------------------------------------------------------
+  // EMAIL + PASSWORD LOGIN
+  // -------------------------------------------------------------------------
+
   @override
-  Future<TeacherUser> signInWithEmailPassword(String email, String password) async {
+  Future<TeacherUser> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     try {
       final credential = await fb.FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+          .signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+
       final fbUser = credential.user;
+
       if (fbUser == null) {
-        throw Exception('प्रमाणीकरण विफल (Authentication failed).');
+        throw Exception(
+          'प्रमाणीकरण विफल (Authentication failed).',
+        );
       }
+
       final teacher = await _mapFirebaseUserToTeacher(fbUser);
+
       _currentUser = teacher;
-      _controller.add(teacher);
+
+      if (!_controller.isClosed) {
+        _controller.add(teacher);
+      }
+
       return teacher;
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_firebaseErrorMessage(e));
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
+
+  // -------------------------------------------------------------------------
+  // GOOGLE LOGIN
+  // -------------------------------------------------------------------------
 
   @override
   Future<TeacherUser> signInWithGoogle() async {
     try {
-      // Initialise GoogleSignIn once with the required server client ID.
+      // Initialize Google Sign-In only once.
+      //
+      // The Android google-services.json already contains the Web OAuth
+      // client ID, so we do not pass serverClientId here.
       if (!_googleInitialized) {
-        await GoogleSignIn.instance.initialize(serverClientId: _webClientId);
+        await GoogleSignIn.instance.initialize();
+
         _googleInitialized = true;
       }
 
-      // ignore: unnecessary_nullable_for_final_variable_declarations
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
-      if (googleUser == null) {
-        throw Exception('Google साइन‑इन रद्द किया गया (Google sign‑in cancelled).');
+      // Open Google account selection/sign-in.
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate();
+
+      // Get authentication information from Google.
+      final GoogleSignInAuthentication googleAuth =
+          googleUser.authentication;
+
+      // Google ID token is required by Firebase Authentication.
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw Exception(
+          'Google ID token नहीं मिला '
+          '(Google ID token was not received).',
+        );
       }
-      // In google_sign_in 7.x, authentication is a synchronous getter.
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      // Convert Google ID token into Firebase credential.
       final credential = fb.GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
+        idToken: idToken,
       );
-      final userCredential = await fb.FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Sign into Firebase using Google credential.
+      final userCredential =
+          await fb.FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+
       final fbUser = userCredential.user;
+
       if (fbUser == null) {
-        throw Exception('Google प्रमाणीकरण विफल (Google authentication failed).');
+        throw Exception(
+          'Google प्रमाणीकरण विफल '
+          '(Google authentication failed).',
+        );
       }
+
+      // Check Firestore teacher profile and role.
       final teacher = await _mapFirebaseUserToTeacher(fbUser);
+
       _currentUser = teacher;
-      _controller.add(teacher);
+
+      if (!_controller.isClosed) {
+        _controller.add(teacher);
+      }
+
       return teacher;
+    } on GoogleSignInException catch (e) {
+      throw Exception(
+        _googleSignInErrorMessage(e),
+      );
     } on fb.FirebaseAuthException catch (e) {
-      throw Exception(_firebaseErrorMessage(e));
+      throw Exception(
+        _firebaseErrorMessage(e),
+      );
+    } catch (e) {
+      throw Exception(
+        e.toString(),
+      );
     }
   }
+
+  // -------------------------------------------------------------------------
+  // PASSWORD RESET
+  // -------------------------------------------------------------------------
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await fb.FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      await fb.FirebaseAuth.instance.sendPasswordResetEmail(
+        email: email.trim(),
+      );
     } on fb.FirebaseAuthException catch (e) {
-      throw Exception(_firebaseErrorMessage(e));
+      throw Exception(
+        _firebaseErrorMessage(e),
+      );
     }
   }
+
+  // -------------------------------------------------------------------------
+  // SIGN OUT
+  // -------------------------------------------------------------------------
 
   @override
   Future<void> signOut() async {
-    await fb.FirebaseAuth.instance.signOut();
-    await GoogleSignIn.instance.signOut();
-    _currentUser = null;
-    _controller.add(null);
+    try {
+      await fb.FirebaseAuth.instance.signOut();
+
+      await GoogleSignIn.instance.signOut();
+
+      _currentUser = null;
+
+      if (!_controller.isClosed) {
+        _controller.add(null);
+      }
+    } catch (e) {
+      // Even if Google sign-out has an issue, make sure local state is cleared.
+      _currentUser = null;
+
+      if (!_controller.isClosed) {
+        _controller.add(null);
+      }
+
+      rethrow;
+    }
   }
 
-  // Helper to translate FirebaseAuthException codes to Hindi/English messages
-  String _firebaseErrorMessage(fb.FirebaseAuthException e) {
+  // Internal sign-out used when the Firebase account is not an authorized
+  // teacher. Avoids unnecessary recursive auth-state handling.
+  Future<void> _signOutInternal() async {
+    try {
+      await fb.FirebaseAuth.instance.signOut();
+    } catch (_) {}
+
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
+
+    _currentUser = null;
+
+    if (!_controller.isClosed) {
+      _controller.add(null);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // FIREBASE ERROR MESSAGES
+  // -------------------------------------------------------------------------
+
+  String _firebaseErrorMessage(
+    fb.FirebaseAuthException e,
+  ) {
     switch (e.code) {
       case 'invalid-email':
         return 'अमान्य ईमेल पता (Invalid email address).';
+
       case 'user-disabled':
         return 'उपयोगकर्ता निष्क्रिय है (User disabled).';
+
       case 'user-not-found':
         return 'उपयोगकर्ता मौजूद नहीं है (User not found).';
+
       case 'wrong-password':
         return 'गलत पासवर्ड (Wrong password).';
+
       case 'invalid-credential':
         return 'अमान्य क्रेडेंशियल (Invalid credential).';
+
+      case 'email-already-in-use':
+        return 'यह ईमेल पहले से उपयोग में है '
+            '(Email is already in use).';
+
+      case 'weak-password':
+        return 'पासवर्ड बहुत कमजोर है '
+            '(Password is too weak).';
+
+      case 'operation-not-allowed':
+        return 'यह साइन-इन विधि Firebase में सक्षम नहीं है '
+            '(This sign-in method is not enabled).';
+
       case 'too-many-requests':
-        return 'बहुत अधिक अनुरोध, कृपया बाद में प्रयास करें (Too many requests).';
+        return 'बहुत अधिक अनुरोध, कृपया बाद में प्रयास करें '
+            '(Too many requests, please try again later).';
+
       case 'network-request-failed':
-        return 'नेटवर्क त्रुटि (Network request failed).';
+        return 'नेटवर्क त्रुटि '
+            '(Network request failed).';
+
+      case 'requires-recent-login':
+        return 'कृपया दोबारा लॉगिन करें '
+            '(Please sign in again).';
+
+      case 'account-exists-with-different-credential':
+        return 'इस ईमेल के लिए अलग साइन-इन विधि पहले से मौजूद है '
+            '(An account already exists with a different sign-in method).';
+
       default:
-        return e.message ?? 'अप्रत्याशित त्रुटि (Unexpected error).';
+        return e.message ??
+            'अप्रत्याशित Firebase त्रुटि '
+            '(Unexpected Firebase error).';
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // GOOGLE SIGN-IN ERROR MESSAGES
+  // -------------------------------------------------------------------------
+
+  String _googleSignInErrorMessage(
+    GoogleSignInException e,
+  ) {
+    switch (e.code) {
+      case GoogleSignInExceptionCode.canceled:
+        return 'Google साइन-इन रद्द किया गया '
+            '(Google sign-in cancelled).';
+
+      case GoogleSignInExceptionCode.clientConfigurationError:
+        return 'Google Sign-In configuration में समस्या है '
+            '(Google Sign-In configuration error).';
+
+      case GoogleSignInExceptionCode.interrupted:
+        return 'Google साइन-इन बाधित हुआ '
+            '(Google sign-in was interrupted).';
+
+      case GoogleSignInExceptionCode.uiUnavailable:
+        return 'Google Sign-In UI उपलब्ध नहीं है '
+            '(Google Sign-In UI unavailable).';
+
+      case GoogleSignInExceptionCode.providerConfigurationError:
+        return 'Google provider configuration में समस्या है '
+            '(Google provider configuration error).';
+
+      default:
+        return 'Google साइन-इन में समस्या हुई '
+            '(Google sign-in failed): ${e.code}';
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // CLEANUP
+  // -------------------------------------------------------------------------
+
+  void dispose() {
+    _controller.close();
   }
 }

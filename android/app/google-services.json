@@ -12,7 +12,20 @@
           "package_name": "org.palash.app.palash_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "72404136697-35tjgmpvlhdr62dbe3ls4qlo74dkk1f1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.palash.app.palash_app",
+            "certificate_hash": "e91fb264a06cbacafbd7fd1f5e55ddb215beac9c"
+          }
+        },
+        {
+          "client_id": "72404136697-ol3c2hu040bj8ibcoltv75uf3blnffpg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDxS4RfdvhnGLCoVPqLvSxTGNNBuzCiFgw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "72404136697-ol3c2hu040bj8ibcoltv75uf3blnffpg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "72404136697-jg9aadjrq9s6eaajnbqp4225n6d3i1te.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.palash.app.palashApp"
+              }
+            }
+          ]
         }
       }
     }
