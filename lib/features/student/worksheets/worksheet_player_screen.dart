@@ -20,9 +20,10 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
   int? _selectedOptionIndex;
   bool _hasAnswered = false;
   bool _isAnswerCorrect = false;
+  int _score = 0;
 
   void _handleOptionSelect(int index) {
-    if (_hasAnswered && _isAnswerCorrect) return; // Prevent change after correct
+    if (_hasAnswered && _isAnswerCorrect) return;
 
     final question = widget.worksheet.questions[_currentIndex];
     final isCorrect = index == question.correctIndex;
@@ -31,6 +32,9 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
       _selectedOptionIndex = index;
       _hasAnswered = true;
       _isAnswerCorrect = isCorrect;
+      if (isCorrect) {
+        _score++;
+      }
     });
   }
 
@@ -57,29 +61,58 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
   }
 
   void _showCompletionDialog() {
+    final total = widget.worksheet.questions.length;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Column(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Column(
           children: [
-            Icon(Icons.stars_rounded, color: AppColors.tertiary, size: 56),
-            SizedBox(height: 10),
-            Text(
-              'शाबाश! आपने कार्यपत्रक पूरा किया!',
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: AppColors.tertiaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.stars_rounded, color: AppColors.tertiary, size: 58),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'शाबाश! कार्यपत्रक पूरा हुआ!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱡᱚᱛᱚ ᱠᱩᱠᱞᱤ ᱨᱮᱭᱟᱜ ᱛᱮᱞᱟ ᱮᱢ ᱠᱮᱫᱼᱟ (All questions completed!)',
+              'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! (All questions completed!)',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: AppColors.secondary, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.secondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'कुल अंक / Score: $_score / $total',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppColors.onPrimaryContainer,
+                ),
+              ),
             ),
           ],
         ),
@@ -89,8 +122,11 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
-            child: const Text('वापस जाएँ (Done)'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: const Text('समाप्त (Done)'),
           ),
         ],
       ),
@@ -127,28 +163,28 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
 
             const SizedBox(height: 18),
 
-            // Question Card
+            // Question Card with Featured Image
             PalashCard(
               elevation: 2,
               padding: const EdgeInsets.all(18),
               child: Column(
                 children: [
-                  // Image
+                  // Image Display
                   if (question.image != null) ...[
                     PalashAssetImage(
                       imagePath: question.image,
-                      width: 130,
-                      height: 130,
-                      borderRadius: BorderRadius.circular(16),
+                      width: 140,
+                      height: 140,
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     const SizedBox(height: 16),
                   ],
 
-                  // Question Text
+                  // Question Text in Hindi + Santali
                   BilingualText(
                     hindi: question.questionHindi,
                     santali: question.questionSantali,
-                    hindiFontSize: 18,
+                    hindiFontSize: 19,
                     santaliFontSize: 15,
                     textAlign: TextAlign.center,
                   ),
@@ -160,7 +196,7 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
 
             // Options List
             const Text(
-              'सही विकल्प चुनें (Select Answer):',
+              'सही उत्तर चुनें (Select Answer):',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
@@ -190,8 +226,8 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
                   child: Row(
                     children: [
                       Container(
-                        width: 32,
-                        height: 32,
+                        width: 34,
+                        height: 34,
                         decoration: BoxDecoration(
                           color: isSelected
                               ? (isCorrect ? AppColors.success : AppColors.error)
@@ -203,6 +239,7 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
                             String.fromCharCode(65 + index), // A, B, C, D
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
+                              fontSize: 15,
                               color: isSelected ? Colors.white : AppColors.textPrimary,
                             ),
                           ),
@@ -221,7 +258,7 @@ class _WorksheetPlayerScreenState extends State<WorksheetPlayerScreen> {
                         Icon(
                           isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
                           color: isCorrect ? AppColors.success : AppColors.error,
-                          size: 24,
+                          size: 26,
                         ),
                     ],
                   ),

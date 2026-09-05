@@ -46,8 +46,9 @@ class PalashAssetImage extends StatelessWidget {
   }
 
   Widget _buildFallback() {
-    IconData icon = Icons.school_rounded;
-    if (iconName != null) {
+    IconData icon = Icons.auto_stories_rounded;
+
+    if (iconName != null && iconName!.isNotEmpty) {
       switch (iconName) {
         case 'restaurant':
           icon = Icons.restaurant_rounded;
@@ -70,8 +71,24 @@ class PalashAssetImage extends StatelessWidget {
         case 'pets':
           icon = Icons.pets_rounded;
           break;
+        case 'face':
+        case 'person':
+          icon = Icons.face_rounded;
+          break;
         case 'palette':
           icon = Icons.palette_rounded;
+          break;
+        case 'school':
+          icon = Icons.school_rounded;
+          break;
+        case 'menu_book':
+          icon = Icons.menu_book_rounded;
+          break;
+        case 'edit':
+          icon = Icons.edit_rounded;
+          break;
+        case 'chair':
+          icon = Icons.chair_rounded;
           break;
         case 'looks_one':
           icon = Icons.looks_one_rounded;
@@ -94,8 +111,30 @@ class PalashAssetImage extends StatelessWidget {
         case 'change_history':
           icon = Icons.change_history_rounded;
           break;
+        case 'crop_square':
+          icon = Icons.crop_square_rounded;
+          break;
         default:
           icon = Icons.auto_stories_rounded;
+      }
+    } else if (imagePath != null) {
+      final p = imagePath!.toLowerCase();
+      if (p.contains('/animals/')) {
+        icon = Icons.pets_rounded;
+      } else if (p.contains('/fruits/')) {
+        icon = Icons.restaurant_rounded;
+      } else if (p.contains('/vegetables/')) {
+        icon = Icons.eco_rounded;
+      } else if (p.contains('/classroom/')) {
+        icon = Icons.school_rounded;
+      } else if (p.contains('/family/')) {
+        icon = Icons.face_rounded;
+      } else if (p.contains('/colors/')) {
+        icon = Icons.palette_rounded;
+      } else if (p.contains('/mathematics/')) {
+        icon = Icons.calculate_rounded;
+      } else if (p.contains('/common/')) {
+        icon = Icons.nature_people_rounded;
       }
     }
 
@@ -104,12 +143,16 @@ class PalashAssetImage extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: AppColors.primaryContainer.withOpacity(0.5),
-        borderRadius: borderRadius ?? BorderRadius.circular(12),
+        borderRadius: borderRadius ?? BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.15),
+          width: 1,
+        ),
       ),
       child: Center(
         child: Icon(
           icon,
-          size: (width < height ? width : height) * 0.55,
+          size: (width < height ? width : height) * 0.52,
           color: AppColors.primary,
         ),
       ),

@@ -13,7 +13,7 @@ import 'app_database.dart';
 
 /// Database Seeder: Seeds SQLite database on initial launch with bundled default content
 class DatabaseSeeder {
-  static const String _keySeeded = 'palash_database_seeded_v1';
+  static const String _keySeeded = 'palash_database_seeded_v2';
 
   static Future<void> seedDatabaseIfNeeded(AppDatabase db) async {
     final prefs = await SharedPreferences.getInstance();

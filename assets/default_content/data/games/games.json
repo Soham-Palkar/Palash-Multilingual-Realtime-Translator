@@ -32,6 +32,104 @@
         "hindi": "पेड़",
         "santali": "ᱫᱟᱨᱮ (Dare)",
         "image": "assets/default_content/images/common/tree.webp"
+      },
+      {
+        "id": "item_05",
+        "hindi": "गाय",
+        "santali": "ᱜᱟᱹᱭ (Gai)",
+        "image": "assets/default_content/images/animals/cow.webp"
+      },
+      {
+        "id": "item_06",
+        "hindi": "किताब",
+        "santali": "ᱯᱩᱛᱷᱤ (Puthi)",
+        "image": "assets/default_content/images/classroom/book.webp"
+      }
+    ]
+  },
+  {
+    "id": "game_identify_animals",
+    "category": "Language",
+    "titleHindi": "चित्र पहचानो: जानवर (Identify Animal)",
+    "titleSantali": "ᱪᱤᱛᱟᱹᱨ ᱪᱤᱱᱦᱟᱹᱣ: ᱡᱤᱭᱟᱹᱞᱤ (Find Animal)",
+    "descriptionHindi": "दिए गए संताली व हिन्दी नाम के सही जानवर के चित्र को छुएं।",
+    "descriptionSantali": "ᱴᱷᱤᱠ ᱡᱤᱭᱟᱹᱞᱤ ᱨᱮᱭᱟᱜ ᱪᱤᱛᱟᱹᱨ ᱪᱮᱛᱟᱱ ᱨᱮ ᱚᱛᱟᱭ ᱢᱮ᱾",
+    "gameType": "choose_image",
+    "isAvailableOffline": true,
+    "promptHindi": "गाय (ᱜᱟᱹᱭ - Gai) का चित्र पहचानें:",
+    "promptSantali": "ᱜᱟᱹᱭ (Cow) ᱨᱮᱭᱟᱜ ᱪᱤᱛᱟᱹᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ:",
+    "targetId": "cow",
+    "options": [
+      {
+        "id": "cow",
+        "nameHindi": "गाय",
+        "nameSantali": "ᱜᱟᱹᱭ (Gai)",
+        "image": "assets/default_content/images/animals/cow.webp",
+        "isCorrect": true
+      },
+      {
+        "id": "dog",
+        "nameHindi": "कुत्ता",
+        "nameSantali": "ᱥᱮᱛᱟ (Seta)",
+        "image": "assets/default_content/images/animals/dog.webp",
+        "isCorrect": false
+      },
+      {
+        "id": "elephant",
+        "nameHindi": "हाथी",
+        "nameSantali": "ᱦᱟᱹᱛᱤ (Hati)",
+        "image": "assets/default_content/images/animals/elephant.webp",
+        "isCorrect": false
+      },
+      {
+        "id": "tiger",
+        "nameHindi": "बाघ",
+        "nameSantali": "ᱛᱟᱹᱨᱩᱵ (Tarub)",
+        "image": "assets/default_content/images/animals/tiger.webp",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "id": "game_identify_fruits",
+    "category": "Language",
+    "titleHindi": "फल पहचानो (Which Fruit is This?)",
+    "titleSantali": "ᱡᱚ ᱪᱤᱱᱦᱟᱹᱣ (Find the Fruit)",
+    "descriptionHindi": "दिए गए फल के सही चित्र को पहचानें।",
+    "descriptionSantali": "ᱴᱷᱤᱠ ᱡᱚ ᱨᱮᱭᱟᱜ ᱪᱤᱛᱟᱹᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ᱾",
+    "gameType": "choose_image",
+    "isAvailableOffline": true,
+    "promptHindi": "आम (ᱩᱞ - Ul) का चित्र कौन सा है?",
+    "promptSantali": "ᱩᱞ (Mango) ᱨᱮᱭᱟᱜ ᱪᱤᱛᱟᱹᱨ ᱚᱠᱟ ᱠᱟᱱᱟ?",
+    "targetId": "mango",
+    "options": [
+      {
+        "id": "banana",
+        "nameHindi": "केला",
+        "nameSantali": "ᱠᱟᱭᱨᱟ (Kaira)",
+        "image": "assets/default_content/images/fruits/banana.webp",
+        "isCorrect": false
+      },
+      {
+        "id": "mango",
+        "nameHindi": "आम",
+        "nameSantali": "ᱩᱞ (Ul)",
+        "image": "assets/default_content/images/fruits/mango.webp",
+        "isCorrect": true
+      },
+      {
+        "id": "apple",
+        "nameHindi": "सेब",
+        "nameSantali": "ᱥᱮᱣ (Seb)",
+        "image": "assets/default_content/images/fruits/apple.webp",
+        "isCorrect": false
+      },
+      {
+        "id": "orange",
+        "nameHindi": "संतरा",
+        "nameSantali": "ᱠᱚᱢᱞᱟ (Komla)",
+        "image": "assets/default_content/images/fruits/orange.webp",
+        "isCorrect": false
       }
     ]
   },
@@ -68,27 +166,18 @@
     "correctOrderSantali": [1, 2, 0]
   },
   {
-    "id": "game_lang_listen_choose",
-    "category": "Language",
-    "titleHindi": "सुनो और चुनो (Listen & Choose)",
-    "titleSantali": "ᱟᱸᱡᱚᱢ ᱟᱨ ᱵᱟᱪᱷᱟᱣ (Listen & Choose)",
-    "descriptionHindi": "ऑडियो सुनकर सही संताली शब्द पहचानें। (शीघ्र आ रहा है)",
-    "descriptionSantali": "ᱟᱲᱟᱝ ᱟᱸᱡᱚᱢ ᱠᱟᱛᱮ ᱵᱟᱪᱷᱟᱣ ᱢᱮ᱾ (Coming Soon)",
-    "gameType": "listen_choose",
-    "isAvailableOffline": false,
-    "isComingSoon": true
-  },
-  {
     "id": "game_math_count",
     "category": "Mathematics",
     "titleHindi": "गिनो और बताओ (Count Objects)",
     "titleSantali": "ᱞᱮᱠᱷᱟᱭ ᱢᱮ ᱟᱨ ᱞᱟᱹᱭ ᱢᱮ (Count Objects)",
-    "descriptionHindi": "दिए गए आम और सितारों को गिनकर सही संख्या पर क्लिक करें।",
+    "descriptionHindi": "दिए गए आमों को गिनकर सही संख्या पर क्लिक करें।",
     "descriptionSantali": "ᱪᱤᱛᱟᱹᱨ ᱨᱮ ᱩᱞ ᱠᱚ ᱞᱮᱠᱷᱟ ᱠᱟᱛᱮ ᱞᱟᱹᱭ ᱢᱮ᱾",
     "gameType": "count_objects",
     "isAvailableOffline": true,
     "targetCount": 4,
     "itemImage": "assets/default_content/images/fruits/mango.webp",
+    "itemNameHindi": "आम",
+    "itemNameSantali": "ᱩᱞ (Ul)",
     "options": [2, 3, 4, 5],
     "correctAnswer": 4,
     "hindiFeedback": "शाबाश! यहाँ ४ (चार) आम हैं।",
@@ -105,7 +194,8 @@
     "isAvailableOffline": true,
     "shapes": [
       {"nameHindi": "वृत्त / गोल", "nameSantali": "ᱜᱩᱞᱟᱹᱭ (Gulai)", "image": "assets/default_content/images/mathematics/circle.webp"},
-      {"nameHindi": "त्रिभुज", "nameSantali": "ᱯᱮ ᱠᱳᱬᱟ (Pe Kona)", "image": "assets/default_content/images/mathematics/triangle.webp"}
+      {"nameHindi": "त्रिभुज", "nameSantali": "ᱯᱮ ᱠᱳᱬᱟ (Pe Kona)", "image": "assets/default_content/images/mathematics/triangle.webp"},
+      {"nameHindi": "चौकोर / वर्ग", "nameSantali": "ᱪᱟᱹᱣᱠᱟᱹ (Chawka)", "image": "assets/default_content/images/mathematics/square.webp"}
     ]
   },
   {
@@ -123,7 +213,9 @@
       {"id": "c3", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.webp"},
       {"id": "c4", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.webp"},
       {"id": "c5", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"},
-      {"id": "c6", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"}
+      {"id": "c6", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"},
+      {"id": "c7", "pairId": "p4", "hindi": "गाय", "santali": "ᱜᱟᱹᱭ", "image": "assets/default_content/images/animals/cow.webp"},
+      {"id": "c8", "pairId": "p4", "hindi": "गाय", "santali": "ᱜᱟᱹᱭ", "image": "assets/default_content/images/animals/cow.webp"}
     ]
   }
 ]

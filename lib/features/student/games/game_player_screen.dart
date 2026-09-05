@@ -21,12 +21,15 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
   // State for count_objects
   int? _selectedCount;
 
+  // State for choose_image
+  String? _selectedImageId;
+  bool? _isImageCorrect;
+
   // State for memory_cards
   List<Map<String, dynamic>> _memoryCards = [];
   int? _firstFlippedIndex;
   int? _secondFlippedIndex;
   final List<int> _matchedIndices = [];
-
 
   @override
   void initState() {
@@ -45,27 +48,34 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     }
   }
 
-  void _showWinDialog() {
+  void _showWinDialog({String? messageHindi, String? messageSantali}) {
     showDialog(
-
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Column(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Column(
           children: [
-            Icon(Icons.emoji_events_rounded, color: AppColors.tertiary, size: 54),
-            SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.tertiaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.stars_rounded, color: AppColors.tertiary, size: 54),
+            ),
+            const SizedBox(height: 12),
             Text(
-              'शाबाश! आपने खेल जीत लिया!',
+              messageHindi ?? 'शाबाश! आपने सही उत्तर दिया!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ],
         ),
-        content: const Text(
-          'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱟᱢ ᱠᱷᱮᱞᱚᱸᱰ ᱮᱢ ᱡᱤᱛᱠᱟᱹᱨ ᱮᱱᱟ (Victory!)',
+        content: Text(
+          messageSantali ?? 'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱟᱢ ᱠᱷᱮᱞᱚᱸᱰ ᱮᱢ ᱡᱤᱛᱠᱟᱹᱨ ᱮᱱᱟ (Great Victory!)',
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.secondary,
             fontWeight: FontWeight.bold,
             fontSize: 14,
@@ -77,7 +87,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
             child: const Text('वापस जाएँ (Done)'),
           ),
         ],
@@ -99,7 +112,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Game Instructions Card
+            // Game Header Card
             PalashCard(
               backgroundColor: AppColors.moduleGames.withOpacity(0.08),
               borderColor: AppColors.moduleGames.withOpacity(0.3),
@@ -115,7 +128,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
             const SizedBox(height: 24),
 
             // Render Game according to type
-            if (widget.game.gameType == 'count_objects')
+            if (widget.game.gameType == 'choose_image')
+              _buildChooseImageGame()
+            else if (widget.game.gameType == 'count_objects')
               _buildCountObjectsGame()
             else if (widget.game.gameType == 'arrange_sentence')
               _buildArrangeSentenceGame()
@@ -131,31 +146,153 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 1. Count Objects Game
+  // 1. Choose Image Game (e.g. Find the Cow / Find the Fruit)
+  Widget _buildChooseImageGame() {
+    final promptHindi = widget.game.rawData['promptHindi'] ?? 'सही चित्र पहचानें:';
+    final promptSantali = widget.game.rawData['promptSantali'] ?? 'ᱴᱷᱤᱠ ᱪᱤᱛᱟᱹᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ:';
+    final options = (widget.game.rawData['options'] as List? ?? []);
+
+    return Column(
+      children: [
+        PalashCard(
+          backgroundColor: Colors.white,
+          borderColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: BilingualText(
+            hindi: promptHindi,
+            santali: promptSantali,
+            hindiFontSize: 18,
+            santaliFontSize: 15,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.95,
+          ),
+          itemCount: options.length,
+          itemBuilder: (context, index) {
+            final opt = options[index];
+            final optId = opt['id'] as String? ?? '$index';
+            final isCorrect = opt['isCorrect'] as bool? ?? false;
+            final isSelected = _selectedImageId == optId;
+
+            Color borderColor = AppColors.border;
+            Color bgColor = Colors.white;
+
+            if (isSelected) {
+              borderColor = isCorrect ? AppColors.success : AppColors.error;
+              bgColor = isCorrect
+                  ? AppColors.successContainer.withOpacity(0.5)
+                  : AppColors.errorContainer.withOpacity(0.5);
+            }
+
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedImageId = optId;
+                  _isImageCorrect = isCorrect;
+                });
+
+                if (isCorrect) {
+                  _showWinDialog(
+                    messageHindi: '✓ सही उत्तर! यह ${opt['nameHindi']} है।',
+                    messageSantali: '✓ ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱱᱚᱣᱟ ᱫᱚ ${opt['nameSantali']} ᱠᱟᱱᱟ᱾',
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: AppColors.error,
+                      content: Text('✗ फिर से कोशिश करो! (Try again!)'),
+                    ),
+                  );
+                }
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: borderColor, width: isSelected ? 2.5 : 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PalashAssetImage(
+                      imagePath: opt['image'],
+                      width: 80,
+                      height: 80,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      opt['nameHindi'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      opt['nameSantali'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // 2. Count Objects Game
   Widget _buildCountObjectsGame() {
     final target = widget.game.rawData['targetCount'] ?? 4;
     final itemImg = widget.game.rawData['itemImage'];
+    final nameHindi = widget.game.rawData['itemNameHindi'] ?? 'आम';
+    final nameSantali = widget.game.rawData['itemNameSantali'] ?? 'ᱩᱞ (Ul)';
     final options = (widget.game.rawData['options'] as List? ?? [2, 3, 4, 5]);
 
     return Column(
       children: [
-        const Text(
-          'इन आमों को गिनें (Count the mangoes):',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          'इन $nameHindi ($nameSantali) को गिनें:',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
 
-        // Fruits display
+        // Items display grid
         Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 14,
+          runSpacing: 14,
           alignment: WrapAlignment.center,
           children: List.generate(target as int, (index) {
             return Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: AppColors.tertiary, width: 1.5),
                 boxShadow: [
                   BoxShadow(
@@ -166,8 +303,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
               ),
               child: PalashAssetImage(
                 imagePath: itemImg,
-                width: 60,
-                height: 60,
+                width: 65,
+                height: 65,
+                borderRadius: BorderRadius.circular(12),
               ),
             );
           }),
@@ -176,10 +314,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
         const SizedBox(height: 32),
 
         const Text(
-          'सही संख्या पर टैप करें (Choose number):',
+          'सही संख्या चुनें (Choose Number):',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +336,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 onTap: () {
                   setState(() => _selectedCount = opt);
                   if (opt == target) {
-                    _showWinDialog();
+                    _showWinDialog(
+                      messageHindi: widget.game.rawData['hindiFeedback'],
+                      messageSantali: widget.game.rawData['santaliFeedback'],
+                    );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -210,8 +351,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
-                  width: 56,
-                  height: 56,
+                  width: 58,
+                  height: 58,
                   decoration: BoxDecoration(
                     color: isSelected ? btnColor : Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -236,7 +377,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 2. Arrange Sentence Game
+  // 3. Arrange Sentence Game
   Widget _buildArrangeSentenceGame() {
     final wordsHindi = (widget.game.rawData['wordsHindi'] as List? ?? ['जाता हूँ', 'मैं', 'स्कूल']);
     final correctOrder = (widget.game.rawData['correctOrderHindi'] as List? ?? [1, 2, 0]);
@@ -319,7 +460,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                           if (_selectedWordsOrder[i] != correctOrder[i]) correct = false;
                         }
                         if (correct) {
-                          _showWinDialog();
+                          _showWinDialog(
+                            messageHindi: 'शाबाश! सही वाक्य: "${widget.game.rawData['sentenceHindi']}"',
+                            messageSantali: 'ᱥᱟᱱᱛᱟᱲᱤ: "${widget.game.rawData['sentenceSantali']}"',
+                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -337,16 +481,16 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 3. Memory Cards Match
+  // 4. Memory Cards Match
   Widget _buildMemoryCardGame() {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+        crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
+        childAspectRatio: 1.1,
       ),
       itemCount: _memoryCards.length,
       itemBuilder: (context, index) {
@@ -397,7 +541,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
             duration: const Duration(milliseconds: 250),
             decoration: BoxDecoration(
               color: isFlipped ? Colors.white : AppColors.moduleGames,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: isFlipped ? AppColors.secondary : AppColors.moduleGames,
                 width: 2,
@@ -415,22 +559,23 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                     children: [
                       PalashAssetImage(
                         imagePath: card['image'],
-                        width: 44,
-                        height: 44,
+                        width: 50,
+                        height: 50,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         card['hindi'] ?? '',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       Text(
                         card['santali'] ?? '',
-                        style: const TextStyle(fontSize: 10, color: AppColors.secondary),
+                        style: const TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold),
                       ),
                     ],
                   )
                 : const Center(
-                    child: Icon(Icons.help_outline_rounded, color: Colors.white, size: 32),
+                    child: Icon(Icons.help_outline_rounded, color: Colors.white, size: 36),
                   ),
           ),
         );
@@ -438,7 +583,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 4. Letter Matching Game
+  // 5. Letter Matching Game
   Widget _buildLetterMatchingGame() {
     final pairs = (widget.game.rawData['pairs'] as List? ?? []);
 
@@ -486,7 +631,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 5. Word Image Match
+  // 6. Word Image Match
   Widget _buildWordImageMatchingGame() {
     final items = (widget.game.rawData['items'] as List? ?? []);
 
@@ -503,9 +648,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
               children: [
                 PalashAssetImage(
                   imagePath: item['image'],
-                  width: 50,
-                  height: 50,
-                  borderRadius: BorderRadius.circular(10),
+                  width: 58,
+                  height: 58,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -516,7 +661,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                     santaliFontSize: 13,
                   ),
                 ),
-                const Icon(Icons.check_circle_rounded, color: AppColors.secondary),
+                const Icon(Icons.check_circle_rounded, color: AppColors.secondary, size: 26),
               ],
             ),
           ),

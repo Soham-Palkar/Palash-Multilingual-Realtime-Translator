@@ -202,6 +202,8 @@ class _StudentGamesScreenState extends State<StudentGamesScreen>
     switch (type) {
       case 'match_word_image':
         return Icons.join_inner_rounded;
+      case 'choose_image':
+        return Icons.image_search_rounded;
       case 'letter_matching':
         return Icons.spellcheck_rounded;
       case 'arrange_sentence':

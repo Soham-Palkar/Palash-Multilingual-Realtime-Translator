@@ -36,6 +36,30 @@
     "linguistNote": "VERIFIED: Santali number 3 is Pe (ᱯᱮ)."
   },
   {
+    "id": "math_003a",
+    "category": "Mathematics",
+    "subcategory": "Numbers",
+    "hindi": "४ (चार)",
+    "santali": "᱔ (ᱯᱩᱱ - Pun)",
+    "santaliOlChiki": "᱔ - ᱯᱩᱱ",
+    "image": "assets/default_content/images/mathematics/number_4.webp",
+    "iconName": "looks_4",
+    "pronunciation": "Chaar / Pun",
+    "linguistNote": "VERIFIED: Santali number 4 is Pun (ᱯᱩᱱ)."
+  },
+  {
+    "id": "math_003b",
+    "category": "Mathematics",
+    "subcategory": "Numbers",
+    "hindi": "५ (पाँच)",
+    "santali": "᱕ (ᱢᱚᱬᱮ - Mone)",
+    "santaliOlChiki": "᱕ - ᱢᱚᱬᱮ",
+    "image": "assets/default_content/images/mathematics/number_5.webp",
+    "iconName": "looks_5",
+    "pronunciation": "Paanch / Mone",
+    "linguistNote": "VERIFIED: Santali number 5 is Mone (ᱢᱚᱬᱮ)."
+  },
+  {
     "id": "math_004",
     "category": "Mathematics",
     "subcategory": "Counting",
@@ -76,19 +100,19 @@
     "category": "Mathematics",
     "subcategory": "Subtraction",
     "hindi": "घटाव (-): ५ - २ = ३",
-    "santali": "ᱜᱮᱫ / ᱚᱪᱚᱜ (-) : ᱢᱚᱬᱮ - ᱵᱟᱨ = ᱯᱮ",
+    "santali": "ᱚᱪᱚᱜ (-) : ᱢᱚᱬᱮ - ᱵᱟᱨ = ᱯᱮ",
     "santaliOlChiki": "ᱚᱪᱚᱜ (-) : ᱕ - ᱒ = ᱓",
     "image": "assets/default_content/images/mathematics/minus.webp",
     "iconName": "remove",
     "pronunciation": "Ghataav / Ochog (Subtraction)",
-    "linguistNote": "VERIFIED: Subtraction is Ochog/Ged (ᱚᱪᱚᱜ)."
+    "linguistNote": "VERIFIED: Subtraction is Ochog (ᱚᱪᱚᱜ)."
   },
   {
     "id": "math_008",
     "category": "Mathematics",
     "subcategory": "Shapes",
     "hindi": "वृत्त / गोल (Circle)",
-    "santali": "ᱜᱩᱞᱟᱹᱭ / ᱜᱳᱞ (Gulai)",
+    "santali": "ᱜᱩᱞᱟᱹᱭ (Gulai)",
     "santaliOlChiki": "ᱜᱩᱞᱟᱹᱭ",
     "image": "assets/default_content/images/mathematics/circle.webp",
     "iconName": "circle",
@@ -105,7 +129,19 @@
     "image": "assets/default_content/images/mathematics/triangle.webp",
     "iconName": "change_history",
     "pronunciation": "Tribhuj / Pe Kona",
-    "linguistNote": "VERIFIED: Three corners / Triangle."
+    "linguistNote": "VERIFIED: Triangle is Pe Kona (ᱯᱮ ᱠᱳᱬᱟ)."
+  },
+  {
+    "id": "math_009a",
+    "category": "Mathematics",
+    "subcategory": "Shapes",
+    "hindi": "चौकोर / वर्ग (Square)",
+    "santali": "ᱪᱟᱹᱣᱠᱟᱹ (Chawka)",
+    "santaliOlChiki": "ᱪᱟᱹᱣᱠᱟᱹ",
+    "image": "assets/default_content/images/mathematics/square.webp",
+    "iconName": "crop_square",
+    "pronunciation": "Chawkor / Chawka",
+    "linguistNote": "VERIFIED: Square is Chawka (ᱪᱟᱹᱣᱠᱟᱹ)."
   },
   {
     "id": "math_010",
