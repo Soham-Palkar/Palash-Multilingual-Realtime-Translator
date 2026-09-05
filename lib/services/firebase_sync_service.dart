@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import '../database/app_database.dart';
 import '../models/flashcard_model.dart';
 import '../models/note_model.dart';
@@ -152,6 +151,7 @@ class FirebaseSyncService implements SyncService {
   }
 
   // Helper upload methods called from repositories
+  @override
   Future<void> uploadNote(TeacherNote note) async {
     await _firestore.collection('notes').doc(note.id).set({
       'lessonId': note.lessonId,
@@ -169,6 +169,7 @@ class FirebaseSyncService implements SyncService {
     }, SetOptions(merge: true));
   }
 
+  @override
   Future<void> uploadFlashcard(FlashcardItem fc) async {
     await _firestore.collection('flashcards').doc(fc.id).set({
       'category': fc.category,
@@ -187,6 +188,7 @@ class FirebaseSyncService implements SyncService {
     }, SetOptions(merge: true));
   }
 
+  @override
   Future<void> uploadAIContent(AIGeneratedContent content) async {
     final payload = {
       'flashcards': content.flashcards.map((f) => f.toJson()).toList(),
