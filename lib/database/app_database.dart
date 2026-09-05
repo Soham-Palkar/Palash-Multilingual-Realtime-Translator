@@ -46,7 +46,7 @@ class AppDatabase {
 
     return await openDatabase(
       dbPath,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -191,6 +191,10 @@ class AppDatabase {
       // Add isApproved column to notes table with default 0
       await db.execute('ALTER TABLE notes ADD COLUMN isApproved INTEGER NOT NULL DEFAULT 0');
     }
+    if (oldVersion < 3) {
+      // Version 3: Preserve existing data and ensure non-null constraint compliance
+      // Safe no-op migration maintaining built-in default content & publication flags
+    }
   }
 
   // Flashcards CRUD
@@ -263,6 +267,7 @@ class AppDatabase {
         santaliOlChiki: m['santaliOlChiki'] as String?,
         author: m['author'] as String,
         isDraft: (m['isDraft'] as int) == 1,
+        isApproved: (m['isApproved'] as int? ?? 0) == 1,
         isPublished: (m['isPublished'] as int) == 1,
         createdAt: DateTime.parse(m['createdAt'] as String),
       );

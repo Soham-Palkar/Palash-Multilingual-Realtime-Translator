@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../models/note_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/curriculum_model.dart';
 import '../../../repositories/content_repository.dart';
@@ -20,7 +21,10 @@ class _StudentNotesScreenState extends State<StudentNotesScreen> {
   int _selectedClass = 1;
   String _selectedSubject = 'Language';
   List<CurriculumLesson> _lessons = [];
+  List<TeacherNote> _notes = [];
   bool _isLoading = true;
+  bool _isNotesLoading = false;
+
 
   final List<String> _subjects = [
     'Language',
@@ -32,6 +36,7 @@ class _StudentNotesScreenState extends State<StudentNotesScreen> {
   void initState() {
     super.initState();
     _loadLessons();
+    _loadNotes();
   }
 
   Future<void> _loadLessons() async {
@@ -45,6 +50,18 @@ class _StudentNotesScreenState extends State<StudentNotesScreen> {
       setState(() {
         _lessons = list;
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadNotes() async {
+    setState(() => _isNotesLoading = true);
+    final repo = Provider.of<ContentRepository>(context, listen: false);
+    final list = await repo.getPublishedNotes();
+    if (mounted) {
+      setState(() {
+        _notes = list;
+        _isNotesLoading = false;
       });
     }
   }
@@ -248,6 +265,69 @@ class _StudentNotesScreenState extends State<StudentNotesScreen> {
                                     Icons.arrow_forward_ios_rounded,
                                     color: AppColors.textMuted,
                                     size: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+          ),
+          const Divider(height: 1, color: AppColors.border),
+          // Published Student Notes List
+          Expanded(
+            child: _isNotesLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _notes.isEmpty
+                    ? const EmptyStateView(
+                        title: 'कोई नोट उपलब्ध नहीं है',
+                        subtitle: 'इस कक्षा के लिये प्रकाशित नोट उपलब्ध नहीं हैं।',
+                        icon: Icons.note_outlined,
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _notes.length,
+                        itemBuilder: (context, idx) {
+                          final note = _notes[idx];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: PalashCard(
+                              elevation: 2,
+                              onTap: () {
+                                // Add navigation to note view if exists, else no-op
+                              },
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.secondaryContainer,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${idx + 1}',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.secondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Text(
+                                      note.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),

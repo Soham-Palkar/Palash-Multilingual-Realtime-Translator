@@ -12,6 +12,7 @@ import '../services/firebase_auth_service.dart';
 import '../services/mock_sync_service.dart';
 import '../services/mock_translation_service.dart';
 import '../services/sync_service.dart';
+import '../services/sync_service_factory.dart';
 import '../services/translation_service.dart';
 import 'routes.dart';
 import 'theme.dart';

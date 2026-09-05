@@ -26,7 +26,7 @@ class TeacherNote {
     this.author = 'Teacher',
     this.isDraft = false,
     this.isApproved = false,
-    this.isPublished = true,
+    this.isPublished = false,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 

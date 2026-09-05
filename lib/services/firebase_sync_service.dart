@@ -12,11 +12,28 @@ import 'sync_service.dart';
 /// Firebase Firestore. It uploads teacher‑initiated changes and pulls published
 /// content for students.
 class FirebaseSyncService implements SyncService {
+  static bool _hasSyncedThisSession = false;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AppDatabase _db = AppDatabase.instance;
 
   final StreamController<SyncStatusResult> _statusController =
       StreamController.broadcast();
+
+  FirebaseSyncService() {
+    _triggerInitialSessionSync();
+  }
+
+  void _triggerInitialSessionSync() {
+    if (!_hasSyncedThisSession) {
+      _hasSyncedThisSession = true;
+      // Asynchronous, fire-and-forget background sync once per session
+      syncContent().catchError((e) {
+        debugPrint('Automatic background session sync error: $e');
+        return SyncStatusResult(isSuccess: false, message: e.toString());
+      });
+    }
+  }
 
   @override
   Stream<SyncStatusResult> get syncStatusStream => _statusController.stream;
@@ -171,6 +188,11 @@ class FirebaseSyncService implements SyncService {
 
   @override
   Future<void> uploadFlashcard(FlashcardItem fc) async {
+    // Safety guard: non-teacher-created flashcards (bundled defaults) cannot be uploaded as published
+    if (!fc.isTeacherCreated && fc.isPublished) {
+      debugPrint('FirebaseSyncService: Guard prevented uploading non-teacher-created flashcard ${fc.id} as published.');
+      return;
+    }
     await _firestore.collection('flashcards').doc(fc.id).set({
       'category': fc.category,
       'subcategory': fc.subcategory,
