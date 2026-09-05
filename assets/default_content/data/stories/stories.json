@@ -1,0 +1,69 @@
+[
+  {
+    "id": "story_001",
+    "titleHindi": "हाथी और नन्हीं चिड़िया",
+    "titleSantali": "ᱦᱟᱹᱛᱤ ᱟᱨ ᱦᱩᱰᱤᱧ ᱪᱮᱬᱮ (The Elephant and the Little Bird)",
+    "coverImage": "assets/default_content/images/animals/elephant.webp",
+    "author": "Vernacular Folk Pedagogy",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "image": "assets/default_content/images/common/tree.webp",
+        "hindiText": "एक घने और हरे-भरे जंगल में एक बड़ा पेड़ था। उस पेड़ पर एक नन्हीं चिड़िया का घोंसला था।",
+        "santaliText": "ᱢᱤᱫ ᱢᱟᱨᱟᱝ ᱟᱨ ᱦᱟᱹᱨᱤᱭᱟᱹᱲ ᱵᱤᱨ ᱨᱮ ᱢᱤᱫ ᱫᱟᱨᱮ ᱛᱟᱦᱮᱸ ᱠᱟᱱᱟ᱾ ᱚᱱᱟ ᱫᱟᱨᱮ ᱨᱮ ᱢᱤᱫ ᱦᱩᱰᱤᱧ ᱪᱮᱬᱮ ᱭᱟᱜ ᱛᱩᱠᱟᱹ ᱛᱟᱦᱮᱸ ᱠᱟᱱᱟ᱾",
+        "santaliPhonetic": "Mid marang ar hariyar bir re mid dare tahe kana. Ona dare re mid hudin chene yah tuka tahe kana."
+      },
+      {
+        "pageNumber": 2,
+        "image": "assets/default_content/images/animals/elephant.webp",
+        "hindiText": "एक दिन एक बड़ा हाथी गर्मी से परेशान होकर पेड़ के नीचे छाया लेने आया।",
+        "santaliText": "ᱢᱤᱫ ᱫᱤᱱ ᱢᱤᱫ ᱢᱟᱨᱟᱝ ᱦᱟᱹᱛᱤ ᱥᱤᱛᱩᱝ ᱛᱮ ᱞᱟᱸᱜᱟ ᱠᱟᱛᱮ ᱫᱟᱨᱮ ᱞᱟᱛᱟᱨ ᱩᱢᱩᱞ ᱦᱮᱡ ᱮᱱᱟᱭ᱾",
+        "santaliPhonetic": "Mid din mid marang hati situng te langa kate dare latar umul hej enae."
+      },
+      {
+        "pageNumber": 3,
+        "image": "assets/default_content/images/common/water.webp",
+        "hindiText": "चिड़िया ने हाथी को पास के झरने से ठंडा और मीठा पानी पीने का रास्ता बताया। दोनों पक्के दोस्त बन गए।",
+        "santaliText": "ᱪᱮᱬᱮ ᱫᱚ ᱦᱟᱹᱛᱤ ᱥᱩᱨ ᱨᱮᱭᱟᱜ ᱡᱷᱟᱨᱱᱟ ᱠᱷᱚᱱ ᱨᱮᱭᱟᱲ ᱫᱟᱜ ᱧᱩ ᱨᱮᱭᱟᱜ ᱦᱚᱨ ᱮ ᱞᱟᱹᱭᱟᱫᱮᱭᱟ᱾ ᱵᱟᱱᱟᱨ ᱜᱟᱹᱦᱤᱨ ᱜᱟᱛᱮ ᱠᱤᱱ ᱵᱮᱱᱟᱣ ᱮᱱᱟ᱾",
+        "santaliPhonetic": "Chene do hati sur reyah jharna khon reyar daah nu reyah hor e laiyadeya. Banar gahir gate kin benaw ena."
+      },
+      {
+        "pageNumber": 4,
+        "image": "assets/default_content/images/common/sun.webp",
+        "hindiText": "शिक्षा: मित्रता में कोई छोटा या बड़ा नहीं होता, हम सब एक-दूसरे की मदद कर सकते हैं।",
+        "santaliText": "ᱥᱮᱪᱮᱫ (Moral): ᱜᱟᱛᱮ ᱨᱮ ᱚᱠᱚᱭ ᱦᱚᱸ ᱢᱟᱨᱟᱝ ᱥᱮ ᱦᱩᱰᱤᱧ ᱵᱟᱹᱱᱩᱜ ᱠᱚᱣᱟ, ᱟᱵᱚ ᱡᱚᱛᱚ ᱦᱚᱲ ᱜᱚᱲᱚ-ᱜᱚᱯᱚᱲᱚ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱᱟ᱾",
+        "santaliPhonetic": "Seched: Gate re okoy ho marang se hudin banuh kowa, abo joto hor goro-goporo lahti kana."
+      }
+    ]
+  },
+  {
+    "id": "story_002",
+    "titleHindi": "समझदार खरगोश और मीठा आम",
+    "titleSantali": "ᱥᱮᱬᱟᱦᱟᱱ ᱠᱩᱞᱟᱹᱭ ᱟᱨ ᱥᱤᱵᱤᱞ ᱩᱞ (The Wise Rabbit & Sweet Mango)",
+    "coverImage": "assets/default_content/images/fruits/mango.webp",
+    "author": "Tribal Tales of Wisdom",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "image": "assets/default_content/images/fruits/mango.webp",
+        "hindiText": "गाँव के किनारे एक बड़ा आम का पेड़ था जिस पर बहुत मीठे और रसीले आम लगे थे।",
+        "santaliText": "ᱟᱹᱛᱩ ᱟᱲᱮ ᱨᱮ ᱢᱤᱫ ᱢᱟᱨᱟᱝ ᱩᱞ ᱫᱟᱨᱮ ᱛᱟᱦᱮᱸ ᱠᱟᱱᱟ ᱡᱟᱦᱟᱸ ᱨᱮ ᱟᱹᱰᱤ ᱥᱤᱵᱤᱞ ᱩᱞ ᱡᱚ ᱞᱮᱱᱟ᱾",
+        "santaliPhonetic": "Atu are re mid marang ul dare tahe kana jaha re adi sibil ul jo lena."
+      },
+      {
+        "pageNumber": 2,
+        "image": "assets/default_content/images/common/conversation.webp",
+        "hindiText": "एक छोटा खरगोश ऊपर नहीं पहुँच पा रहा था। उसने अपने मित्र मोर और बंदर से मदद माँगी।",
+        "santaliText": "ᱢᱤᱫ ᱦᱩᱰᱤᱧ ᱠᱩᱞᱟᱹᱭ ᱪᱮᱛᱟᱱ ᱵᱟᱭ ᱥᱮᱴᱮᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱛᱟᱦᱮᱸᱫ᱾ ᱩᱱᱤ ᱫᱚ ᱢᱟᱨᱟᱜ ᱟᱨ ᱜᱟᱹᱰᱤ ᱴᱷᱮᱱ ᱜᱚᱲᱚ ᱠᱚᱭ ᱠᱮᱫᱼᱟ᱾",
+        "santaliPhonetic": "Mid hudin kulai cetan bay seter dareyah kan tahed. Uni do marag ar gadi then goro koy ked-a."
+      },
+      {
+        "pageNumber": 3,
+        "image": "assets/default_content/images/family/child.webp",
+        "hindiText": "सबने मिलकर आम तोड़े और आपस में मिल-बांटकर खुशी-खुशी खाए।",
+        "santaliText": "ᱡᱚᱛᱚ ᱦᱚᱲ ᱢᱮᱥᱟ ᱠᱟᱛᱮ ᱩᱞ ᱠᱚ ᱦᱟᱹᱴᱤᱧ ᱠᱮᱫᱼᱟ ᱟᱨ ᱨᱟᱹᱥᱠᱟᱹ ᱛᱮᱠᱚ ᱡᱚᱢ ᱠᱮᱫᱼᱟ᱾",
+        "santaliPhonetic": "Joto hor mesa kate ul ko hatin ked-a ar raska teko jom ked-a."
+      }
+    ]
+  }
+]

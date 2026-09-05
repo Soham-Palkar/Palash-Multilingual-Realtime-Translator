@@ -1,0 +1,75 @@
+[
+  {
+    "id": "ws_001",
+    "titleHindi": "कार्यपत्रक १: चित्रों को पहचानें और सही शब्द चुनें",
+    "titleSantali": "ᱠᱟᱹᱢᱤ ᱥᱟᱠᱟᱢ ᱑: ᱪᱤᱛᱟᱹᱨ ᱧᱮᱞ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱥᱟᱵᱟᱫ ᱵᱟᱪᱷᱟᱣ",
+    "gradeClass": 1,
+    "subject": "General Knowledge",
+    "questions": [
+      {
+        "id": "ws_q_01",
+        "questionHindi": "यह कौन सा जानवर है?",
+        "questionSantali": "ᱱᱚᱣᱟ ᱫᱚ ᱪᱮᱫ ᱡᱤᱭᱟᱹᱞᱤ ᱠᱟᱱᱟ? (Nowa do ched jiyali kana?)",
+        "image": "assets/default_content/images/animals/elephant.webp",
+        "optionsHindi": ["हाथी", "कुत्ता", "बिल्ली", "बकरी"],
+        "optionsSantali": ["ᱦᱟᱹᱛᱤ (Hati)", "ᱥᱮᱛᱟ (Seta)", "ᱯᱩᱥᱤ (Pusi)", "ᱢᱮᱨᱚᱢ (Merom)"],
+        "correctIndex": 0,
+        "explanationHindi": "यह हाथी है। हाथी जंगल का सबसे बड़ा थल प्राणी है।",
+        "explanationSantali": "ᱱᱚᱣᱟ ᱫᱚ ᱦᱟᱹᱛᱤ ᱠᱟᱱᱟ (This is an Elephant)᱾ ᱦᱟᱹᱛᱤ ᱫᱚ ᱵᱤᱨ ᱨᱤᱱᱤᱡ ᱡᱚᱛᱚ ᱠᱷᱚᱱ ᱢᱟᱨᱟᱝ ᱡᱤᱭᱟᱹᱞᱤ ᱠᱟᱱᱟᱭ᱾"
+      },
+      {
+        "id": "ws_q_02",
+        "questionHindi": "इस फल का सही नाम क्या है?",
+        "questionSantali": "ᱱᱚᱣᱟ ᱡᱚ ᱨᱮᱭᱟᱜ ᱴᱷᱤᱠ ᱧᱩᱛᱩᱢ ᱪᱮᱫ? (Nowa jo reyah thik nutum ched?)",
+        "image": "assets/default_content/images/fruits/mango.webp",
+        "optionsHindi": ["सेब", "केला", "आम", "अंगूर"],
+        "optionsSantali": ["ᱥᱮᱣ (Seb)", "ᱠᱟᱭᱨᱟ (Kaira)", "ᱩᱞ (Ul)", "ᱟᱝᱜᱩᱨ (Angur)"],
+        "correctIndex": 2,
+        "explanationHindi": "यह आम है। आम को फलों का राजा कहा जाता है।",
+        "explanationSantali": "ᱱᱚᱣᱟ ᱫᱚ ᱩᱞ ᱠᱟᱱᱟ (This is a Mango)᱾ ᱩᱞ ᱫᱚ ᱡᱚ ᱠᱚ ᱨᱤᱱᱤᱡ ᱨᱟᱡᱟ ᱠᱟᱱᱟᱭ᱾"
+      },
+      {
+        "id": "ws_q_03",
+        "questionHindi": "यह कौन सा रंग है?",
+        "questionSantali": "ᱱᱚᱣᱟ ᱫᱚ ᱪᱮᱫ ᱨᱚᱝ ᱠᱟᱱᱟ? (Nowa do ched rong kana?)",
+        "image": "assets/default_content/images/colors/red.webp",
+        "optionsHindi": ["हरा", "लाल", "नीला", "पीला"],
+        "optionsSantali": ["ᱦᱟᱹᱨᱤᱭᱟᱹᱲ (Hariyar)", "ᱟᱨᱟᱜ (Arag)", "ᱞᱤᱞ (Lil)", "ᱥᱟᱥᱟᱝ (Sasang)"],
+        "correctIndex": 1,
+        "explanationHindi": "यह लाल रंग है। अनार और सेब लाल रंग के होते हैं।",
+        "explanationSantali": "ᱱᱚᱣᱟ ᱫᱚ ᱟᱨᱟᱜ ᱨᱚᱝ ᱠᱟᱱᱟ (This is Red color)᱾"
+      }
+    ]
+  },
+  {
+    "id": "ws_002",
+    "titleHindi": "कार्यपत्रक २: सरल गिनती और आकृतियाँ",
+    "titleSantali": "ᱠᱟᱹᱢᱤ ᱥᱟᱠᱟᱢ ᱒: ᱟᱞᱜᱟ ᱞᱮᱠᱷᱟ ᱟᱨ ᱜᱩᱞᱟᱹᱭ ᱪᱤᱱᱦᱟᱹ",
+    "gradeClass": 2,
+    "subject": "Mathematics",
+    "questions": [
+      {
+        "id": "ws_q_04",
+        "questionHindi": "२ + ३ मिलकर कुल कितने होते हैं?",
+        "questionSantali": "ᱵᱟᱨ (᱒) + ᱯᱮ (᱓) ᱢᱮᱥᱟ ᱠᱟᱛᱮ ᱛᱤᱱᱟᱹᱜ ᱦᱩᱭᱩᱜᱼᱟ?",
+        "image": "assets/default_content/images/mathematics/plus.webp",
+        "optionsHindi": ["३", "४", "५", "६"],
+        "optionsSantali": ["ᱯᱮ (᱓)", "ᱯᱩᱱ (᱔)", "ᱢᱚᱬᱮ (᱕)", "ᱛᱩᱨᱩᱭ (᱖)"],
+        "correctIndex": 2,
+        "explanationHindi": "२ और ३ को जोड़ने पर ५ आता है (२ + ३ = ५)।",
+        "explanationSantali": "ᱵᱟᱨ (᱒) ᱟᱨ ᱯᱮ (᱓) ᱢᱮᱥᱟ ᱞᱮᱠᱷᱟᱱ ᱢᱚᱬᱮ (᱕) ᱦᱩᱭᱩᱜᱼᱟ (2 + 3 = 5)᱾"
+      },
+      {
+        "id": "ws_q_05",
+        "questionHindi": "इस गोल आकृति को क्या कहते हैं?",
+        "questionSantali": "ᱱᱚᱣᱟ ᱜᱩᱞᱟᱹᱭ ᱪᱤᱛᱟᱹᱨ ᱫᱚ ᱪᱮᱫ ᱠᱚ ᱢᱮᱛᱟᱜᱼᱟ?",
+        "image": "assets/default_content/images/mathematics/circle.webp",
+        "optionsHindi": ["वृत्त / गोल", "त्रिभुज", "चौकोर", "तारा"],
+        "optionsSantali": ["ᱜᱩᱞᱟᱹᱭ (Gulai / Circle)", "ᱯᱮ ᱠᱳᱬᱟ (Triangle)", "ᱪᱟᱹᱣᱠᱟᱹ (Square)", "ᱤᱯᱤᱞ (Star)"],
+        "correctIndex": 0,
+        "explanationHindi": "यह वृत्त (Circle) है, जो बिल्कुल गोल होता है।",
+        "explanationSantali": "ᱱᱚᱣᱟ ᱫᱚ ᱜᱩᱞᱟᱹᱭ (Gulai) ᱠᱟᱱᱟ᱾"
+      }
+    ]
+  }
+]

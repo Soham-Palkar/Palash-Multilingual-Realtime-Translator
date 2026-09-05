@@ -1,0 +1,129 @@
+[
+  {
+    "id": "game_lang_match_word",
+    "category": "Language",
+    "titleHindi": "शब्द और चित्र मिलान",
+    "titleSantali": "ᱥᱟᱵᱟᱫ ᱟᱨ ᱪᱤᱛᱟᱹᱨ ᱡᱚᱲᱟᱣ (Word & Image Match)",
+    "descriptionHindi": "चित्र देखकर सही हिन्दी और संताली शब्द का मिलान करें।",
+    "descriptionSantali": "ᱪᱤᱛᱟᱹᱨ ᱧᱮᱞ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱥᱟᱵᱟᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ᱾",
+    "gameType": "match_word_image",
+    "isAvailableOffline": true,
+    "items": [
+      {
+        "id": "item_01",
+        "hindi": "हाथी",
+        "santali": "ᱦᱟᱹᱛᱤ (Hati)",
+        "image": "assets/default_content/images/animals/elephant.webp"
+      },
+      {
+        "id": "item_02",
+        "hindi": "आम",
+        "santali": "ᱩᱞ (Ul)",
+        "image": "assets/default_content/images/fruits/mango.webp"
+      },
+      {
+        "id": "item_03",
+        "hindi": "सूरज",
+        "santali": "ᱥᱤᱝᱜᱤ (Singi)",
+        "image": "assets/default_content/images/common/sun.webp"
+      },
+      {
+        "id": "item_04",
+        "hindi": "पेड़",
+        "santali": "ᱫᱟᱨᱮ (Dare)",
+        "image": "assets/default_content/images/common/tree.webp"
+      }
+    ]
+  },
+  {
+    "id": "game_lang_letter_match",
+    "category": "Language",
+    "titleHindi": "अक्षर मिलान खेल",
+    "titleSantali": "ᱚᱞ ᱪᱤᱠᱤ ᱟᱨ ᱫᱮᱵᱽᱱᱟᱜᱽᱨᱤ ᱡᱚᱲᱟᱣ (Letter Match)",
+    "descriptionHindi": "देवनागरी और ओल चिकी अक्षरों की जोड़ी बनाएं।",
+    "descriptionSantali": "ᱫᱮᱵᱽᱱᱟᱜᱽᱨᱤ ᱟᱨ ᱚᱞ ᱪᱤᱠᱤ ᱨᱮᱭᱟᱜ ᱡᱚᱲ ᱵᱮᱱᱟᱣ ᱢᱮ᱾",
+    "gameType": "letter_matching",
+    "isAvailableOffline": true,
+    "pairs": [
+      {"hindi": "अ", "santali": "ᱚ", "label": "A - O"},
+      {"hindi": "त", "santali": "ᱛ", "label": "Ta - Ot"},
+      {"hindi": "ग", "santali": "ᱜ", "label": "Ga - Og"},
+      {"hindi": "ल", "santali": "ᱞ", "label": "La - Ol"}
+    ]
+  },
+  {
+    "id": "game_lang_arrange_sentence",
+    "category": "Language",
+    "titleHindi": "वाक्य जोड़ो (Arrange Sentence)",
+    "titleSantali": "ᱟᱹᱭᱟᱹᱛ ᱥᱟᱡᱟᱣ (Arrange Words)",
+    "descriptionHindi": "उलटे-पुलटे शब्दों को सही क्रम में रखकर अर्थपूर्ण वाक्य बनाएं।",
+    "descriptionSantali": "ᱥᱟᱵᱟᱫ ᱠᱚ ᱥᱟᱡᱟᱣ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱟᱹᱭᱟᱹᱛ ᱵᱮᱱᱟᱣ ᱢᱮ᱾",
+    "gameType": "arrange_sentence",
+    "isAvailableOffline": true,
+    "sentenceHindi": "मैं स्कूल जाता हूँ",
+    "sentenceSantali": "ᱤᱧ ᱤᱥᱠᱩᱞᱤᱧ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "wordsHindi": ["जाता हूँ", "मैं", "स्कूल"],
+    "correctOrderHindi": [1, 2, 0],
+    "wordsSantali": ["ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ", "ᱤᱧ", "ᱤᱥᱠᱩᱞᱤᱧ"],
+    "correctOrderSantali": [1, 2, 0]
+  },
+  {
+    "id": "game_lang_listen_choose",
+    "category": "Language",
+    "titleHindi": "सुनो और चुनो (Listen & Choose)",
+    "titleSantali": "ᱟᱸᱡᱚᱢ ᱟᱨ ᱵᱟᱪᱷᱟᱣ (Listen & Choose)",
+    "descriptionHindi": "ऑडियो सुनकर सही संताली शब्द पहचानें। (शीघ्र आ रहा है)",
+    "descriptionSantali": "ᱟᱲᱟᱝ ᱟᱸᱡᱚᱢ ᱠᱟᱛᱮ ᱵᱟᱪᱷᱟᱣ ᱢᱮ᱾ (Coming Soon)",
+    "gameType": "listen_choose",
+    "isAvailableOffline": false,
+    "isComingSoon": true
+  },
+  {
+    "id": "game_math_count",
+    "category": "Mathematics",
+    "titleHindi": "गिनो और बताओ (Count Objects)",
+    "titleSantali": "ᱞᱮᱠᱷᱟᱭ ᱢᱮ ᱟᱨ ᱞᱟᱹᱭ ᱢᱮ (Count Objects)",
+    "descriptionHindi": "दिए गए आम और सितारों को गिनकर सही संख्या पर क्लिक करें।",
+    "descriptionSantali": "ᱪᱤᱛᱟᱹᱨ ᱨᱮ ᱩᱞ ᱠᱚ ᱞᱮᱠᱷᱟ ᱠᱟᱛᱮ ᱞᱟᱹᱭ ᱢᱮ᱾",
+    "gameType": "count_objects",
+    "isAvailableOffline": true,
+    "targetCount": 4,
+    "itemImage": "assets/default_content/images/fruits/mango.webp",
+    "options": [2, 3, 4, 5],
+    "correctAnswer": 4,
+    "hindiFeedback": "शाबाश! यहाँ ४ (चार) आम हैं।",
+    "santaliFeedback": "ᱟᱹᱰᱤ ᱵᱮᱥ! ᱱᱚᱸᱰᱮ ᱔ (ᱯᱩᱱ) ᱩᱞ ᱢᱮᱱᱟᱜᱼᱟ᱾"
+  },
+  {
+    "id": "game_math_shapes",
+    "category": "Mathematics",
+    "titleHindi": "आकृति पहचान (Shape Match)",
+    "titleSantali": "ᱪᱤᱱᱦᱟᱹ ᱵᱟᱪᱷᱟᱣ (Shape Match)",
+    "descriptionHindi": "गोल, चौकोर और त्रिभुज आकृतियों को उनके नाम से मिलाएँ।",
+    "descriptionSantali": "ᱜᱩᱞᱟᱹᱭ ᱟᱨ ᱯᱮ ᱠᱳᱬᱟ ᱪᱤᱛᱟᱹᱨ ᱢᱮᱞ ᱢᱮ᱾",
+    "gameType": "shape_matching",
+    "isAvailableOffline": true,
+    "shapes": [
+      {"nameHindi": "वृत्त / गोल", "nameSantali": "ᱜᱩᱞᱟᱹᱭ (Gulai)", "image": "assets/default_content/images/mathematics/circle.webp"},
+      {"nameHindi": "त्रिभुज", "nameSantali": "ᱯᱮ ᱠᱳᱬᱟ (Pe Kona)", "image": "assets/default_content/images/mathematics/triangle.webp"}
+    ]
+  },
+  {
+    "id": "game_memory_cards",
+    "category": "Memory",
+    "titleHindi": "स्मृति खेल (Memory Card Match)",
+    "titleSantali": "ᱫᱤᱥᱟᱹ ᱠᱷᱮᱞ (Memory Match)",
+    "descriptionHindi": "पलटकर कार्ड्स की सही जोड़ी ढूँढें।",
+    "descriptionSantali": "ᱠᱟᱨᱰ ᱩᱞᱴᱟᱹᱣ ᱠᱟᱛᱮ ᱡᱚᱲᱟ ᱯᱟᱸᱡᱟᱭ ᱢᱮ᱾",
+    "gameType": "memory_cards",
+    "isAvailableOffline": true,
+    "cards": [
+      {"id": "c1", "pairId": "p1", "hindi": "हाथी", "santali": "ᱦᱟᱹᱛᱤ", "image": "assets/default_content/images/animals/elephant.webp"},
+      {"id": "c2", "pairId": "p1", "hindi": "हाथी", "santali": "ᱦᱟᱹᱛᱤ", "image": "assets/default_content/images/animals/elephant.webp"},
+      {"id": "c3", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.webp"},
+      {"id": "c4", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.webp"},
+      {"id": "c5", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"},
+      {"id": "c6", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"}
+    ]
+  }
+]

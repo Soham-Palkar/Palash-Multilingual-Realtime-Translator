@@ -1,0 +1,118 @@
+[
+  {
+    "id": "curr_c1_lang_01",
+    "gradeClass": 1,
+    "subject": "Language",
+    "titleHindi": "पाठ १: हमारी वर्णमाला और स्वर",
+    "titleSantali": "ᱯᱟᱴᱷ ᱑: ᱟᱵᱚᱣᱟᱜ ᱟᱠᱷᱚᱨ ᱟᱨ ᱨᱟᱦᱟ ᱟᱲᱟᱝ",
+    "description": "बुनियादी वर्णमाला, स्वर और प्रथम शब्द परिचय।",
+    "notes": [
+      {
+        "id": "note_001",
+        "title": "वर्णमाला के प्रथम पांच स्वर",
+        "hindiContent": "हिन्दी वर्णमाला में अ, आ, इ, ई, उ स्वर हैं। प्रत्येक स्वर की अपनी ध्वनि होती है जैसे अ से अनार और आ से आम।",
+        "santaliContent": "ᱥᱟᱱᱛᱟᱲᱤ ᱚᱞ ᱪᱤᱠᱤ ᱨᱮ ᱚ, ᱛ, ᱜ, ᱝ, ᱞ ᱮᱢᱟᱱ ᱢᱮᱱᱟᱜᱼᱟ᱾ ᱨᱟᱦᱟ ᱟᱲᱟᱝ ᱛᱮ ᱥᱟᱵᱟᱫ ᱵᱮᱱᱟᱣᱜᱼᱟ᱾ (Ol Chiki vowels and basic sound formation)",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      },
+      {
+        "id": "note_002",
+        "title": "कक्षा में दैनिक अभिवादन",
+        "hindiContent": "शिक्षक और मित्रों से मिलते समय 'नमस्ते' या 'प्रणाम' कहना आदर का प्रतीक है।",
+        "santaliContent": "ᱢᱟᱪᱮᱛ ᱟᱨ ᱜᱟᱛᱮ ᱠᱚ ᱥᱟᱶ ᱧᱟᱯᱟᱢ ᱡᱚᱦᱚᱜ 'ᱡᱚᱦᱟᱨ' (Johar) ᱢᱮᱱ ᱫᱚ ᱢᱟᱹᱱ ᱨᱮᱭᱟᱜ ᱪᱤᱱᱦᱟᱹ ᱠᱟᱱᱟ᱾",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      }
+    ]
+  },
+  {
+    "id": "curr_c1_math_01",
+    "gradeClass": 1,
+    "subject": "Mathematics",
+    "titleHindi": "पाठ १: १ से १० तक गिनती और वस्तु गणना",
+    "titleSantali": "ᱯᱟᱴᱷ ᱑: ᱑ ᱠᱷᱚᱱ ᱑᱐ ᱫᱷᱟᱹᱵᱤᱡ ᱞᱮᱠᱷᱟ",
+    "description": "मूर्त वस्तुओं द्वारा १ से १० तक गिनने का अभ्यास।",
+    "notes": [
+      {
+        "id": "note_003",
+        "title": "मूर्त वस्तुओं से संख्या ज्ञान (१ से ५)",
+        "hindiContent": "१ (एक फूल), २ (दो पत्तियां), ३ (तीन कंकड़), ४ (चार आम), ५ (पांच उंगलियां)।",
+        "santaliContent": "᱑ (ᱢᱤᱫ ᱵᱟᱦᱟ), ᱒ (ᱵᱟᱨ ᱥᱟᱠᱟᱢ), ᱓ (ᱯᱮ ᱫᱷᱤᱨᱤ), ᱔ (ᱯᱩᱱ ᱩᱞ), ᱕ (ᱢᱚᱬᱮ ᱠᱟᱹᱴᱩᱵ)᱾",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      }
+    ]
+  },
+  {
+    "id": "curr_c2_evs_01",
+    "gradeClass": 2,
+    "subject": "EVS / General Knowledge",
+    "titleHindi": "पाठ १: हमारे आस-पास के पेड़-पौधे और जीव",
+    "titleSantali": "ᱯᱟᱴᱷ ᱑: ᱟᱵᱚ ᱥᱩᱨ-ᱥᱩᱯᱩᱨ ᱨᱮᱭᱟᱜ ᱫᱟᱨᱮ-ᱱᱟᱹᱲᱤ ᱟᱨ ᱡᱤᱵᱽ-ᱡᱤᱭᱟᱹᱞᱤ",
+    "description": "गाँव और जंगल के परिचित पेड़ एवं वन्य प्राणियों की पहचान।",
+    "notes": [
+      {
+        "id": "note_004",
+        "title": "महुआ और साल के पेड़ का महत्व",
+        "hindiContent": "महुआ (मातकोम) और साल (सर्जम) हमारे जीवन में छाया, फल, और औषधीय लाभ देते हैं।",
+        "santaliContent": "ᱢᱟᱛᱠᱚᱢ (Matkom) ᱟᱨ ᱥᱟᱨᱡᱚᱢ (Sarjom) ᱫᱟᱨᱮ ᱟᱵᱚ ᱡᱤᱭᱚᱱ ᱨᱮ ᱩᱢᱩᱞ, ᱡᱚ ᱟᱨ ᱨᱟᱱ-ᱢᱩᱨᱜᱟᱹᱱ ᱮᱢᱟᱵᱚᱱᱟ᱾",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      }
+    ]
+  },
+  {
+    "id": "curr_c3_lang_01",
+    "gradeClass": 3,
+    "subject": "Language",
+    "titleHindi": "पाठ २: सरल वाक्य रचना और क्रियाएँ",
+    "titleSantali": "ᱯᱟᱴᱷ ᱒: ᱟᱞᱜᱟ ᱟᱹᱭᱟᱹᱛ ᱟᱨ ᱠᱟᱹᱢᱤ ᱥᱟᱵᱟᱫ",
+    "description": "पढ़ना, लिखना, खेलना आदि क्रियाओं से वाक्य बनाना।",
+    "notes": [
+      {
+        "id": "note_005",
+        "title": "दैनिक क्रिया शब्द (Actions)",
+        "hindiContent": "पढ़ना (पढ़ाव), लिखना (ओल), खेलना (एनेच), खाना (जोम), पानी पीना (दाग नू)।",
+        "santaliContent": "ᱯᱟᱲᱦᱟᱣ (Parhao), ᱚᱞ (Ol), ᱮᱱᱮᱡ (Enej), ᱡᱚᱢ (Jom), ᱫᱟᱜ ᱧᱩ (Daah nu)᱾",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      }
+    ]
+  },
+  {
+    "id": "curr_c4_math_01",
+    "gradeClass": 4,
+    "subject": "Mathematics",
+    "titleHindi": "पाठ ३: जोड़ और घटाव के व्यावहारिक प्रश्न",
+    "titleSantali": "ᱯᱟᱴᱷ ᱓: ᱢᱮᱥᱟ ᱟᱨ ᱚᱪᱚᱜ ᱨᱮᱭᱟᱜ ᱠᱩᱠᱞᱤ",
+    "description": "हाट-बाजार के सरल जोड़-घटाव उदाहरण।",
+    "notes": [
+      {
+        "id": "note_006",
+        "title": "बाजार में हिसाब-किताब",
+        "hindiContent": "यदि आपके पास १० रुपये हैं और आपने ४ रुपये का अमरूद खरीदा, तो कितने बचे? १० - ४ = ६ रुपये।",
+        "santaliContent": "ᱡᱩᱫᱤ ᱟᱢ ᱴᱷᱮᱱ ᱑᱐ ᱴᱟᱠᱟ ᱢᱮᱱᱟᱜᱼᱟ ᱟᱨ ᱔ ᱴᱟᱠᱟ ᱨᱮᱭᱟᱜ ᱡᱚ ᱮᱢ ᱦᱟᱛᱟᱣ ᱠᱮᱫᱼᱟ, ᱛᱚᱵᱮ ᱛᱤᱱᱟᱹᱜ ᱥᱟᱨᱮᱡᱮᱱᱟ? ᱑᱐ - ᱔ = ᱖ ᱴᱟᱠᱟ᱾",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      }
+    ]
+  },
+  {
+    "id": "curr_c5_evs_01",
+    "gradeClass": 5,
+    "subject": "EVS / General Knowledge",
+    "titleHindi": "पाठ ४: जल संरक्षण और हमारे स्रोत",
+    "titleSantali": "ᱯᱟᱴᱷ ᱔: ᱫᱟᱜ ᱡᱚᱜᱟᱣ ᱟᱨ ᱟᱵᱚᱣᱟᱜ ᱯᱷᱮᱰᱟᱛ",
+    "description": "कुआँ, तालाब, झरना और वर्षा जल का सदुपयोग।",
+    "notes": [
+      {
+        "id": "note_007",
+        "title": "प्राकृतिक जल स्रोत",
+        "hindiContent": "वर्षा का जल धरती को जीवन देता है। हमें कुएं (कुंई) और तालाब (पुखुरी/बांध) को स्वच्छ रखना चाहिए।",
+        "santaliContent": "ᱫᱟᱜ ᱡᱟᱹᱲᱤ ᱫᱷᱟᱹᱨᱛᱤ ᱡᱤᱣᱤ ᱮᱢᱟᱭᱟ᱾ ᱠᱩᱧ ᱟᱨ ᱵᱟᱸᱫᱷ/ᱯᱩᱠᱷᱨᱤ ᱥᱟᱯᱷᱟ ᱫᱚᱦᱚ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱᱟ᱾",
+        "isPublished": true,
+        "author": "Palash Pedagogy Core"
+      }
+    ]
+  }
+]
