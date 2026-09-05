@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../features/welcome/welcome_screen.dart';
 import '../features/authentication/teacher_login_screen.dart';
+import '../features/authentication/teacher_sign_up_screen.dart';
 import '../features/teacher/dashboard/teacher_dashboard_screen.dart';
 import '../features/teacher/curriculum/curriculum_screen.dart';
 import '../features/teacher/curriculum/lesson_detail_screen.dart';
@@ -37,6 +38,7 @@ import '../models/story_model.dart';
 class AppRoutes {
   static const String welcome = '/';
   static const String teacherLogin = '/teacher-login';
+  static const String teacherSignUp = '/teacher-sign-up';
   static const String teacherDashboard = '/teacher-dashboard';
   static const String teacherCurriculum = '/teacher-curriculum';
   static const String teacherLessonDetail = '/teacher-lesson-detail';
@@ -68,6 +70,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const WelcomeScreen());
       case teacherLogin:
         return MaterialPageRoute(builder: (_) => const TeacherLoginScreen());
+      case teacherSignUp:
+        return MaterialPageRoute(builder: (_) => const TeacherSignUpScreen());
       case teacherDashboard:
         return MaterialPageRoute(builder: (_) => const TeacherDashboardScreen());
       case teacherCurriculum:

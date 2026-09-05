@@ -7,6 +7,13 @@ abstract class AuthService {
   Stream<TeacherUser?> get authStateChanges;
   TeacherUser? get currentUser;
   Future<TeacherUser> signInWithEmailPassword(String email, String password);
+  Future<TeacherUser> createTeacherAccount({
+    required String name,
+    required String email,
+    required String school,
+    required String district,
+    required String password,
+  });
   Future<TeacherUser> signInWithGoogle();
   Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();

@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Teacher Profiles
+    match /teachers/{teacherId} {
+      // Teachers can read their own profile
+      allow read: if isOwner(teacherId);
+
+      // Authenticated teachers can create their own profile during sign-up
+      // Role must be 'teacher', and document ID must match auth UID
+      allow create: if isOwner(teacherId)
+                    && request.resource.data.role == 'teacher'
+                    && request.resource.data.email is string
+                    && request.resource.data.name is string;
+
+      // Teachers can update their own profile, but cannot change their role
+      allow update: if isOwner(teacherId)
+                    && request.resource.data.role == 'teacher';
+
+      // Disallow deletion by client
+      allow delete: if false;
+    }
+
+    // Default deny for other collections unless explicitly allowed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

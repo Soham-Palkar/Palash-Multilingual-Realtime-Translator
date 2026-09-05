@@ -151,6 +151,77 @@ class FirebaseAuthService implements AuthService {
   }
 
   // -------------------------------------------------------------------------
+  // CREATE TEACHER ACCOUNT (SIGN UP)
+  // -------------------------------------------------------------------------
+
+  @override
+  Future<TeacherUser> createTeacherAccount({
+    required String name,
+    required String email,
+    required String school,
+    required String district,
+    required String password,
+  }) async {
+    try {
+      final credential = await fb.FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+
+      final fbUser = credential.user;
+
+      if (fbUser == null) {
+        throw Exception(
+          'खाता निर्माण विफल (Account creation failed).',
+        );
+      }
+
+      // Update user display name in Firebase Auth
+      try {
+        await fbUser.updateDisplayName(name.trim());
+      } catch (_) {
+        // Display name update failure is non-fatal
+      }
+
+      // Create Teacher profile in Firestore at teachers/{uid}
+      await FirebaseFirestore.instance
+          .collection('teachers')
+          .doc(fbUser.uid)
+          .set({
+        'name': name.trim(),
+        'email': email.trim(),
+        'school': school.trim(),
+        'district': district.trim(),
+        'role': 'teacher',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      final teacher = TeacherUser(
+        uid: fbUser.uid,
+        email: email.trim(),
+        displayName: name.trim(),
+        schoolName: school.trim(),
+        district: district.trim(),
+        photoUrl: fbUser.photoURL ?? '',
+        isEmailVerified: fbUser.emailVerified,
+      );
+
+      _currentUser = teacher;
+
+      if (!_controller.isClosed) {
+        _controller.add(teacher);
+      }
+
+      return teacher;
+    } on fb.FirebaseAuthException catch (e) {
+      throw Exception(_firebaseErrorMessage(e));
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // GOOGLE LOGIN
   // -------------------------------------------------------------------------
 

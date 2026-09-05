@@ -58,6 +58,34 @@ class MockAuthService implements AuthService {
   }
 
   @override
+  Future<TeacherUser> createTeacherAccount({
+    required String name,
+    required String email,
+    required String school,
+    required String district,
+    required String password,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (email.trim().isEmpty || password.length < 6) {
+      throw Exception('कृपया वैध ईमेल और कम से कम 6 अक्षरों का पासवर्ड दर्ज करें।');
+    }
+
+    _currentUser = TeacherUser(
+      uid: 'teacher_${DateTime.now().millisecondsSinceEpoch}',
+      email: email.trim(),
+      displayName: name.trim(),
+      schoolName: school.trim(),
+      district: district.trim(),
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyTeacherLoggedIn, true);
+
+    _controller.add(_currentUser);
+    return _currentUser!;
+  }
+
+  @override
   Future<TeacherUser> signInWithGoogle() async {
     await Future.delayed(const Duration(milliseconds: 700));
     _currentUser = TeacherUser(
