@@ -66,20 +66,16 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
     super.dispose();
   }
 
-  Future<void> _handleSave() async {
+  // Submit note for review (draft -> review)
+  Future<void> _handleSubmitReview() async {
     if (!_formKey.currentState!.validate()) return;
-
     final repo = Provider.of<TeacherRepository>(context, listen: false);
-
     if (_isEditing && _existingNote != null) {
-      final updated = _existingNote!.copyWith(
-        title: _titleController.text.trim(),
-        hindiContent: _hindiController.text.trim(),
-        santaliContent: _santaliController.text.trim(),
-        santaliOlChiki: _olChikiController.text.trim(),
-      );
-      await repo.updateNote(updated);
+      final reviewed = _existingNote!
+          .copyWith(isDraft: false, isApproved: false, isPublished: false);
+      await repo.submitForReview(reviewed);
     } else {
+      // Creating a new note directly for review
       final newNote = TeacherNote(
         id: 'note_${const Uuid().v4().substring(0, 8)}',
         lessonId: _lessonId,
@@ -93,16 +89,107 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
         santaliOlChiki: _olChikiController.text.trim(),
         author: 'Teacher',
         isDraft: false,
-        isPublished: true,
+        isApproved: false,
+        isPublished: false,
       );
-      await repo.saveNote(newNote);
+      await repo.submitForReview(newNote);
     }
-
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: AppColors.secondary,
-          content: Text(_isEditing ? 'नोट अपडेट हो गया' : 'नया नोट सुरक्षित हुआ'),
+          content: const Text('नोट समीक्षा के लिए भेजा गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  // Approve note (review -> approved)
+  Future<void> _handleApprove() async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    if (_isEditing && _existingNote != null) {
+      final approved = _existingNote!.copyWith(isApproved: true);
+      await repo.approveNote(approved);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('नोट स्वीकृत हो गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  // Publish note (approved -> published)
+  Future<void> _handlePublish() async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    if (_isEditing && _existingNote != null) {
+      final published = _existingNote!
+          .copyWith(isDraft: false, isApproved: true, isPublished: true);
+      await repo.publishNote(published);
+    } else {
+      // Publishing a brand‑new note directly (unlikely UI path)
+      final newNote = TeacherNote(
+        id: 'note_${const Uuid().v4().substring(0, 8)}',
+        lessonId: _lessonId,
+        gradeClass: _gradeClass,
+        subject: _subject,
+        title: _titleController.text.trim(),
+        hindiContent: _hindiController.text.trim(),
+        santaliContent: _santaliController.text.trim().isNotEmpty
+            ? _santaliController.text.trim()
+            : '<!-- TODO: LINGUIST_VERIFICATION -->',
+        santaliOlChiki: _olChikiController.text.trim(),
+        author: 'Teacher',
+        isDraft: false,
+        isApproved: true,
+        isPublished: true,
+      );
+      await repo.publishNote(newNote);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('नोट प्रकाशित हो गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+  // Save Draft handler
+  Future<void> _handleSave(bool _dummy) async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    final note = TeacherNote(
+      id: _isEditing && _existingNote != null ? _existingNote!.id : 'note_${const Uuid().v4().substring(0, 8)}',
+      lessonId: _lessonId,
+      gradeClass: _gradeClass,
+      subject: _subject,
+      title: _titleController.text.trim(),
+      hindiContent: _hindiController.text.trim(),
+      santaliContent: _santaliController.text.trim().isNotEmpty ? _santaliController.text.trim() : '<!-- TODO: LINGUIST_VERIFICATION -->',
+      santaliOlChiki: _olChikiController.text.trim(),
+      author: 'Teacher',
+      isDraft: true,
+      isApproved: false,
+      isPublished: false,
+    );
+    if (_isEditing && _existingNote != null) {
+      await repo.updateNote(note);
+    } else {
+      await repo.saveNote(note);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('ड्राफ्ट सेव हो गया'),
         ),
       );
       Navigator.pop(context);
@@ -245,16 +332,47 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
 
               const SizedBox(height: 28),
 
-              // Save Button
-              ElevatedButton.icon(
-                onPressed: _handleSave,
-                icon: const Icon(Icons.check_circle_outline_rounded),
-                label: Text(_isEditing ? 'अपडेट करें (Update)' : 'सुरक्षित करें (Save Note)'),
+              // Action Buttons
+              Row(
+                children: [
+                  // Draft Save always available (for new or editing draft)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _handleSave(false),
+                      child: const Text('ड्राफ्ट सेव करें'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Conditional buttons based on note state
+                  if (_isEditing && _existingNote != null && _existingNote!.isDraft)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handleSubmitReview,
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+                        child: const Text('समीक्षा के लिए भेजें'),
+                      ),
+                    ),
+                  if (_isEditing && _existingNote != null && !_existingNote!.isDraft && !_existingNote!.isApproved && !_existingNote!.isPublished)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handleApprove,
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+                        child: const Text('स्वीकृत करें'),
+                      ),
+                    ),
+                  if (_isEditing && _existingNote != null && _existingNote!.isApproved && !_existingNote!.isPublished)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handlePublish,
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+                        child: const Text('प्रकाशित करें (Publish)'),
+                      ),
+                    ),
+                ],
               ),
+
             ],
           ),
         ),
       ),
     );
-  }
-}

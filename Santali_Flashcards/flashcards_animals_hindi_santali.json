@@ -1,0 +1,132 @@
+[
+    {
+        "id": 1,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "कुत्ता",
+        "santali_animal": "ᱜᱩᱛᱤ ᱫᱚ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 2,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "बिल्ली",
+        "santali_animal": "ᱵᱳᱭᱥ ᱫᱚ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 3,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "गाय",
+        "santali_animal": "ᱜᱚᱭ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 4,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "घोड़ा",
+        "santali_animal": "ᱜᱳᱲᱤᱭᱟᱹ ᱠᱚ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 5,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "बकरी",
+        "santali_animal": "ᱵᱳᱭᱥ ᱠᱚ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 6,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "भेड़",
+        "santali_animal": "ᱜᱳᱲᱤᱭᱟᱹ ᱠᱚ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 7,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "शेर",
+        "santali_animal": "ᱥᱤᱝ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 8,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "बाघ",
+        "santali_animal": "ᱴᱟᱭᱜᱟᱨ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 9,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "हाथी",
+        "santali_animal": "ᱦᱟᱹᱱᱛᱤ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 10,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "बंदर",
+        "santali_animal": "ᱢᱟᱱᱠᱨᱤ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 11,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "हिरण",
+        "santali_animal": "ᱦᱟᱹᱱᱛᱤ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 12,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "खरगोश",
+        "santali_animal": "ᱜᱷᱩᱨᱩᱢ ᱫᱚ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    },
+    {
+        "id": 13,
+        "category": "General Knowledge",
+        "subcategory": "Animals",
+        "hindi_animal": "भालू",
+        "santali_animal": "ᱵᱷᱟᱲᱟ ᱾",
+        "hindi_question": "यह कौन सा जानवर है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱵᱤᱨᱤᱭᱟᱹ?",
+        "learning_objective": "Identify common animals and understand simple facts about them"
+    }
+]

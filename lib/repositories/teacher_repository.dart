@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 import '../database/app_database.dart';
 import '../models/ai_content_model.dart';
-import '../models/flashcard_model.dart';
 import '../models/note_model.dart';
+import '../services/sync_service_factory.dart';
+import '../services/sync_service.dart';
+import '../models/flashcard_model.dart';
 
 /// Repository for Teacher actions, Notes management, and AI Generation workflow.
 class TeacherRepository extends ChangeNotifier {
   final AppDatabase _db;
+  final SyncService _syncService = SyncServiceFactory.create();
 
   TeacherRepository(this._db);
 
@@ -15,13 +18,40 @@ class TeacherRepository extends ChangeNotifier {
     return await _db.getAllNotes();
   }
 
+  // New method to publish a note (set isDraft false, isPublished true) and sync
+  Future<void> publishNote(TeacherNote note) async {
+    final published = note.copyWith(isDraft: false, isApproved: true, isPublished: true);
+    await _db.updateNote(published);
+    await _syncService.uploadNote(published);
+    notifyListeners();
+  }
+
+  // Submit for review: mark as not draft, not approved, not published
+  Future<void> submitForReview(TeacherNote note) async {
+    final reviewed = note.copyWith(isDraft: false, isApproved: false, isPublished: false);
+    await _db.updateNote(reviewed);
+    await _syncService.uploadNote(reviewed);
+    notifyListeners();
+  }
+
+  // Approve note: set approved flag
+  Future<void> approveNote(TeacherNote note) async {
+    final approved = note.copyWith(isApproved: true);
+    await _db.updateNote(approved);
+    await _syncService.uploadNote(approved);
+    notifyListeners();
+  }
+
   Future<void> saveNote(TeacherNote note) async {
     await _db.insertNote(note);
+    // Upload to Firestore for draft or published note
+    await _syncService.uploadNote(note);
     notifyListeners();
   }
 
   Future<void> updateNote(TeacherNote note) async {
     await _db.updateNote(note);
+    await _syncService.uploadNote(note);
     notifyListeners();
   }
 
@@ -48,11 +78,13 @@ class TeacherRepository extends ChangeNotifier {
   Future<void> publishAIContent(AIGeneratedContent content) async {
     // 1. Update status to published
     await _db.updateAIContentState(content.id, ContentState.published);
+    await _syncService.uploadAIContent(content);
 
     // 2. Publish any generated flashcards into student offline database
     for (var fc in content.flashcards) {
       final publishedFc = fc.copyWith(isPublished: true, isTeacherCreated: true);
       await _db.insertFlashcard(publishedFc);
+      await _syncService.uploadFlashcard(publishedFc);
     }
 
     notifyListeners();
@@ -61,6 +93,7 @@ class TeacherRepository extends ChangeNotifier {
   // Teacher Flashcard Creator
   Future<void> createManualFlashcard(FlashcardItem item) async {
     await _db.insertFlashcard(item);
+    await _syncService.uploadFlashcard(item);
     notifyListeners();
   }
 

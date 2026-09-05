@@ -1,0 +1,132 @@
+[
+    {
+        "id": 1,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "सेब",
+        "santali_fruit": "ᱟᱢᱚᱞ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 2,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "केला",
+        "santali_fruit": "ᱠᱟᱞᱞᱟ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 3,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "आम",
+        "santali_fruit": "ᱥᱟᱫᱷᱟᱨᱚᱱ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 4,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "संतरा",
+        "santali_fruit": "ᱠᱚᱢᱞᱟ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 5,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "अंगूर",
+        "santali_fruit": "ᱮᱝᱠᱨᱤ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 6,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "अनार",
+        "santali_fruit": "ᱚᱱᱩᱢᱟᱹᱱᱛᱤ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 7,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "तरबूज",
+        "santali_fruit": "ᱫᱟᱜᱫᱩᱱᱩᱞ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 8,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "पपीता",
+        "santali_fruit": "ᱯᱮᱯᱟᱯᱟ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 9,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "अमरूद",
+        "santali_fruit": "ᱟᱢᱚᱞ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 10,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "नारियल",
+        "santali_fruit": "ᱱᱟᱨᱠᱮᱞ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 11,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "अनानास",
+        "santali_fruit": "ᱚᱱᱤᱱᱮᱥ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 12,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "नींबू",
+        "santali_fruit": "ᱞᱮᱢᱩᱱ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    },
+    {
+        "id": 13,
+        "category": "General Knowledge",
+        "subcategory": "Fruits",
+        "hindi_fruit": "लीची",
+        "santali_fruit": "ᱞᱤᱪᱤ ᱾",
+        "hindi_question": "यह कौन सा फल है?",
+        "santali_question": "ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱫ ᱯᱷᱚᱞᱮ?",
+        "learning_objective": "Identify common fruits and understand simple facts about them"
+    }
+]

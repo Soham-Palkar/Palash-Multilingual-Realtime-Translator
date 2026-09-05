@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "आलू",
+    "back": "ᱵᱟᱴᱚᱞᱳ ᱾",
+    "english": "Potato"
+  },
+  {
+    "id": 2,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "टमाटर",
+    "back": "ᱴᱟᱢᱚᱴᱳ ᱾",
+    "english": "Tomato"
+  },
+  {
+    "id": 3,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "प्याज",
+    "back": "ᱯᱮᱥᱤ ᱾",
+    "english": "Onion"
+  },
+  {
+    "id": 4,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "गाजर",
+    "back": "ᱜᱟᱨᱮᱴ ᱾",
+    "english": "Carrot"
+  },
+  {
+    "id": 5,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "मूली",
+    "back": "ᱢᱩᱲᱩᱫ ᱫᱚ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ ᱾",
+    "english": "Radish"
+  },
+  {
+    "id": 6,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "बैंगन",
+    "back": "ᱵᱮᱝᱜᱚᱱ ᱾",
+    "english": "Brinjal"
+  },
+  {
+    "id": 7,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "भिंडी",
+    "back": "ᱵᱷᱤᱱᱰᱤ ᱾",
+    "english": "Ladyfinger"
+  },
+  {
+    "id": 8,
+    "category": "General Knowledge",
+    "subcategory": "Vegetables",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "फूलगोभी",
+    "back": "ᱯᱷᱚᱞᱳᱯᱷᱚᱞᱳ ᱾",
+    "english": "Cauliflower"
+  }
+]

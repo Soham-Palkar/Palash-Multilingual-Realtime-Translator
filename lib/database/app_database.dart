@@ -46,8 +46,9 @@ class AppDatabase {
 
     return await openDatabase(
       dbPath,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -97,7 +98,8 @@ class AppDatabase {
         santaliOlChiki TEXT,
         author TEXT NOT NULL DEFAULT 'Teacher',
         isDraft INTEGER NOT NULL DEFAULT 0,
-        isPublished INTEGER NOT NULL DEFAULT 1,
+        isApproved INTEGER NOT NULL DEFAULT 0,
+        isPublished INTEGER NOT NULL DEFAULT 0,
         createdAt TEXT NOT NULL
       )
     ''');
@@ -181,6 +183,14 @@ class AppDatabase {
         lastSyncedAt TEXT NOT NULL
       )
     ''');
+  }
+
+  // Migration strategy
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add isApproved column to notes table with default 0
+      await db.execute('ALTER TABLE notes ADD COLUMN isApproved INTEGER NOT NULL DEFAULT 0');
+    }
   }
 
   // Flashcards CRUD
@@ -308,6 +318,7 @@ class AppDatabase {
       santaliOlChiki: m['santaliOlChiki'] as String?,
       author: m['author'] as String,
       isDraft: (m['isDraft'] as int) == 1,
+      isApproved: (m['isApproved'] as int) == 1,
       isPublished: (m['isPublished'] as int) == 1,
       createdAt: DateTime.parse(m['createdAt'] as String),
     )).toList();
@@ -316,44 +327,46 @@ class AppDatabase {
   Future<void> insertNote(TeacherNote note) async {
     final db = await database;
     await db.insert(
-      'notes',
-      {
-        'id': note.id,
-        'lessonId': note.lessonId,
-        'gradeClass': note.gradeClass,
-        'subject': note.subject,
-        'title': note.title,
-        'hindiContent': note.hindiContent,
-        'santaliContent': note.santaliContent,
-        'santaliOlChiki': note.santaliOlChiki,
-        'author': note.author,
-        'isDraft': note.isDraft ? 1 : 0,
-        'isPublished': note.isPublished ? 1 : 0,
-        'createdAt': note.createdAt.toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+        'notes',
+        {
+          'id': note.id,
+          'lessonId': note.lessonId,
+          'gradeClass': note.gradeClass,
+          'subject': note.subject,
+          'title': note.title,
+          'hindiContent': note.hindiContent,
+          'santaliContent': note.santaliContent,
+          'santaliOlChiki': note.santaliOlChiki,
+          'author': note.author,
+          'isDraft': note.isDraft ? 1 : 0,
+          'isApproved': note.isApproved ? 1 : 0,
+          'isPublished': note.isPublished ? 1 : 0,
+          'createdAt': note.createdAt.toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
   }
 
   Future<void> updateNote(TeacherNote note) async {
     final db = await database;
     await db.update(
-      'notes',
-      {
-        'lessonId': note.lessonId,
-        'gradeClass': note.gradeClass,
-        'subject': note.subject,
-        'title': note.title,
-        'hindiContent': note.hindiContent,
-        'santaliContent': note.santaliContent,
-        'santaliOlChiki': note.santaliOlChiki,
-        'author': note.author,
-        'isDraft': note.isDraft ? 1 : 0,
-        'isPublished': note.isPublished ? 1 : 0,
-      },
-      where: 'id = ?',
-      whereArgs: [note.id],
-    );
+        'notes',
+        {
+          'lessonId': note.lessonId,
+          'gradeClass': note.gradeClass,
+          'subject': note.subject,
+          'title': note.title,
+          'hindiContent': note.hindiContent,
+          'santaliContent': note.santaliContent,
+          'santaliOlChiki': note.santaliOlChiki,
+          'author': note.author,
+          'isDraft': note.isDraft ? 1 : 0,
+          'isApproved': note.isApproved ? 1 : 0,
+          'isPublished': note.isPublished ? 1 : 0,
+        },
+        where: 'id = ?',
+        whereArgs: [note.id],
+      );
   }
 
   Future<void> deleteNote(String id) async {

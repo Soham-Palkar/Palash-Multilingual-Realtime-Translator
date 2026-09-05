@@ -10,6 +10,7 @@ class TeacherNote {
   final String? santaliOlChiki;
   final String author;
   final bool isDraft;
+  final bool isApproved;
   final bool isPublished;
   final DateTime createdAt;
 
@@ -24,6 +25,7 @@ class TeacherNote {
     this.santaliOlChiki,
     this.author = 'Teacher',
     this.isDraft = false,
+    this.isApproved = false,
     this.isPublished = true,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -45,6 +47,7 @@ class TeacherNote {
       santaliOlChiki: json['santaliOlChiki'] as String?,
       author: json['author'] as String? ?? 'Teacher',
       isDraft: json['isDraft'] as bool? ?? false,
+      isApproved: json['isApproved'] as bool? ?? false,
       isPublished: json['isPublished'] as bool? ?? true,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
@@ -64,6 +67,7 @@ class TeacherNote {
       'santaliOlChiki': santaliOlChiki,
       'author': author,
       'isDraft': isDraft,
+      'isApproved': isApproved,
       'isPublished': isPublished,
       'createdAt': createdAt.toIso8601String(),
     };
@@ -80,6 +84,7 @@ class TeacherNote {
     String? santaliOlChiki,
     String? author,
     bool? isDraft,
+    bool? isApproved,
     bool? isPublished,
     DateTime? createdAt,
   }) {
@@ -94,6 +99,7 @@ class TeacherNote {
       santaliOlChiki: santaliOlChiki ?? this.santaliOlChiki,
       author: author ?? this.author,
       isDraft: isDraft ?? this.isDraft,
+      isApproved: isApproved ?? this.isApproved,
       isPublished: isPublished ?? this.isPublished,
       createdAt: createdAt ?? this.createdAt,
     );
