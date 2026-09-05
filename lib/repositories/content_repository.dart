@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../database/app_database.dart';
 import '../models/flashcard_model.dart';
+import '../models/note_model.dart';
 import '../models/curriculum_model.dart';
 import '../models/worksheet_model.dart';
 import '../models/game_model.dart';

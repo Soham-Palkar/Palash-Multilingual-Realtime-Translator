@@ -3,8 +3,9 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../database/app_database.dart';
-import '../models/flashcard_model.dart';
 import '../models/note_model.dart';
+import '../models/flashcard_model.dart';
+import 'package:flutter/foundation.dart';
 import '../models/ai_content_model.dart';
 import 'sync_service.dart';
 
