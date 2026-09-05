@@ -376,3 +376,5 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
         ),
       ),
     );
+  }
+}

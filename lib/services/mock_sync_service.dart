@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'sync_service.dart';
+import '../models/note_model.dart';
+import '../models/flashcard_model.dart';
+import '../models/ai_content_model.dart';
 
 /// Mock Implementation of SyncService
 class MockSyncService implements SyncService {
@@ -37,4 +40,13 @@ class MockSyncService implements SyncService {
     _controller.add(_currentStatus);
     return _currentStatus;
   }
+
+  @override
+  Future<void> uploadNote(TeacherNote note) async {}
+
+  @override
+  Future<void> uploadFlashcard(FlashcardItem flashcard) async {}
+
+  @override
+  Future<void> uploadAIContent(AIGeneratedContent content) async {}
 }

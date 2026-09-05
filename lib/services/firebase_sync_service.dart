@@ -86,17 +86,59 @@ class FirebaseSyncService implements SyncService {
           .get();
       for (var doc in aiQuery.docs) {
         final data = doc.data();
-        final payload = data['payloadJson'] as String;
-        final content = AIGeneratedContent.fromJson(
-          doc.id,
-          data['noteId'] as String,
-          data['noteTitle'] as String,
-          data['explanationHindi'] as String,
-          data['explanationSantali'] as String,
-          data['translationSantali'] as String,
-          payload,
-          ContentState.published,
-          (data['createdAt'] as Timestamp).toDate(),
+        List<FlashcardItem> flashcards = [];
+        List<AIPracticeQuestion> practiceQuestions = [];
+        List<AIActivityIdea> activities = [];
+
+        if (data['payloadJson'] != null && (data['payloadJson'] as String).isNotEmpty) {
+          try {
+            final payload = jsonDecode(data['payloadJson'] as String) as Map<String, dynamic>;
+            if (payload['flashcards'] is List) {
+              flashcards = (payload['flashcards'] as List)
+                  .map((f) => FlashcardItem.fromJson(Map<String, dynamic>.from(f)))
+                  .toList();
+            }
+            if (payload['practiceQuestions'] is List) {
+              practiceQuestions = (payload['practiceQuestions'] as List).map((q) {
+                final map = Map<String, dynamic>.from(q);
+                return AIPracticeQuestion(
+                  questionHindi: map['questionHindi'] as String? ?? '',
+                  questionSantali: map['questionSantali'] as String? ?? '',
+                  optionsHindi: List<String>.from(map['optionsHindi'] ?? []),
+                  optionsSantali: List<String>.from(map['optionsSantali'] ?? []),
+                  correctIndex: map['correctIndex'] as int? ?? 0,
+                  explanation: map['explanation'] as String? ?? '',
+                );
+              }).toList();
+            }
+            if (payload['activities'] is List) {
+              activities = (payload['activities'] as List).map((a) {
+                final map = Map<String, dynamic>.from(a);
+                return AIActivityIdea(
+                  titleHindi: map['titleHindi'] as String? ?? '',
+                  titleSantali: map['titleSantali'] as String? ?? '',
+                  descriptionHindi: map['descriptionHindi'] as String? ?? '',
+                  descriptionSantali: map['descriptionSantali'] as String? ?? '',
+                );
+              }).toList();
+            }
+          } catch (_) {}
+        }
+
+        final content = AIGeneratedContent(
+          id: doc.id,
+          noteId: data['noteId'] as String? ?? '',
+          noteTitle: data['noteTitle'] as String? ?? '',
+          explanationHindi: data['explanationHindi'] as String? ?? '',
+          explanationSantali: data['explanationSantali'] as String? ?? '',
+          translationSantali: data['translationSantali'] as String? ?? '',
+          flashcards: flashcards,
+          practiceQuestions: practiceQuestions,
+          activities: activities,
+          state: ContentState.published,
+          createdAt: data['createdAt'] != null
+              ? (data['createdAt'] as Timestamp).toDate()
+              : DateTime.now(),
         );
         await _db.insertAIContent(content);
       }
