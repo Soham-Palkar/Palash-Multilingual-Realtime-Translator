@@ -154,7 +154,7 @@ class StudentLessonViewScreen extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.secondary,
+                                    color: AppColors.textPrimary,
                                     height: 1.5,
                                   ),
                                 ),

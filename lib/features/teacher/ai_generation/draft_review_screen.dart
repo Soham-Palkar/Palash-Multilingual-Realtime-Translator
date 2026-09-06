@@ -81,32 +81,59 @@ class _DraftReviewScreenState extends State<DraftReviewScreen> {
     }
   }
 
+  
+
   Future<void> _handleApprove() async {
+    LoadingDialog.show(context, message: 'नोट स्वीकृत हो रहा है...');
     final repo = Provider.of<TeacherRepository>(context, listen: false);
-    await repo.approveAIContent(_content.id);
-    setState(() {
-      _content.state = ContentState.approved;
-    });
-    if (mounted) {
+    try {
+      if (widget.note != null) {
+        await repo.approveNote(widget.note!);
+        setState(() {
+          _content.state = ContentState.approved;
+        });
+      } else {
+        await repo.approveAIContent(_content.id);
+        setState(() {
+          _content.state = ContentState.approved;
+        });
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          backgroundColor: AppColors.secondary,
-          content: Text('✓ सामग्री स्वीकृत (Approved). अब आप इसे प्रकाशित कर सकते हैं।'),
+          backgroundColor: AppColors.info,
+          content: Text('✓ सामग्री स्वीकृत हुई (Content approved)'),
         ),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text('Error approving note: $e'),
+        ),
+      );
+    } finally {
+      if (mounted) LoadingDialog.hide(context);
     }
   }
 
   Future<void> _handlePublish() async {
     LoadingDialog.show(context, message: 'सामग्री प्रकाशित हो रही है...');
     final repo = Provider.of<TeacherRepository>(context, listen: false);
-    await repo.publishAIContent(_content);
+    if (widget.note != null) {
+      await repo.publishNote(widget.note!);
+      setState(() {
+        _content.state = ContentState.published;
+      });
+    } else {
+      await repo.publishAIContent(_content);
+      setState(() {
+        _content.state = ContentState.published;
+      });
+    }
     if (!mounted) return;
     LoadingDialog.hide(context);
-    setState(() {
-      _content.state = ContentState.published;
-    });
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

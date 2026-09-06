@@ -294,7 +294,20 @@ class _StudentNotesScreenState extends State<StudentNotesScreen> {
                             child: PalashCard(
                               elevation: 2,
                               onTap: () {
-                                // Add navigation to note view if exists, else no-op
+                                final syntheticLesson = CurriculumLesson(
+                                  id: note.lessonId,
+                                  gradeClass: note.gradeClass,
+                                  subject: note.subject,
+                                  titleHindi: note.title,
+                                  titleSantali: '',
+                                  description: 'शिक्षक नोट / Teacher Note',
+                                  notes: [note],
+                                );
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.studentLessonView,
+                                  arguments: syntheticLesson,
+                                );
                               },
                               child: Row(
                                 children: [

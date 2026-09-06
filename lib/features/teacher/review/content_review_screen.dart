@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../models/ai_content_model.dart';
+import '../../../models/note_model.dart';
 import '../../../repositories/teacher_repository.dart';
 import '../../../widgets/empty_state_view.dart';
 import '../../../widgets/palash_card.dart';
@@ -15,7 +15,7 @@ class ContentReviewScreen extends StatefulWidget {
 }
 
 class _ContentReviewScreenState extends State<ContentReviewScreen> {
-  List<AIGeneratedContent> _items = [];
+  List<TeacherNote> _items = [];
   bool _isLoading = true;
 
   @override
@@ -26,7 +26,7 @@ class _ContentReviewScreenState extends State<ContentReviewScreen> {
 
   Future<void> _loadItems() async {
     final repo = Provider.of<TeacherRepository>(context, listen: false);
-    final list = await repo.getAIGeneratedContents();
+    final list = await repo.getAllNotes();
     if (mounted) {
       setState(() {
         _items = list;
@@ -57,14 +57,15 @@ class _ContentReviewScreenState extends State<ContentReviewScreen> {
                   itemCount: _items.length,
                   itemBuilder: (context, index) {
                     final item = _items[index];
+                    // Determine badge based on note status flags
                     Color badgeColor = AppColors.tertiary;
                     String badgeLabel = 'ड्राफ्ट (DRAFT)';
-                    if (item.state == ContentState.approved) {
-                      badgeColor = AppColors.info;
-                      badgeLabel = 'स्वीकृत (APPROVED)';
-                    } else if (item.state == ContentState.published) {
+                    if (item.isPublished) {
                       badgeColor = AppColors.secondary;
                       badgeLabel = 'प्रकाशित (PUBLISHED)';
+                    } else if (item.isApproved) {
+                      badgeColor = AppColors.info;
+                      badgeLabel = 'स्वीकृत (APPROVED)';
                     }
 
                     return Padding(
@@ -86,7 +87,7 @@ class _ContentReviewScreenState extends State<ContentReviewScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    item.noteTitle,
+                                    item.title,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -117,7 +118,7 @@ class _ContentReviewScreenState extends State<ContentReviewScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              item.explanationHindi,
+                              item.hindiContent,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -129,7 +130,7 @@ class _ContentReviewScreenState extends State<ContentReviewScreen> {
                             Row(
                               children: [
                                 Text(
-                                  '${item.flashcards.length} फ्लैशकार्ड्स • ${item.practiceQuestions.length} प्रश्न',
+                                  '0 फ्लैशकार्ड्स • 0 प्रश्न',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,

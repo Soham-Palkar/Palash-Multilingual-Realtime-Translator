@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/note_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../../../repositories/teacher_repository.dart';
 
 class AddEditNoteScreen extends StatefulWidget {
@@ -165,6 +167,27 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
   // Save Draft handler
   Future<void> _handleSave(bool _dummy) async {
     if (!_formKey.currentState!.validate()) return;
+    final user = FirebaseAuth.instance.currentUser;
+    debugPrint('========== FIREBASE AUTH DEBUG ==========');
+    if (user == null) {
+      debugPrint('❌ NO FIREBASE USER IS CURRENTLY SIGNED IN');
+      debugPrint('=========================================');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: const Text('❌ No Firebase user signed in'),
+          ),
+        );
+      }
+      return;
+    }
+    debugPrint('UID: ${user?.uid}');
+    debugPrint('Email: ${user?.email}');
+    debugPrint('Display Name: ${user?.displayName}');
+    debugPrint('Is Anonymous: ${user?.isAnonymous}');
+    debugPrint('Email Verified: ${user?.emailVerified}');
+    debugPrint('=========================================');
     final repo = Provider.of<TeacherRepository>(context, listen: false);
     final note = TeacherNote(
       id: _isEditing && _existingNote != null ? _existingNote!.id : 'note_${const Uuid().v4().substring(0, 8)}',
@@ -180,19 +203,34 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
       isApproved: false,
       isPublished: false,
     );
-    if (_isEditing && _existingNote != null) {
-      await repo.updateNote(note);
-    } else {
-      await repo.saveNote(note);
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.secondary,
-          content: const Text('ड्राफ्ट सेव हो गया'),
-        ),
-      );
-      Navigator.pop(context);
+    try {
+      if (_isEditing && _existingNote != null) {
+        await repo.updateNote(note);
+      } else {
+        await repo.saveNote(note);
+      }
+      debugPrint('✅ FIRESTORE NOTE SAVE SUCCESSFUL');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.secondary,
+            content: const Text('ड्राफ्ट सेव हो गया'),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ FIRESTORE NOTE SAVE FAILED');
+      debugPrint('Error: $e');
+      debugPrint('StackTrace: $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Error saving draft: $e'),
+          ),
+        );
+      }
     }
   }
 
@@ -289,9 +327,10 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
               const SizedBox(height: 18),
 
               // Santali Content (Optional / Auto translated via AI)
-              const Row(
+              Wrap(
+                spacing: 6,
                 children: [
-                  Text(
+                  const Text(
                     'ᱥᱟᱱᱛᱟᱲᱤ ᱛᱚᱨᱡᱚᱢᱟ (Santali Translation)',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -299,8 +338,8 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
                       color: AppColors.secondary,
                     ),
                   ),
-                  SizedBox(width: 6),
-                  Text(
+                  const SizedBox(width: 6),
+                  const Text(
                     '(वैकल्पिक / AI द्वारा तैयार की जा सकती है)',
                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                   ),

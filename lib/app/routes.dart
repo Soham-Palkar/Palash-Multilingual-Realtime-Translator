@@ -87,10 +87,33 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => AIGeneratorScreen(preselectedNote: note));
       case teacherDraftReview:
         final map = settings.arguments as Map<String, dynamic>;
+        // Determine if the argument is an AIGeneratedContent or a TeacherNote
+        final dynamic aiContentRaw = map['aiContent'];
+        AIGeneratedContent? aiContent;
+        TeacherNote? note;
+
+        if (aiContentRaw is AIGeneratedContent) {
+          aiContent = aiContentRaw;
+        } else if (aiContentRaw is TeacherNote) {
+          // Received a TeacherNote directly; create a minimal AIGeneratedContent wrapper
+          note = aiContentRaw;
+          aiContent = AIGeneratedContent(
+            id: note.id,
+            noteId: note.id,
+            noteTitle: note.title,
+            explanationHindi: note.hindiContent,
+            explanationSantali: note.santaliContent,
+            translationSantali: note.santaliContent,
+          );
+        }
+        // Also allow explicit "note" key
+        if (map['note'] != null) {
+          note = map['note'] as TeacherNote?;
+        }
         return MaterialPageRoute(
           builder: (_) => DraftReviewScreen(
-            aiContent: map['aiContent'] as AIGeneratedContent,
-            note: map['note'] as TeacherNote?,
+            aiContent: aiContent!,
+            note: note,
           ),
         );
       case teacherFlashcards:

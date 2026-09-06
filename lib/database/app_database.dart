@@ -14,6 +14,7 @@ import '../models/worksheet_model.dart';
 import '../models/game_model.dart';
 import '../models/activity_model.dart';
 import '../models/story_model.dart';
+import '../models/translation_model.dart';
 
 /// Central SQLite Database Access Layer for PALASH
 /// Handles offline-first persistence for all educational and teacher data.
@@ -181,6 +182,16 @@ class AppDatabase {
         entityId TEXT NOT NULL,
         syncStatus TEXT NOT NULL DEFAULT 'synced',
         lastSyncedAt TEXT NOT NULL
+      )
+    ''');
+
+    // 10. Translation Recordings Table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS translation_recordings (
+        id TEXT PRIMARY KEY,
+        audioPath TEXT NOT NULL,
+        teacherId TEXT NOT NULL,
+        createdAt TEXT NOT NULL
       )
     ''');
   }
@@ -591,5 +602,47 @@ class AppDatabase {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  // Translation Recordings CRUD
+  Future<void> insertTranslationRecording(TranslationRecording recording) async {
+    final db = await database;
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS translation_recordings (
+        id TEXT PRIMARY KEY,
+        audioPath TEXT NOT NULL,
+        teacherId TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+    await db.insert(
+      'translation_recordings',
+      {
+        'id': recording.id,
+        'audioPath': recording.audioPath,
+        'teacherId': recording.teacherId,
+        'createdAt': recording.createdAt.toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<TranslationRecording>> getAllTranslationRecordings() async {
+    final db = await database;
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS translation_recordings (
+        id TEXT PRIMARY KEY,
+        audioPath TEXT NOT NULL,
+        teacherId TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+    final maps = await db.query('translation_recordings', orderBy: 'createdAt DESC');
+    return maps.map((m) => TranslationRecording(
+      id: m['id'] as String,
+      audioPath: m['audioPath'] as String,
+      teacherId: m['teacherId'] as String,
+      createdAt: DateTime.parse(m['createdAt'] as String),
+    )).toList();
   }
 }
