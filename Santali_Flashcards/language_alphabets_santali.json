@@ -1,0 +1,482 @@
+[
+    {
+        "id": 1,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱚ",
+        "back": {
+            "character": "ᱚ",
+            "name": "Ol",
+            "transliteration": "a",
+            "pronunciation_hint": "अ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 2,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱛ",
+        "back": {
+            "character": "ᱛ",
+            "name": "At",
+            "transliteration": "at",
+            "pronunciation_hint": "त"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 3,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱜ",
+        "back": {
+            "character": "ᱜ",
+            "name": "Ag",
+            "transliteration": "ag",
+            "pronunciation_hint": "ग"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 4,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱝ",
+        "back": {
+            "character": "ᱝ",
+            "name": "Ang",
+            "transliteration": "ang",
+            "pronunciation_hint": "ङ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 5,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱞ",
+        "back": {
+            "character": "ᱞ",
+            "name": "La",
+            "transliteration": "la",
+            "pronunciation_hint": "ल"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 6,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱟ",
+        "back": {
+            "character": "ᱟ",
+            "name": "Lad",
+            "transliteration": "ad",
+            "pronunciation_hint": "आ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 7,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱠ",
+        "back": {
+            "character": "ᱠ",
+            "name": "Ak",
+            "transliteration": "k",
+            "pronunciation_hint": "क"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 8,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱡ",
+        "back": {
+            "character": "ᱡ",
+            "name": "Al",
+            "transliteration": "l",
+            "pronunciation_hint": "ल"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 9,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱢ",
+        "back": {
+            "character": "ᱢ",
+            "name": "Em",
+            "transliteration": "m",
+            "pronunciation_hint": "म"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 10,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱣ",
+        "back": {
+            "character": "ᱣ",
+            "name": "Aw",
+            "transliteration": "w",
+            "pronunciation_hint": "व"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 11,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱤ",
+        "back": {
+            "character": "ᱤ",
+            "name": "I",
+            "transliteration": "i",
+            "pronunciation_hint": "इ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 12,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱥ",
+        "back": {
+            "character": "ᱥ",
+            "name": "Is",
+            "transliteration": "s",
+            "pronunciation_hint": "स"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 13,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱦ",
+        "back": {
+            "character": "ᱦ",
+            "name": "Ah",
+            "transliteration": "h",
+            "pronunciation_hint": "ह"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 14,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱧ",
+        "back": {
+            "character": "ᱧ",
+            "name": "En",
+            "transliteration": "n",
+            "pronunciation_hint": "ञ / न"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 15,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱨ",
+        "back": {
+            "character": "ᱨ",
+            "name": "Ar",
+            "transliteration": "r",
+            "pronunciation_hint": "र"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 16,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱩ",
+        "back": {
+            "character": "ᱩ",
+            "name": "U",
+            "transliteration": "u",
+            "pronunciation_hint": "उ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 17,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱪ",
+        "back": {
+            "character": "ᱪ",
+            "name": "Ac",
+            "transliteration": "c",
+            "pronunciation_hint": "च"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 18,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱫ",
+        "back": {
+            "character": "ᱫ",
+            "name": "Ad",
+            "transliteration": "d",
+            "pronunciation_hint": "द"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 19,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱬ",
+        "back": {
+            "character": "ᱬ",
+            "name": "Eny",
+            "transliteration": "ny",
+            "pronunciation_hint": "ञ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 20,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱭ",
+        "back": {
+            "character": "ᱭ",
+            "name": "Ay",
+            "transliteration": "y",
+            "pronunciation_hint": "य"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 21,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱮ",
+        "back": {
+            "character": "ᱮ",
+            "name": "E",
+            "transliteration": "e",
+            "pronunciation_hint": "ए"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 22,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱯ",
+        "back": {
+            "character": "ᱯ",
+            "name": "Op",
+            "transliteration": "p",
+            "pronunciation_hint": "प"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 23,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱰ",
+        "back": {
+            "character": "ᱰ",
+            "name": "Ord",
+            "transliteration": "d",
+            "pronunciation_hint": "ड"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 24,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱱ",
+        "back": {
+            "character": "ᱱ",
+            "name": "An",
+            "transliteration": "n",
+            "pronunciation_hint": "न"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 25,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱲ",
+        "back": {
+            "character": "ᱲ",
+            "name": "Rr",
+            "transliteration": "r",
+            "pronunciation_hint": "ड़"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 26,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱳ",
+        "back": {
+            "character": "ᱳ",
+            "name": "O",
+            "transliteration": "o",
+            "pronunciation_hint": "ओ"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 27,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱴ",
+        "back": {
+            "character": "ᱴ",
+            "name": "Ott",
+            "transliteration": "t",
+            "pronunciation_hint": "ट"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 28,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱵ",
+        "back": {
+            "character": "ᱵ",
+            "name": "Ob",
+            "transliteration": "b",
+            "pronunciation_hint": "ब"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 29,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱶ",
+        "back": {
+            "character": "ᱶ",
+            "name": "Ang",
+            "transliteration": "ng",
+            "pronunciation_hint": "ं"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    },
+    {
+        "id": 30,
+        "category": "Language",
+        "subcategory": "Alphabets",
+        "front": "ᱷ",
+        "back": {
+            "character": "ᱷ",
+            "name": "Ahad",
+            "transliteration": "h",
+            "pronunciation_hint": "ः / ह"
+        },
+        "language": "Santali",
+        "script": "Ol Chiki",
+        "type": "default",
+        "difficulty": "beginner"
+    }
+]

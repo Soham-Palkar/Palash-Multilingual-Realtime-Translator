@@ -1,0 +1,50 @@
+[
+  {
+    "id": "act_001",
+    "titleHindi": "गतिविधि १: जंगल के साथी (Identify Wildlife)",
+    "titleSantali": "ᱠᱟᱹᱢᱤᱦᱚᱨᱟ ᱑: ᱵᱤᱨ ᱡᱤᱭᱟᱹᱞᱤ ᱪᱤᱱᱦᱟᱹᱣ (Identify Forest Friends)",
+    "category": "EVS / GK",
+    "type": "identify_object",
+    "instructionsHindi": "चित्र पर उंगली रखकर सही संताली नाम बताएं और मिलान करें।",
+    "instructionsSantali": "ᱪᱤᱛᱟᱹᱨ ᱧᱮᱞ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱥᱟᱱᱛᱟᱲᱤ ᱧᱩᱛᱩᱢ ᱪᱮᱛᱟᱱ ᱨᱮ ᱚᱛᱟᱭ ᱢᱮ᱾",
+    "items": [
+      {
+        "promptHindi": "इनमें से 'हाथी' (ᱦᱟᱹᱛᱤ) कौन सा है?",
+        "promptSantali": "ᱱᱚᱣᱟ ᱠᱚ ᱢᱩᱫᱽ ᱨᱮ 'ᱦᱟᱹᱛᱤ' ᱫᱚ ᱚᱠᱚᱭ ᱠᱟᱱᱟᱭ?",
+        "options": [
+          {"nameHindi": "हाथी", "nameSantali": "ᱦᱟᱹᱛᱤ (Hati)", "image": "assets/default_content/images/animals/elephant.webp", "isCorrect": true},
+          {"nameHindi": "गाय", "nameSantali": "ᱜᱟᱹᱭ (Gai)", "image": "assets/default_content/images/animals/cow.webp", "isCorrect": false},
+          {"nameHindi": "कुत्ता", "nameSantali": "ᱥᱮᱛᱟ (Seta)", "image": "assets/default_content/images/animals/dog.webp", "isCorrect": false}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "act_002",
+    "titleHindi": "गतिविधि २: रंगों की दुनिया (Color Concepts)",
+    "titleSantali": "ᱠᱟᱹᱢᱤᱦᱚᱨᱟ ᱒: ᱨᱚᱝ ᱨᱮᱭᱟᱜ ᱫᱩᱱᱤᱭᱟᱹ (Match Colors)",
+    "category": "General Knowledge",
+    "type": "match_concepts",
+    "instructionsHindi": "वस्तु को उसके प्राकृतिक रंग से मिलाएँ।",
+    "instructionsSantali": "ᱡᱤᱱᱤᱥ ᱥᱟᱶ ᱚᱱᱟ ᱨᱮᱭᱟᱜ ᱥᱟᱹᱨᱤ ᱨᱚᱝ ᱡᱚᱲᱟᱣ ᱢᱮ᱾",
+    "pairs": [
+      {"objectHindi": "पत्ता (Leaf)", "objectSantali": "ᱥᱟᱠᱟᱢ", "colorHindi": "हरा रंग", "colorSantali": "ᱦᱟᱹᱨᱤᱭᱟᱹᱲ (Hariyar)"},
+      {"objectHindi": "अनार (Pomegranate)", "objectSantali": "ᱫᱟᱲᱤᱢ", "colorHindi": "लाल रंग", "colorSantali": "ᱟᱨᱟᱜ (Arag)"},
+      {"objectHindi": "सूरज (Sun)", "objectSantali": "ᱥᱤᱝᱜᱤ", "colorHindi": "पीला रंग", "colorSantali": "ᱥᱟᱥᱟᱝ (Sasang)"}
+    ]
+  },
+  {
+    "id": "act_003",
+    "titleHindi": "गतिविधि ३: फलों की टोकरी (Counting Fruits)",
+    "titleSantali": "ᱠᱟᱹᱢᱤᱦᱚᱨᱟ ᱓: ᱡᱚ ᱠᱷᱟᱹᱪᱞᱟᱹᱠ (Arrange & Count)",
+    "category": "Mathematics",
+    "type": "arrange_objects",
+    "instructionsHindi": "फलों को छोटे से बड़े क्रम में व्यवस्थित करें।",
+    "instructionsSantali": "ᱡᱚ ᱠᱚ ᱦᱩᱰᱤᱧ ᱠᱷᱚᱱ ᱢᱟᱨᱟᱝ ᱞᱮᱠᱟᱛᱮ ᱥᱟᱡᱟᱣ ᱢᱮ᱾",
+    "steps": [
+      {"nameHindi": "बेर / कुल (छोटा)", "nameSantali": "ᱡᱟᱱᱩᱢ / ᱠᱩᱞ (ᱦᱩᱰᱤᱧ)", "rank": 1},
+      {"nameHindi": "आम (मध्यम)", "nameSantali": "ᱩᱞ (ᱛᱟᱞᱟᱢᱟᱞᱟ)", "rank": 2},
+      {"nameHindi": "कटहल (बड़ा)", "nameSantali": "ᱠᱟᱱᱴᱷᱟᱲ (ᱢᱟᱨᱟᱝ)", "rank": 3}
+    ]
+  }
+]

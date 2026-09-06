@@ -1,0 +1,122 @@
+[
+    {
+        "id": 1,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "बतख",
+        "translated_text": "ᱫᱟ",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 2,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "कबूतर",
+        "translated_text": "ᱠᱟᱵᱷᱟᱨ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 3,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "तोता",
+        "translated_text": "ᱯᱮᱨᱟᱴᱤ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 4,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "कौआ",
+        "translated_text": "ᱠᱟᱶᱰᱤ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 5,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "मैना",
+        "translated_text": "ᱢᱮᱭᱱᱟ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 6,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "मोर",
+        "translated_text": "ᱢᱳᱨ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 7,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "कोयल",
+        "translated_text": "ᱠᱳᱭᱤᱞ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 8,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "उल्लू",
+        "translated_text": "ᱞᱟᱹᱞᱤᱥᱠᱚ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 9,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "गरुड़",
+        "translated_text": "ᱜᱟᱨᱩᱰ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 10,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "बाज़",
+        "translated_text": "ᱫᱟ ᱳᱣᱟᱠ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 11,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "चील",
+        "translated_text": "ᱪᱤᱠᱮᱞ ᱾",
+        "script": "Ol Chiki"
+    },
+    {
+        "id": 12,
+        "category": "General Knowledge",
+        "subcategory": "Birds",
+        "language_source": "Hindi",
+        "language_target": "Santali",
+        "source_text": "हंस",
+        "translated_text": "ᱦᱮᱱᱥ ᱾",
+        "script": "Ol Chiki"
+    }
+]

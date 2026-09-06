@@ -1,0 +1,92 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isTeacher() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/teachers/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // Teacher Profiles
+    match /teachers/{teacherId} {
+      // Teachers can read their own profile
+      allow read: if request.auth.uid == teacherId;
+
+      // Authenticated teachers can create their own profile during sign-up
+      // Role must be 'teacher', and document ID must match auth UID
+      allow create: if request.auth.uid == teacherId &&
+                    request.resource.data.role == 'teacher' &&
+                    request.resource.data.email is string &&
+                    request.resource.data.name is string;
+
+      // Teachers can update their own profile, but cannot change their role
+      allow update: if request.auth.uid == teacherId &&
+                    request.resource.data.role == 'teacher';
+
+      // Disallow deletion by client
+      allow delete: if false;
+    }
+
+    // Notes collection
+    match /notes/{noteId} {
+      // Only teachers can create or modify notes
+      allow create, update: if isTeacher() &&
+        // Prevent changing author after creation
+        (!exists(/databases/$(database)/documents/notes/$(noteId)) ||
+        request.resource.data.author == resource.data.author) &&
+        // Enforce lifecycle constraints on write using integer flags (1 for true, 0 for false)
+        ((request.resource.data.isDraft == 1 && request.resource.data.isApproved == 0 && request.resource.data.isPublished == 0) ||
+        // Review state
+        (request.resource.data.isDraft == 0 && request.resource.data.isApproved == 0 && request.resource.data.isPublished == 0) ||
+        // Approved state
+        (request.resource.data.isDraft == 0 && request.resource.data.isApproved == 1 && request.resource.data.isPublished == 0) ||
+        // Published state (must be approved first)
+        (request.resource.data.isDraft == 0 && request.resource.data.isApproved == 1 && request.resource.data.isPublished == 1));
+
+      // Students can read only published notes
+      allow read: if resource.data.isPublished == 1;
+    }
+
+    // Flashcards collection
+    match /flashcards/{fcId} {
+      // Only teachers can create or modify flashcards
+      allow create, update: if isTeacher();
+
+      // Enforce that flashcards cannot become published unless teacher created flag is set (using integer flags)
+      allow create, update: if request.resource.data.isPublished == 1 ?
+        request.resource.data.isTeacherCreated == 1 : true;
+
+      // Students can read only published flashcards
+      allow read: if resource.data.isPublished == 1;
+    }
+
+    // AI generated content collection
+    match /generated_ai_content/{contentId} {
+      // Only teachers can create or modify AI content
+      allow create, update: if isTeacher();
+
+      // Enforce state transitions
+      allow create, update: if
+        // Draft state
+        (request.resource.data.state == 'draft') ||
+        // Approved state only from draft
+        (request.resource.data.state == 'approved' && resource.data.state == 'draft') ||
+        // Published state only from approved
+        (request.resource.data.state == 'published' && resource.data.state == 'approved');
+
+      // Students can read only published AI content
+      allow read: if resource.data.state == 'published';
+    }
+
+    // Default deny for other collections unless explicitly allowed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

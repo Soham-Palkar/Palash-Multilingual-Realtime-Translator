@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "लाल",
+    "back": "ᱨᱮᱞᱰ ᱾",
+    "english": "Red"
+  },
+  {
+    "id": 2,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "नीला",
+    "back": "ᱱᱤᱞᱩ ᱾",
+    "english": "Blue"
+  },
+  {
+    "id": 3,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "हरा",
+    "back": "ᱜᱟᱹᱨᱰᱩ ᱾",
+    "english": "Green"
+  },
+  {
+    "id": 4,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "पीला",
+    "back": "ᱡᱚᱞᱟ ᱾",
+    "english": "Yellow"
+  },
+  {
+    "id": 5,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "नारंगी",
+    "back": "ᱠᱚᱢᱞᱟ ᱾",
+    "english": "Orange"
+  },
+  {
+    "id": 6,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "गुलाबी",
+    "back": "ᱜᱚᱞᱚᱠ ᱾",
+    "english": "Pink"
+  },
+  {
+    "id": 7,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "बैंगनी",
+    "back": "ᱵᱨᱟᱢᱵᱷᱚ ᱾",
+    "english": "Purple"
+  },
+  {
+    "id": 8,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "भूरा",
+    "back": "ᱵᱨᱟᱣᱩᱱ ᱾",
+    "english": "Brown"
+  },
+  {
+    "id": 9,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "काला",
+    "back": "ᱠᱟᱞᱟᱹᱜ ᱾",
+    "english": "Black"
+  },
+  {
+    "id": 10,
+    "category": "General Knowledge",
+    "subcategory": "Colors",
+    "language_source": "Hindi",
+    "language_target": "Santali",
+    "script": "Ol Chiki",
+    "front": "सफेद",
+    "back": "ᱥᱟᱭᱴ ᱾",
+    "english": "White"
+  }
+]

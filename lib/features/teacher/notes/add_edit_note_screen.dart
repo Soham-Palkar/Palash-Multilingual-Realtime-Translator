@@ -1,0 +1,380 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../models/note_model.dart';
+import '../../../repositories/teacher_repository.dart';
+
+class AddEditNoteScreen extends StatefulWidget {
+  final dynamic initialData; // TeacherNote or Map<String, dynamic>
+
+  const AddEditNoteScreen({super.key, this.initialData});
+
+  @override
+  State<AddEditNoteScreen> createState() => _AddEditNoteScreenState();
+}
+
+class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _titleController;
+  late TextEditingController _hindiController;
+  late TextEditingController _santaliController;
+  late TextEditingController _olChikiController;
+
+  int _gradeClass = 1;
+  String _subject = 'Language';
+  String _lessonId = 'curr_c1_lang_01';
+  bool _isEditing = false;
+  TeacherNote? _existingNote;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialData is TeacherNote) {
+      _isEditing = true;
+      _existingNote = widget.initialData as TeacherNote;
+      _gradeClass = _existingNote!.gradeClass;
+      _subject = _existingNote!.subject;
+      _lessonId = _existingNote!.lessonId;
+      _titleController = TextEditingController(text: _existingNote!.title);
+      _hindiController = TextEditingController(text: _existingNote!.hindiContent);
+      _santaliController = TextEditingController(text: _existingNote!.santaliContent);
+      _olChikiController = TextEditingController(text: _existingNote!.santaliOlChiki ?? '');
+    } else if (widget.initialData is Map) {
+      final map = widget.initialData as Map;
+      _gradeClass = map['gradeClass'] ?? 1;
+      _subject = map['subject'] ?? 'Language';
+      _lessonId = map['lessonId'] ?? 'curr_c1_lang_01';
+      _titleController = TextEditingController();
+      _hindiController = TextEditingController();
+      _santaliController = TextEditingController();
+      _olChikiController = TextEditingController();
+    } else {
+      _titleController = TextEditingController();
+      _hindiController = TextEditingController();
+      _santaliController = TextEditingController();
+      _olChikiController = TextEditingController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _hindiController.dispose();
+    _santaliController.dispose();
+    _olChikiController.dispose();
+    super.dispose();
+  }
+
+  // Submit note for review (draft -> review)
+  Future<void> _handleSubmitReview() async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    if (_isEditing && _existingNote != null) {
+      final reviewed = _existingNote!
+          .copyWith(isDraft: false, isApproved: false, isPublished: false);
+      await repo.submitForReview(reviewed);
+    } else {
+      // Creating a new note directly for review
+      final newNote = TeacherNote(
+        id: 'note_${const Uuid().v4().substring(0, 8)}',
+        lessonId: _lessonId,
+        gradeClass: _gradeClass,
+        subject: _subject,
+        title: _titleController.text.trim(),
+        hindiContent: _hindiController.text.trim(),
+        santaliContent: _santaliController.text.trim().isNotEmpty
+            ? _santaliController.text.trim()
+            : '<!-- TODO: LINGUIST_VERIFICATION -->',
+        santaliOlChiki: _olChikiController.text.trim(),
+        author: 'Teacher',
+        isDraft: false,
+        isApproved: false,
+        isPublished: false,
+      );
+      await repo.submitForReview(newNote);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('नोट समीक्षा के लिए भेजा गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  // Approve note (review -> approved)
+  Future<void> _handleApprove() async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    if (_isEditing && _existingNote != null) {
+      final approved = _existingNote!.copyWith(isApproved: true);
+      await repo.approveNote(approved);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('नोट स्वीकृत हो गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  // Publish note (approved -> published)
+  Future<void> _handlePublish() async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    if (_isEditing && _existingNote != null) {
+      final published = _existingNote!
+          .copyWith(isDraft: false, isApproved: true, isPublished: true);
+      await repo.publishNote(published);
+    } else {
+      // Publishing a brand‑new note directly (unlikely UI path)
+      final newNote = TeacherNote(
+        id: 'note_${const Uuid().v4().substring(0, 8)}',
+        lessonId: _lessonId,
+        gradeClass: _gradeClass,
+        subject: _subject,
+        title: _titleController.text.trim(),
+        hindiContent: _hindiController.text.trim(),
+        santaliContent: _santaliController.text.trim().isNotEmpty
+            ? _santaliController.text.trim()
+            : '<!-- TODO: LINGUIST_VERIFICATION -->',
+        santaliOlChiki: _olChikiController.text.trim(),
+        author: 'Teacher',
+        isDraft: false,
+        isApproved: true,
+        isPublished: true,
+      );
+      await repo.publishNote(newNote);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('नोट प्रकाशित हो गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+  // Save Draft handler
+  Future<void> _handleSave(bool _dummy) async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = Provider.of<TeacherRepository>(context, listen: false);
+    final note = TeacherNote(
+      id: _isEditing && _existingNote != null ? _existingNote!.id : 'note_${const Uuid().v4().substring(0, 8)}',
+      lessonId: _lessonId,
+      gradeClass: _gradeClass,
+      subject: _subject,
+      title: _titleController.text.trim(),
+      hindiContent: _hindiController.text.trim(),
+      santaliContent: _santaliController.text.trim().isNotEmpty ? _santaliController.text.trim() : '<!-- TODO: LINGUIST_VERIFICATION -->',
+      santaliOlChiki: _olChikiController.text.trim(),
+      author: 'Teacher',
+      isDraft: true,
+      isApproved: false,
+      isPublished: false,
+    );
+    if (_isEditing && _existingNote != null) {
+      await repo.updateNote(note);
+    } else {
+      await repo.saveNote(note);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.secondary,
+          content: const Text('ड्राफ्ट सेव हो गया'),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          _isEditing ? 'नोट संपादित करें (Edit Note)' : 'नया शिक्षण नोट (Add Note)',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Class & Subject Header Badges
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'कक्षा $_gradeClass',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _subject,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Title
+              const Text(
+                'नोट शीर्षक (Title)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  hintText: 'उदा. वर्णमाला के स्वर / संख्या ज्ञान',
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'शीर्षक आवश्यक है';
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 18),
+
+              // Hindi Content
+              const Text(
+                'हिन्दी पाठ्य सामग्री (Hindi Content)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _hindiController,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  hintText: 'शिक्षक व्याख्या, उदाहरण व महत्वपूर्ण बिन्दु लिखें...',
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'हिन्दी सामग्री आवश्यक है';
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 18),
+
+              // Santali Content (Optional / Auto translated via AI)
+              const Row(
+                children: [
+                  Text(
+                    'ᱥᱟᱱᱛᱟᱲᱤ ᱛᱚᱨᱡᱚᱢᱟ (Santali Translation)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    '(वैकल्पिक / AI द्वारा तैयार की जा सकती है)',
+                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _santaliController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  hintText: 'संताली भाषा अनुवाद (यदि उपलब्ध हो)...',
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // Ol Chiki script input (Optional)
+              const Text(
+                'ᱚᱞ ᱪᱤᱠᱤ (Ol Chiki Text - Optional)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _olChikiController,
+                decoration: const InputDecoration(
+                  hintText: 'ᱚᱞ ᱪᱤᱠᱤ ᱪᱤᱠᱤ ᱛᱮ ᱚᱞ...',
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Action Buttons
+              Row(
+                children: [
+                  // Draft Save always available (for new or editing draft)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _handleSave(false),
+                      child: const Text('ड्राफ्ट सेव करें'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Conditional buttons based on note state
+                  if (_isEditing && _existingNote != null && _existingNote!.isDraft)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handleSubmitReview,
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+                        child: const Text('समीक्षा के लिए भेजें'),
+                      ),
+                    ),
+                  if (_isEditing && _existingNote != null && !_existingNote!.isDraft && !_existingNote!.isApproved && !_existingNote!.isPublished)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handleApprove,
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+                        child: const Text('स्वीकृत करें'),
+                      ),
+                    ),
+                  if (_isEditing && _existingNote != null && _existingNote!.isApproved && !_existingNote!.isPublished)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _handlePublish,
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
+                        child: const Text('प्रकाशित करें (Publish)'),
+                      ),
+                    ),
+                ],
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

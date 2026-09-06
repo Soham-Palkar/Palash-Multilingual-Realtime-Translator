@@ -1,45 +1,73 @@
+# ==============================
 # Python
+# ==============================
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyc
 
+# ==============================
 # Virtual environments
+# ==============================
 venv/
 .venv/
 asr-env/
 
-# Model/cache files
+# ==============================
+# AI model / cache files
+# ==============================
 models/
+Models/
+NeMo/
 *.nemo
 *.onnx
 *.pt
 *.pth
 *.bin
-*.safetensors
 
-# Hugging Face / ML caches
-.cache/
-.cache/
-huggingface/
-transformers/
-
-# Audio generated during testing
+# ==============================
+# Audio / generated test files
+# ==============================
 *.wav
-*.mp3
-*.flac
 
-# Jupyter
-.ipynb_checkpoints/
+# ==============================
+# Flutter / Dart
+# ==============================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
 
-# IDE
+# ==============================
+# Miscellaneous
+# ==============================
+*.class
+*.log
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# ==============================
+# IntelliJ / Android Studio
+# ==============================
+*.iml
+*.ipr
+.idea/
+
+# ==============================
+# VS Code
+# ==============================
 .vscode/
 
-# Logs
-*.log
-
-# Secrets
-.env
-.env.*
-
-# Local source clones
-NeMo/
+# ==============================
+# OS / IDE generated files
+# ==============================
+.metadata

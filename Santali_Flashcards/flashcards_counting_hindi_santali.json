@@ -1,0 +1,222 @@
+[
+    {
+        "id": 1,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 1,
+        "hindi": "एक",
+        "santali": "ᱢᱤᱫᱴᱟᱝ ᱾",
+        "question": "हिंदी में एक को संताली में क्या कहते हैं?",
+        "answer": "ᱢᱤᱫᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 2,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 2,
+        "hindi": "दो",
+        "santali": "ᱟᱭᱢᱟᱜᱟᱱ",
+        "question": "हिंदी में दो को संताली में क्या कहते हैं?",
+        "answer": "ᱟᱭᱢᱟᱜᱟᱱ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 3,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 3,
+        "hindi": "तीन",
+        "santali": "ᱯᱮᱭᱟ ᱾",
+        "question": "हिंदी में तीन को संताली में क्या कहते हैं?",
+        "answer": "ᱯᱮᱭᱟ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 4,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 4,
+        "hindi": "चार",
+        "santali": "4 ᱜᱚᱴᱟᱝ ᱾",
+        "question": "हिंदी में चार को संताली में क्या कहते हैं?",
+        "answer": "4 ᱜᱚᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 5,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 5,
+        "hindi": "पाँच",
+        "santali": "ᱢᱚᱬᱮ ᱜᱚᱴᱟᱝ ᱾",
+        "question": "हिंदी में पाँच को संताली में क्या कहते हैं?",
+        "answer": "ᱢᱚᱬᱮ ᱜᱚᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 6,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 6,
+        "hindi": "छह",
+        "santali": "ᱛᱩᱨᱩᱭ ᱜᱚᱴᱟᱝ ᱾",
+        "question": "हिंदी में छह को संताली में क्या कहते हैं?",
+        "answer": "ᱛᱩᱨᱩᱭ ᱜᱚᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 7,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 7,
+        "hindi": "सात",
+        "santali": "ᱮᱭᱟᱭ ᱜᱚᱴᱟᱝ ᱾",
+        "question": "हिंदी में सात को संताली में क्या कहते हैं?",
+        "answer": "ᱮᱭᱟᱭ ᱜᱚᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 8,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 8,
+        "hindi": "आठ",
+        "santali": "8 ᱜᱚᱴᱟᱝ ᱾",
+        "question": "हिंदी में आठ को संताली में क्या कहते हैं?",
+        "answer": "8 ᱜᱚᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 9,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 9,
+        "hindi": "नौ",
+        "santali": "ᱱᱟᱶᱟ ᱾",
+        "question": "हिंदी में नौ को संताली में क्या कहते हैं?",
+        "answer": "ᱱᱟᱶᱟ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 10,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 10,
+        "hindi": "दस",
+        "santali": "ᱜᱮᱞ",
+        "question": "हिंदी में दस को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 11,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 11,
+        "hindi": "ग्यारह",
+        "santali": "ᱜᱮᱞ ᱢᱤᱫ ᱾",
+        "question": "हिंदी में ग्यारह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱢᱤᱫ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 12,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 12,
+        "hindi": "बारह",
+        "santali": "ᱵᱟᱨ ᱜᱚᱴᱟᱝ ᱾",
+        "question": "हिंदी में बारह को संताली में क्या कहते हैं?",
+        "answer": "ᱵᱟᱨ ᱜᱚᱴᱟᱝ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 13,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 13,
+        "hindi": "तेरह",
+        "santali": "ᱜᱮᱞ ᱯᱮ ᱾",
+        "question": "हिंदी में तेरह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱯᱮ ᱾",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 14,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 14,
+        "hindi": "चौदह",
+        "santali": "ᱜᱮᱞ ᱜᱮᱞ",
+        "question": "हिंदी में चौदह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱜᱮᱞ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 15,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 15,
+        "hindi": "पंद्रह",
+        "santali": "ᱜᱮᱞ ᱢᱚᱬᱮ",
+        "question": "हिंदी में पंद्रह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱢᱚᱬᱮ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 16,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 16,
+        "hindi": "सोलह",
+        "santali": "ᱜᱮᱞ ᱩᱱ",
+        "question": "हिंदी में सोलह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱩᱱ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 17,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 17,
+        "hindi": "सत्रह",
+        "santali": "ᱜᱮᱞ ᱯᱩᱱ",
+        "question": "हिंदी में सत्रह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱯᱩᱱ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 18,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 18,
+        "hindi": "अठारह",
+        "santali": "ᱜᱮᱞ ᱡᱚᱺ",
+        "question": "हिंदी में अठारह को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱡᱚᱺ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 19,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 19,
+        "hindi": "उन्नीस",
+        "santali": "ᱜᱮᱞ ᱟᱬᱟ",
+        "question": "हिंदी में उन्नीस को संताली में क्या कहते हैं?",
+        "answer": "ᱜᱮᱞ ᱟᱬᱟ",
+        "learning_objective": "Learn basic counting in Santali"
+    },
+    {
+        "id": 20,
+        "category": "Mathematics",
+        "subcategory": "Counting",
+        "number": 20,
+        "hindi": "बीस",
+        "santali": "ᱵᱟᱨ ᱜᱮᱞ",
+        "question": "हिंदी में बीस को संताली में क्या कहते हैं?",
+        "answer": "ᱵᱟᱨ ᱜᱮᱞ",
+        "learning_objective": "Learn basic counting in Santali"
+    }
+]
