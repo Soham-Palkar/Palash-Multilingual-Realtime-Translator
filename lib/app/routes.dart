@@ -30,6 +30,7 @@ import '../features/student/stories/story_reader_screen.dart';
 import '../models/curriculum_model.dart';
 import '../models/note_model.dart';
 import '../models/ai_content_model.dart';
+import '../models/flashcard_model.dart';
 import '../models/worksheet_model.dart';
 import '../models/game_model.dart';
 import '../models/activity_model.dart';
@@ -119,7 +120,8 @@ class AppRoutes {
       case teacherFlashcards:
         return MaterialPageRoute(builder: (_) => const TeacherFlashcardsScreen());
       case teacherManualFlashcard:
-        return MaterialPageRoute(builder: (_) => const ManualFlashcardCreator());
+        final card = settings.arguments as FlashcardItem?;
+        return MaterialPageRoute(builder: (_) => ManualFlashcardCreator(initialCard: card));
       case teacherTranslation:
         return MaterialPageRoute(builder: (_) => const LiveTranslationScreen());
       case teacherReview:

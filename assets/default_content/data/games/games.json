@@ -13,37 +13,37 @@
         "id": "item_01",
         "hindi": "हाथी",
         "santali": "ᱦᱟᱹᱛᱤ (Hati)",
-        "image": "assets/default_content/images/animals/elephant.webp"
+        "image": "assets/default_content/images/animals/elephant.png"
       },
       {
         "id": "item_02",
         "hindi": "आम",
         "santali": "ᱩᱞ (Ul)",
-        "image": "assets/default_content/images/fruits/mango.webp"
+        "image": "assets/default_content/images/fruits/mango.png"
       },
       {
         "id": "item_03",
-        "hindi": "सूरज",
-        "santali": "ᱥᱤᱝᱜᱤ (Singi)",
-        "image": "assets/default_content/images/common/sun.webp"
+        "hindi": "बाघ",
+        "santali": "ᱛᱟᱹᱨᱩᱵ (Tarub)",
+        "image": "assets/default_content/images/animals/tiger.png"
       },
       {
         "id": "item_04",
-        "hindi": "पेड़",
-        "santali": "ᱫᱟᱨᱮ (Dare)",
-        "image": "assets/default_content/images/common/tree.webp"
+        "hindi": "कुत्ता",
+        "santali": "ᱥᱮᱛᱟ (Seta)",
+        "image": "assets/default_content/images/animals/dog.png"
       },
       {
         "id": "item_05",
         "hindi": "गाय",
         "santali": "ᱜᱟᱹᱭ (Gai)",
-        "image": "assets/default_content/images/animals/cow.webp"
+        "image": "assets/default_content/images/animals/cow.png"
       },
       {
         "id": "item_06",
         "hindi": "किताब",
         "santali": "ᱯᱩᱛᱷᱤ (Puthi)",
-        "image": "assets/default_content/images/classroom/book.webp"
+        "image": "assets/default_content/images/classroom/book.png"
       }
     ]
   },
@@ -64,28 +64,28 @@
         "id": "cow",
         "nameHindi": "गाय",
         "nameSantali": "ᱜᱟᱹᱭ (Gai)",
-        "image": "assets/default_content/images/animals/cow.webp",
+        "image": "assets/default_content/images/animals/cow.png",
         "isCorrect": true
       },
       {
         "id": "dog",
         "nameHindi": "कुत्ता",
         "nameSantali": "ᱥᱮᱛᱟ (Seta)",
-        "image": "assets/default_content/images/animals/dog.webp",
+        "image": "assets/default_content/images/animals/dog.png",
         "isCorrect": false
       },
       {
         "id": "elephant",
         "nameHindi": "हाथी",
         "nameSantali": "ᱦᱟᱹᱛᱤ (Hati)",
-        "image": "assets/default_content/images/animals/elephant.webp",
+        "image": "assets/default_content/images/animals/elephant.png",
         "isCorrect": false
       },
       {
         "id": "tiger",
         "nameHindi": "बाघ",
         "nameSantali": "ᱛᱟᱹᱨᱩᱵ (Tarub)",
-        "image": "assets/default_content/images/animals/tiger.webp",
+        "image": "assets/default_content/images/animals/tiger.png",
         "isCorrect": false
       }
     ]
@@ -107,28 +107,28 @@
         "id": "banana",
         "nameHindi": "केला",
         "nameSantali": "ᱠᱟᱭᱨᱟ (Kaira)",
-        "image": "assets/default_content/images/fruits/banana.webp",
+        "image": "assets/default_content/images/fruits/banana.png",
         "isCorrect": false
       },
       {
         "id": "mango",
         "nameHindi": "आम",
         "nameSantali": "ᱩᱞ (Ul)",
-        "image": "assets/default_content/images/fruits/mango.webp",
+        "image": "assets/default_content/images/fruits/mango.png",
         "isCorrect": true
       },
       {
         "id": "apple",
         "nameHindi": "सेब",
         "nameSantali": "ᱥᱮᱣ (Seb)",
-        "image": "assets/default_content/images/fruits/apple.webp",
+        "image": "assets/default_content/images/fruits/apple.png",
         "isCorrect": false
       },
       {
         "id": "orange",
         "nameHindi": "संतरा",
         "nameSantali": "ᱠᱚᱢᱞᱟ (Komla)",
-        "image": "assets/default_content/images/fruits/orange.webp",
+        "image": "assets/default_content/images/fruits/orange.png",
         "isCorrect": false
       }
     ]
@@ -175,7 +175,7 @@
     "gameType": "count_objects",
     "isAvailableOffline": true,
     "targetCount": 4,
-    "itemImage": "assets/default_content/images/fruits/mango.webp",
+    "itemImage": "assets/default_content/images/fruits/mango.png",
     "itemNameHindi": "आम",
     "itemNameSantali": "ᱩᱞ (Ul)",
     "options": [2, 3, 4, 5],
@@ -193,9 +193,9 @@
     "gameType": "shape_matching",
     "isAvailableOffline": true,
     "shapes": [
-      {"nameHindi": "वृत्त / गोल", "nameSantali": "ᱜᱩᱞᱟᱹᱭ (Gulai)", "image": "assets/default_content/images/mathematics/circle.webp"},
-      {"nameHindi": "त्रिभुज", "nameSantali": "ᱯᱮ ᱠᱳᱬᱟ (Pe Kona)", "image": "assets/default_content/images/mathematics/triangle.webp"},
-      {"nameHindi": "चौकोर / वर्ग", "nameSantali": "ᱪᱟᱹᱣᱠᱟᱹ (Chawka)", "image": "assets/default_content/images/mathematics/square.webp"}
+      {"nameHindi": "वृत्त / गोल", "nameSantali": "ᱜᱩᱞᱟᱹᱭ (Gulai)", "image": "assets/default_content/images/mathematics/circle.png"},
+      {"nameHindi": "त्रिभुज", "nameSantali": "ᱯᱮ ᱠᱳᱬᱟ (Pe Kona)", "image": "assets/default_content/images/mathematics/triangle.png"},
+      {"nameHindi": "चौकोर / वर्ग", "nameSantali": "ᱪᱟᱹᱣᱠᱟᱹ (Chawka)", "image": "assets/default_content/images/mathematics/square.png"}
     ]
   },
   {
@@ -208,14 +208,14 @@
     "gameType": "memory_cards",
     "isAvailableOffline": true,
     "cards": [
-      {"id": "c1", "pairId": "p1", "hindi": "हाथी", "santali": "ᱦᱟᱹᱛᱤ", "image": "assets/default_content/images/animals/elephant.webp"},
-      {"id": "c2", "pairId": "p1", "hindi": "हाथी", "santali": "ᱦᱟᱹᱛᱤ", "image": "assets/default_content/images/animals/elephant.webp"},
-      {"id": "c3", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.webp"},
-      {"id": "c4", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.webp"},
-      {"id": "c5", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"},
-      {"id": "c6", "pairId": "p3", "hindi": "सूरज", "santali": "ᱥᱤᱝᱜᱤ", "image": "assets/default_content/images/common/sun.webp"},
-      {"id": "c7", "pairId": "p4", "hindi": "गाय", "santali": "ᱜᱟᱹᱭ", "image": "assets/default_content/images/animals/cow.webp"},
-      {"id": "c8", "pairId": "p4", "hindi": "गाय", "santali": "ᱜᱟᱹᱭ", "image": "assets/default_content/images/animals/cow.webp"}
+      {"id": "c1", "pairId": "p1", "hindi": "हाथी", "santali": "ᱦᱟᱹᱛᱤ", "image": "assets/default_content/images/animals/elephant.png"},
+      {"id": "c2", "pairId": "p1", "hindi": "हाथी", "santali": "ᱦᱟᱹᱛᱤ", "image": "assets/default_content/images/animals/elephant.png"},
+      {"id": "c3", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.png"},
+      {"id": "c4", "pairId": "p2", "hindi": "आम", "santali": "ᱩᱞ", "image": "assets/default_content/images/fruits/mango.png"},
+      {"id": "c5", "pairId": "p3", "hindi": "बाघ", "santali": "ᱛᱟᱹᱨᱩᱵ", "image": "assets/default_content/images/animals/tiger.png"},
+      {"id": "c6", "pairId": "p3", "hindi": "बाघ", "santali": "ᱛᱟᱹᱨᱩᱵ", "image": "assets/default_content/images/animals/tiger.png"},
+      {"id": "c7", "pairId": "p4", "hindi": "गाय", "santali": "ᱜᱟᱹᱭ", "image": "assets/default_content/images/animals/cow.png"},
+      {"id": "c8", "pairId": "p4", "hindi": "गाय", "santali": "ᱜᱟᱹᱭ", "image": "assets/default_content/images/animals/cow.png"}
     ]
   }
 ]

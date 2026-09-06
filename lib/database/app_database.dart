@@ -50,7 +50,7 @@ class AppDatabase {
     // Open the database and run temporary diagnostics
     final db = await openDatabase(
       dbPath,
-      version: 5,
+      version: 6,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -219,35 +219,68 @@ class AppDatabase {
       await _repairFlashcardImages(db);
     }
     if (oldVersion < 5) {
-      // Version 5: Ensure all master flashcards have imagePath populated (covers cases where DB was at version 4 without repair)
+      // Version 5: Ensure all master flashcards have imagePath populated
+      await _repairFlashcardImages(db);
+    }
+    if (oldVersion < 6) {
+      // Version 6: Safe & idempotent master flashcard reconciliation for installed databases
       await _repairFlashcardImages(db);
     }
   }
 
-  // Helper to repair flashcard imagePath for master content
+  // Helper to repair flashcard imagePath for master content safely
   Future<void> _repairFlashcardImages(Database db) async {
     // Iterate over master flashcards
     for (var fc in MasterSantaliContent.masterFlashcards) {
-      // Fetch existing row
+      // Fetch existing row by canonical master ID
       final rows = await db.query(
         'flashcards',
         where: 'id = ?',
         whereArgs: [fc.id],
       );
-      if (rows.isEmpty) continue;
+      if (rows.isEmpty) {
+        // Safe insert of missing master flashcard
+        await db.insert(
+          'flashcards',
+          {
+            'id': fc.id,
+            'category': fc.category,
+            'subcategory': fc.subcategory,
+            'hindi': fc.hindi,
+            'santali': fc.santali,
+            'santaliOlChiki': fc.santaliOlChiki,
+            'imagePath': fc.image,
+            'iconName': fc.iconName,
+            'pronunciation': fc.pronunciation,
+            'linguistNote': fc.linguistNote,
+            'isDefault': 1,
+            'isTeacherCreated': 0,
+            'isPublished': 1,
+            'createdAt': fc.createdAt.toIso8601String(),
+          },
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+        continue;
+      }
+
       final row = rows.first;
-      // Check if this row is teacher created; skip if true
+      // CRITICAL: Check if this row is teacher created; NEVER overwrite teacher-created records
       final isTeacherCreated = (row['isTeacherCreated'] as int?) ?? 0;
       if (isTeacherCreated == 1) continue;
+
       final existingImage = row['imagePath'] as String?;
-      // Update only if imagePath is null/empty and master has a non-empty image
-      if ((existingImage == null || existingImage.isEmpty) &&
-          fc.image != null &&
-          fc.image!.isNotEmpty) {
+      // Update imagePath if it's missing, empty, or needs canonical master reconciliation
+      if (fc.image != null &&
+          fc.image!.isNotEmpty &&
+          (existingImage == null || existingImage.isEmpty || existingImage != fc.image)) {
         await db.update(
           'flashcards',
-          {'imagePath': fc.image},
-          where: 'id = ?',
+          {
+            'imagePath': fc.image,
+            'isDefault': 1,
+            'isPublished': 1,
+          },
+          where: 'id = ? AND isTeacherCreated = 0',
           whereArgs: [fc.id],
         );
       }
@@ -716,18 +749,18 @@ class AppDatabase {
 
       // Sample flashcard IDs to inspect
       final sampleIds = [
-        'gk_anim_elephant',
-        'gk_anim_tiger',
-        'gk_anim_lion',
-        'gk_anim_sheep',
-        'gk_anim_goat',
-        'gk_anim_horse',
-        'gk_anim_monkey',
-        'gk_fruit_mango',
-        'gk_bird_parrot',
-        'math_cnt_1',
-        'math_cnt_9',
-        'math_cnt_10',
+        'fc_gk_anim_elephant',
+        'fc_gk_anim_tiger',
+        'fc_gk_anim_lion',
+        'fc_gk_anim_sheep',
+        'fc_gk_anim_goat',
+        'fc_gk_anim_horse',
+        'fc_gk_anim_monkey',
+        'fc_gk_fruit_mango',
+        'fc_gk_bird_parrot',
+        'fc_math_cnt_1',
+        'fc_math_cnt_9',
+        'fc_math_cnt_10',
       ];
       for (var id in sampleIds) {
         final rows = await db.query(

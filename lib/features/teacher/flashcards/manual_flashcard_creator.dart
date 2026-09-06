@@ -35,9 +35,17 @@ class _ManualFlashcardCreatorState extends State<ManualFlashcardCreator> {
 
   final List<Map<String, String>> _availableImages = [
     {'name': 'हाथी (Elephant)', 'path': 'assets/default_content/images/animals/elephant.png'},
+    {'name': 'बाघ (Tiger)', 'path': 'assets/default_content/images/animals/tiger.png'},
+    {'name': 'गाय (Cow)', 'path': 'assets/default_content/images/animals/cow.png'},
+    {'name': 'कुत्ता (Dog)', 'path': 'assets/default_content/images/animals/dog.png'},
+    {'name': 'मोर (Peacock)', 'path': 'assets/default_content/images/animals/peacock.png'},
     {'name': 'आम (Mango)', 'path': 'assets/default_content/images/fruits/mango.png'},
-    {'name': 'सूरज (Sun)', 'path': 'assets/default_content/images/common/sun.png'},
-    {'name': 'पेड़ (Tree)', 'path': 'assets/default_content/images/common/tree.png'},
+    {'name': 'केला (Banana)', 'path': 'assets/default_content/images/fruits/banana.png'},
+    {'name': 'सेब (Apple)', 'path': 'assets/default_content/images/fruits/apple.png'},
+    {'name': 'किताब (Book)', 'path': 'assets/default_content/images/classroom/book.png'},
+    {'name': 'कलम (Pencil)', 'path': 'assets/default_content/images/classroom/pencil.png'},
+    {'name': 'वृत्त / गोल (Circle)', 'path': 'assets/default_content/images/mathematics/circle.png'},
+    {'name': 'गिनती १ (Number 1)', 'path': 'assets/default_content/images/mathematics/number_1.png'},
   ];
 
   @override

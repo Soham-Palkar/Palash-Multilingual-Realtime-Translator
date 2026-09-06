@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/game_model.dart';
@@ -15,6 +16,18 @@ class GamePlayerScreen extends StatefulWidget {
 }
 
 class _GamePlayerScreenState extends State<GamePlayerScreen> {
+  // State for match_word_image (interactive question-by-question)
+  int _wordImageCurrentIndex = 0;
+  int _wordImageScore = 0;
+  int? _wordImageSelectedOption;
+  bool _wordImageAnswered = false;
+
+  // State for shape_matching
+  int _shapeCurrentIndex = 0;
+  int _shapeScore = 0;
+  int? _shapeSelectedOption;
+  bool _shapeAnswered = false;
+
   // State for arrange_sentence
   final List<int> _selectedWordsOrder = [];
 
@@ -30,6 +43,14 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
   int? _secondFlippedIndex;
   final List<int> _matchedIndices = [];
 
+  // State for letter_matching
+  List<Map<String, dynamic>> _letterPairs = [];
+  List<String> _shuffledSantaliLetters = [];
+  int? _selectedHindiIndex;
+  int? _selectedSantaliIndex;
+  final Set<int> _matchedHindiIndices = {};
+  final Set<int> _matchedSantaliIndices = {};
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +65,15 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
           .map((c) => Map<String, dynamic>.from(c as Map))
           .toList();
       _memoryCards.shuffle();
+    } else if (type == 'letter_matching') {
+      final pairs = (widget.game.rawData['pairs'] as List? ?? []);
+      _letterPairs = pairs
+          .map((p) => Map<String, dynamic>.from(p as Map))
+          .toList();
+      _shuffledSantaliLetters = _letterPairs
+          .map((p) => (p['santali'] ?? '') as String)
+          .toList();
+      _shuffledSantaliLetters.shuffle(Random());
     }
   }
 
@@ -57,7 +87,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.tertiaryContainer,
                 shape: BoxShape.circle,
               ),
@@ -69,7 +99,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              messageHindi ?? 'शाबाश! आपने सही उत्तर दिया!',
+              messageHindi ?? 'शाबाश! आपने खेल पूरा किया!',
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
@@ -144,6 +174,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
               _buildMemoryCardGame()
             else if (widget.game.gameType == 'letter_matching')
               _buildLetterMatchingGame()
+            else if (widget.game.gameType == 'shape_matching')
+              _buildShapeMatchingGame()
             else
               _buildWordImageMatchingGame(),
           ],
@@ -246,6 +278,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                   children: [
                     PalashAssetImage(
                       imagePath: opt['image'],
+                      assetKey: opt['id'],
                       width: 80,
                       height: 80,
                       borderRadius: BorderRadius.circular(14),
@@ -277,9 +310,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 2. Count Objects Game
+  // 2. Count Objects Game (Interactive 1-10 counting)
   Widget _buildCountObjectsGame() {
-    final target = widget.game.rawData['targetCount'] ?? 4;
+    final target = (widget.game.rawData['targetCount'] as int?) ?? 4;
     final itemImg = widget.game.rawData['itemImage'];
     final nameHindi = widget.game.rawData['itemNameHindi'] ?? 'आम';
     final nameSantali = widget.game.rawData['itemNameSantali'] ?? 'ᱩᱞ (Ul)';
@@ -288,7 +321,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     return Column(
       children: [
         Text(
-          'इन $nameHindi ($nameSantali) को गिनें:',
+          'इन $nameHindi ($nameSantali) को गिनें और सही संख्या चुनें:',
+          textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -298,7 +332,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
           spacing: 14,
           runSpacing: 14,
           alignment: WrapAlignment.center,
-          children: List.generate(target as int, (index) {
+          children: List.generate(target, (index) {
             return Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -348,8 +382,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                   setState(() => _selectedCount = opt);
                   if (opt == target) {
                     _showWinDialog(
-                      messageHindi: widget.game.rawData['hindiFeedback'],
-                      messageSantali: widget.game.rawData['santaliFeedback'],
+                      messageHindi: widget.game.rawData['hindiFeedback'] ?? 'शाबाश! आपने सही गिना!',
+                      messageSantali: widget.game.rawData['santaliFeedback'] ?? 'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ!',
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -617,106 +651,457 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
     );
   }
 
-  // 5. Letter Matching Game
+  // 5. Letter Matching Game (Interactive matching)
   Widget _buildLetterMatchingGame() {
-    final pairs = (widget.game.rawData['pairs'] as List? ?? []);
-
     return Column(
-      children: pairs.map((pair) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: PalashCard(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    pair['hindi'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+      children: [
+        const Text(
+          'देवनागरी अक्षर छूकर उसका सही ओल चिकी अक्षर जोड़ें:',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left Column: Hindi Letters
+            Expanded(
+              child: Column(
+                children: List.generate(_letterPairs.length, (hIdx) {
+                  final pair = _letterPairs[hIdx];
+                  final isMatched = _matchedHindiIndices.contains(hIdx);
+                  final isSelected = _selectedHindiIndex == hIdx;
+
+                  Color bgColor = Colors.white;
+                  Color borderColor = AppColors.border;
+                  if (isMatched) {
+                    bgColor = AppColors.successContainer.withOpacity(0.5);
+                    borderColor = AppColors.success;
+                  } else if (isSelected) {
+                    bgColor = AppColors.primaryContainer;
+                    borderColor = AppColors.primary;
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: InkWell(
+                      onTap: isMatched
+                          ? null
+                          : () {
+                              setState(() {
+                                _selectedHindiIndex = hIdx;
+                                _checkLetterMatch();
+                              });
+                            },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: borderColor,
+                            width: isSelected || isMatched ? 2.5 : 1,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            pair['hindi'] ?? '',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: isMatched ? AppColors.success : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const Icon(
-                  Icons.swap_horiz_rounded,
-                  color: AppColors.textMuted,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    pair['santali'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                ),
-              ],
+                  );
+                }),
+              ),
             ),
-          ),
-        );
-      }).toList(),
+            const SizedBox(width: 16),
+            // Right Column: Shuffled Santali Ol Chiki Letters
+            Expanded(
+              child: Column(
+                children: List.generate(_shuffledSantaliLetters.length, (sIdx) {
+                  final santaliLetter = _shuffledSantaliLetters[sIdx];
+                  final isMatched = _matchedSantaliIndices.contains(sIdx);
+                  final isSelected = _selectedSantaliIndex == sIdx;
+
+                  Color bgColor = Colors.white;
+                  Color borderColor = AppColors.border;
+                  if (isMatched) {
+                    bgColor = AppColors.successContainer.withOpacity(0.5);
+                    borderColor = AppColors.success;
+                  } else if (isSelected) {
+                    bgColor = AppColors.secondaryContainer;
+                    borderColor = AppColors.secondary;
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: InkWell(
+                      onTap: isMatched
+                          ? null
+                          : () {
+                              setState(() {
+                                _selectedSantaliIndex = sIdx;
+                                _checkLetterMatch();
+                              });
+                            },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: borderColor,
+                            width: isSelected || isMatched ? 2.5 : 1,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            santaliLetter,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: isMatched ? AppColors.success : AppColors.secondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  // 6. Word Image Match
-  Widget _buildWordImageMatchingGame() {
-    final items = (widget.game.rawData['items'] as List? ?? []);
+  void _checkLetterMatch() {
+    if (_selectedHindiIndex != null && _selectedSantaliIndex != null) {
+      final expectedSantali = _letterPairs[_selectedHindiIndex!]['santali'];
+      final selectedSantali = _shuffledSantaliLetters[_selectedSantaliIndex!];
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: PalashCard(
-            child: Row(
-              children: [
-                PalashAssetImage(
-                  imagePath: item['image'],
-                  width: 58,
-                  height: 58,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: BilingualText(
-                    hindi: item['hindi'] ?? '',
-                    santali: item['santali'] ?? '',
-                    hindiFontSize: 16,
-                    santaliFontSize: 13,
-                  ),
-                ),
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: AppColors.secondary,
-                  size: 26,
-                ),
-              ],
-            ),
+      if (expectedSantali == selectedSantali) {
+        _matchedHindiIndices.add(_selectedHindiIndex!);
+        _matchedSantaliIndices.add(_selectedSantaliIndex!);
+        _selectedHindiIndex = null;
+        _selectedSantaliIndex = null;
+
+        if (_matchedHindiIndices.length == _letterPairs.length) {
+          _showWinDialog(
+            messageHindi: 'शाबाश! आपने सभी अक्षरों का सही मिलान किया!',
+            messageSantali: 'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱡᱚᱛᱚ ᱟᱠᱷᱚᱨ ᱢᱤᱞᱟᱹᱣ ᱮᱱᱟ!',
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            duration: Duration(milliseconds: 900),
+            content: Text('✗ मिलान सही नहीं है, पुनः प्रयास करें!'),
           ),
         );
-      },
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) {
+            setState(() {
+              _selectedHindiIndex = null;
+              _selectedSantaliIndex = null;
+            });
+          }
+        });
+      }
+    }
+  }
+
+  // 6. Interactive Shape Matching Game
+  Widget _buildShapeMatchingGame() {
+    final shapes = (widget.game.rawData['shapes'] as List? ?? []);
+    if (shapes.isEmpty) return const Text('आकृति उपलब्ध नहीं है');
+
+    final currentShape = shapes[_shapeCurrentIndex % shapes.length];
+    final shapeImg = currentShape['image'];
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'प्रश्न ${_shapeCurrentIndex + 1} / ${shapes.length}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            Text(
+              'अंक: $_shapeScore',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.moduleMath, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              PalashAssetImage(
+                imagePath: shapeImg,
+                width: 110,
+                height: 110,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'यह कौन सी आकृति है? (Which shape is this?)',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Column(
+          children: List.generate(shapes.length, (optIdx) {
+            final opt = shapes[optIdx];
+            final isCorrect = optIdx == (_shapeCurrentIndex % shapes.length);
+            final isSelected = _shapeSelectedOption == optIdx;
+
+            Color bgColor = Colors.white;
+            Color borderColor = AppColors.border;
+
+            if (_shapeAnswered) {
+              if (isCorrect) {
+                bgColor = AppColors.successContainer.withOpacity(0.6);
+                borderColor = AppColors.success;
+              } else if (isSelected) {
+                bgColor = AppColors.errorContainer.withOpacity(0.6);
+                borderColor = AppColors.error;
+              }
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: InkWell(
+                onTap: _shapeAnswered
+                    ? null
+                    : () {
+                        setState(() {
+                          _shapeSelectedOption = optIdx;
+                          _shapeAnswered = true;
+                          if (isCorrect) _shapeScore++;
+                        });
+
+                        Future.delayed(const Duration(milliseconds: 1000), () {
+                          if (mounted) {
+                            if (_shapeCurrentIndex + 1 < shapes.length) {
+                              setState(() {
+                                _shapeCurrentIndex++;
+                                _shapeSelectedOption = null;
+                                _shapeAnswered = false;
+                              });
+                            } else {
+                              _showWinDialog(
+                                messageHindi: 'शाबाश! आपने $_shapeScore / ${shapes.length} सही उत्तर दिए!',
+                              );
+                            }
+                          }
+                        });
+                      },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor, width: 1.5),
+                  ),
+                  child: Text(
+                    '${opt['nameHindi']} (${opt['nameSantali']})',
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  // 7. Interactive Word & Image Matching Game
+  Widget _buildWordImageMatchingGame() {
+    final items = (widget.game.rawData['items'] as List? ?? []);
+    if (items.isEmpty) return const Text('खेल सामग्री उपलब्ध नहीं है');
+
+    final currentIndex = _wordImageCurrentIndex % items.length;
+    final currentItem = items[currentIndex];
+    final currentImg = currentItem['image'] ?? currentItem['imageKey'];
+
+    // Create 4 deterministic options from items
+    final List<Map<String, dynamic>> options = [];
+    options.add(Map<String, dynamic>.from(currentItem as Map));
+    for (var it in items) {
+      if (options.length < 4 && it['hindi'] != currentItem['hindi']) {
+        options.add(Map<String, dynamic>.from(it as Map));
+      }
+    }
+    // Deterministic shuffle based on current question index
+    options.shuffle(Random(currentIndex * 7));
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'प्रश्न ${currentIndex + 1} / ${items.length}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            Text(
+              'अंक: $_wordImageScore',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.primary, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              PalashAssetImage(
+                imagePath: currentImg,
+                assetKey: currentItem['imageKey'] ?? currentItem['id'],
+                width: 120,
+                height: 120,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'यह क्या है? सही नाम चुनें (Select Correct Name):',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Column(
+          children: List.generate(options.length, (optIdx) {
+            final opt = options[optIdx];
+            final isCorrect = opt['hindi'] == currentItem['hindi'];
+            final isSelected = _wordImageSelectedOption == optIdx;
+
+            Color bgColor = Colors.white;
+            Color borderColor = AppColors.border;
+
+            if (_wordImageAnswered) {
+              if (isCorrect) {
+                bgColor = AppColors.successContainer.withOpacity(0.6);
+                borderColor = AppColors.success;
+              } else if (isSelected) {
+                bgColor = AppColors.errorContainer.withOpacity(0.6);
+                borderColor = AppColors.error;
+              }
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: InkWell(
+                onTap: _wordImageAnswered
+                    ? null
+                    : () {
+                        setState(() {
+                          _wordImageSelectedOption = optIdx;
+                          _wordImageAnswered = true;
+                          if (isCorrect) _wordImageScore++;
+                        });
+
+                        Future.delayed(const Duration(milliseconds: 1000), () {
+                          if (mounted) {
+                            if (_wordImageCurrentIndex + 1 < items.length) {
+                              setState(() {
+                                _wordImageCurrentIndex++;
+                                _wordImageSelectedOption = null;
+                                _wordImageAnswered = false;
+                              });
+                            } else {
+                              _showWinDialog(
+                                messageHindi: 'शाबाश! आपने $_wordImageScore / ${items.length} सही उत्तर दिए!',
+                              );
+                            }
+                          }
+                        });
+                      },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor, width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        opt['hindi'] ?? '',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        opt['santali'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }
+

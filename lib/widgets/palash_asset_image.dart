@@ -5,7 +5,7 @@ import '../core/constants/app_colors.dart';
 /// Renders bundled asset image or rich contextual illustration
 class PalashAssetImage extends StatelessWidget {
   final String? imagePath;
-  final String? assetKey; // New logical key for centralized mapping
+  final String? assetKey; // Logical key for centralized mapping
   final String? iconName;
   final double width;
   final double height;
@@ -26,19 +26,21 @@ class PalashAssetImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content;
-    // Resolve asset path: prefer assetKey mapping, fallback to imagePath
+    // Priority:
+    // 1. assetKey lookup
+    // 2. imagePath resolution via resolveImageKeyOrPath
+    // 3. Fallback illustration
     String? resolvedPath;
     if (assetKey != null && assetKey!.isNotEmpty) {
-      // Import the mapping (added below) to resolve logical key
-      resolvedPath = imageAssetMap[assetKey];
+      resolvedPath = resolveImageKeyOrPath(assetKey);
     }
     if ((resolvedPath == null || resolvedPath.isEmpty) && imagePath != null && imagePath!.isNotEmpty) {
-      resolvedPath = imageAssetMap[imagePath] ?? imagePath;
+      resolvedPath = resolveImageKeyOrPath(imagePath);
     }
+
     if (resolvedPath != null && resolvedPath.isNotEmpty) {
       content = Image.asset(
         resolvedPath,
-
         width: width,
         height: height,
         fit: fit,
@@ -129,24 +131,20 @@ class PalashAssetImage extends StatelessWidget {
         default:
           icon = Icons.auto_stories_rounded;
       }
-    } else if (imagePath != null) {
-      final p = imagePath!.toLowerCase();
-      if (p.contains('/animals/')) {
+    } else {
+      final keyOrPath = (assetKey ?? imagePath ?? '').toLowerCase();
+      if (keyOrPath.contains('animal') || keyOrPath.contains('dog') || keyOrPath.contains('cat') || keyOrPath.contains('cow') || keyOrPath.contains('tiger') || keyOrPath.contains('elephant') || keyOrPath.contains('bird') || keyOrPath.contains('horse') || keyOrPath.contains('goat')) {
         icon = Icons.pets_rounded;
-      } else if (p.contains('/fruits/')) {
+      } else if (keyOrPath.contains('fruit') || keyOrPath.contains('mango') || keyOrPath.contains('apple') || keyOrPath.contains('banana')) {
         icon = Icons.restaurant_rounded;
-      } else if (p.contains('/vegetables/')) {
+      } else if (keyOrPath.contains('veg') || keyOrPath.contains('tomato') || keyOrPath.contains('potato')) {
         icon = Icons.eco_rounded;
-      } else if (p.contains('/classroom/')) {
+      } else if (keyOrPath.contains('class') || keyOrPath.contains('book') || keyOrPath.contains('pencil') || keyOrPath.contains('school')) {
         icon = Icons.school_rounded;
-      } else if (p.contains('/family/')) {
-        icon = Icons.face_rounded;
-      } else if (p.contains('/colors/')) {
+      } else if (keyOrPath.contains('color') || keyOrPath.contains('red') || keyOrPath.contains('blue') || keyOrPath.contains('green')) {
         icon = Icons.palette_rounded;
-      } else if (p.contains('/mathematics/')) {
+      } else if (keyOrPath.contains('math') || keyOrPath.contains('number') || keyOrPath.contains('count') || keyOrPath.contains('shape')) {
         icon = Icons.calculate_rounded;
-      } else if (p.contains('/common/')) {
-        icon = Icons.nature_people_rounded;
       }
     }
 
@@ -171,3 +169,4 @@ class PalashAssetImage extends StatelessWidget {
     );
   }
 }
+

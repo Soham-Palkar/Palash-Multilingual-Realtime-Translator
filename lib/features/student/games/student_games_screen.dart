@@ -49,9 +49,15 @@ class _StudentGamesScreenState extends State<StudentGamesScreen>
   }
 
   List<GameItem> _getGamesForCategory(String category) {
-    return _games
-        .where((g) => g.category.toLowerCase() == category.toLowerCase())
-        .toList();
+    final catLower = category.toLowerCase();
+    return _games.where((g) {
+      final gCat = g.category.toLowerCase();
+      if (gCat == catLower) return true;
+      if (catLower == 'language' && (gCat == 'general knowledge' || gCat == 'evs' || gCat == 'gk')) {
+        return true;
+      }
+      return false;
+    }).toList();
   }
 
   @override

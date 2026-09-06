@@ -98,28 +98,6 @@ class _StudentFlashcardsScreenState extends State<StudentFlashcardsScreen>
     });
   }
 
-  void _playPronunciation(FlashcardItem card) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.secondary,
-        duration: const Duration(seconds: 2),
-        content: Row(
-          children: [
-            const Icon(Icons.volume_up_rounded, color: Colors.white, size: 22),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                '🔊 ${card.pronunciation ?? "${card.hindi} • ${card.santali}"}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -365,23 +343,6 @@ class _StudentFlashcardsScreenState extends State<StudentFlashcardsScreen>
                         ),
                       ),
                     ],
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () => _playPronunciation(card),
-                          icon: const Icon(Icons.volume_up_rounded, size: 18),
-                          label: const Text('उच्चारण (Pronounce)'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(120, 36),
-                            side: const BorderSide(color: AppColors.secondary),
-                            foregroundColor: AppColors.secondary,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),

@@ -97,7 +97,10 @@ class TeacherRepository extends ChangeNotifier {
   // Teacher Flashcard Creator
   Future<void> createManualFlashcard(FlashcardItem item) async {
     // Ensure manual teacher-created flashcards have correct flags
-    final adjusted = item.copyWith(isTeacherCreated: true, isPublished: false);
+    final adjusted = item.copyWith(
+      isTeacherCreated: true,
+      isPublished: item.isPublished,
+    );
     await _db.insertFlashcard(adjusted);
     await _syncService.uploadFlashcard(adjusted);
     notifyListeners();

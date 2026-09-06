@@ -12,9 +12,9 @@
         "promptHindi": "इनमें से 'हाथी' (ᱦᱟᱹᱛᱤ) कौन सा है?",
         "promptSantali": "ᱱᱚᱣᱟ ᱠᱚ ᱢᱩᱫᱽ ᱨᱮ 'ᱦᱟᱹᱛᱤ' ᱫᱚ ᱚᱠᱚᱭ ᱠᱟᱱᱟᱭ?",
         "options": [
-          {"nameHindi": "हाथी", "nameSantali": "ᱦᱟᱹᱛᱤ (Hati)", "image": "assets/default_content/images/animals/elephant.webp", "isCorrect": true},
-          {"nameHindi": "गाय", "nameSantali": "ᱜᱟᱹᱭ (Gai)", "image": "assets/default_content/images/animals/cow.webp", "isCorrect": false},
-          {"nameHindi": "कुत्ता", "nameSantali": "ᱥᱮᱛᱟ (Seta)", "image": "assets/default_content/images/animals/dog.webp", "isCorrect": false}
+          {"nameHindi": "हाथी", "nameSantali": "ᱦᱟᱹᱛᱤ (Hati)", "image": "assets/default_content/images/animals/elephant.png", "isCorrect": true},
+          {"nameHindi": "गाय", "nameSantali": "ᱜᱟᱹᱭ (Gai)", "image": "assets/default_content/images/animals/cow.png", "isCorrect": false},
+          {"nameHindi": "कुत्ता", "nameSantali": "ᱥᱮᱛᱟ (Seta)", "image": "assets/default_content/images/animals/dog.png", "isCorrect": false}
         ]
       }
     ]

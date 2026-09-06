@@ -1,5 +1,4 @@
-// GENERATED FILE: Mapping of image keys to asset paths
-
+// Centralized Mapping of logical image keys to asset paths
 const Map<String, String> imageAssetMap = {
   // Animals & Birds
   'cat': 'assets/default_content/images/animals/cat.png',
@@ -100,3 +99,35 @@ const Map<String, String> imageAssetMap = {
   'purple': 'assets/default_content/images/colors/purple.png',
   'brown': 'assets/default_content/images/colors/brown.png',
 };
+
+/// Helper to safely resolve logical key or legacy asset path into a valid PNG asset path
+String? resolveImageKeyOrPath(String? keyOrPath) {
+  if (keyOrPath == null || keyOrPath.isEmpty) return null;
+  
+  // 1. Direct logical key lookup
+  if (imageAssetMap.containsKey(keyOrPath)) {
+    return imageAssetMap[keyOrPath];
+  }
+
+  // 2. Extract base key from path if provided (e.g. assets/default_content/images/animals/elephant.webp -> elephant)
+  final normalized = keyOrPath.replaceAll('\\', '/');
+  final filename = normalized.split('/').last;
+  final dotIndex = filename.lastIndexOf('.');
+  final baseName = dotIndex != -1 ? filename.substring(0, dotIndex) : filename;
+
+  if (imageAssetMap.containsKey(baseName)) {
+    return imageAssetMap[baseName];
+  }
+
+  // 3. If it's a valid png path in our known directories, return normalized path
+  if (normalized.endsWith('.webp')) {
+    final pngPath = normalized.replaceAll('.webp', '.png');
+    // Check if the png path matches any mapped asset path
+    for (var val in imageAssetMap.values) {
+      if (val == pngPath) return pngPath;
+    }
+  }
+
+  return keyOrPath;
+}
+

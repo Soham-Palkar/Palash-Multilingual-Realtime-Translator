@@ -67,6 +67,13 @@ class _TeacherFlashcardsScreenState extends State<TeacherFlashcardsScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: PalashCard(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.teacherManualFlashcard,
+                            arguments: card,
+                          ).then((_) => _loadFlashcards());
+                        },
                         child: Row(
                           children: [
                             PalashAssetImage(
@@ -80,23 +87,50 @@ class _TeacherFlashcardsScreenState extends State<TeacherFlashcardsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryContainer,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      card.category,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.onPrimaryContainer,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryContainer,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          card.category,
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.onPrimaryContainer,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: card.isPublished
+                                              ? AppColors.successContainer
+                                              : AppColors.surfaceVariant,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          card.isPublished ? 'प्रकाशित (Published)' : 'ड्राफ्ट (Draft)',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                            color: card.isPublished
+                                                ? AppColors.success
+                                                : AppColors.textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 6),
                                   BilingualText(
@@ -108,6 +142,11 @@ class _TeacherFlashcardsScreenState extends State<TeacherFlashcardsScreen> {
                                   ),
                                 ],
                               ),
+                            ),
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 18,
+                              color: AppColors.textMuted,
                             ),
                           ],
                         ),

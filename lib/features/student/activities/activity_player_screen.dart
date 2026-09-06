@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/activity_model.dart';
@@ -15,11 +16,43 @@ class ActivityPlayerScreen extends StatefulWidget {
 }
 
 class _ActivityPlayerScreenState extends State<ActivityPlayerScreen> {
+  // State for identify_object
   int? _selectedOption;
+
+  // State for match_concepts (interactive concept matching)
+  List<Map<String, dynamic>> _pairs = [];
+  List<String> _shuffledColors = [];
+  int? _selectedObjectIdx;
+  int? _selectedColorIdx;
+  final Set<int> _matchedObjectIndices = {};
+  final Set<int> _matchedColorIndices = {};
+
+  // State for arrange_objects (interactive ranking)
+  List<Map<String, dynamic>> _arrangedSteps = [];
+  final List<int> _selectedStepOrder = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initActivityData();
+  }
+
+  void _initActivityData() {
+    if (widget.activity.type == 'match_concepts') {
+      final rawPairs = (widget.activity.rawData['pairs'] as List? ?? []);
+      _pairs = rawPairs.map((p) => Map<String, dynamic>.from(p as Map)).toList();
+      _shuffledColors = _pairs.map((p) => '${p['colorHindi']} (${p['colorSantali']})').toList();
+      _shuffledColors.shuffle(Random());
+    } else if (widget.activity.type == 'arrange_objects') {
+      final rawSteps = (widget.activity.rawData['steps'] as List? ?? []);
+      _arrangedSteps = rawSteps.map((s) => Map<String, dynamic>.from(s as Map)).toList();
+    }
+  }
 
   void _showCompleteDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: const Column(
@@ -93,6 +126,7 @@ class _ActivityPlayerScreenState extends State<ActivityPlayerScreen> {
     );
   }
 
+  // 1. Identify Object Activity
   Widget _buildIdentifyObject() {
     final items = (widget.activity.rawData['items'] as List? ?? []);
     if (items.isEmpty) return const Text('गतिविधि सामग्री उपलब्ध नहीं है।');
@@ -174,108 +208,300 @@ class _ActivityPlayerScreenState extends State<ActivityPlayerScreen> {
     );
   }
 
+  // 2. Interactive Match Concepts Activity (e.g. Object to natural color)
   Widget _buildMatchConcepts() {
-    final pairs = (widget.activity.rawData['pairs'] as List? ?? []);
-
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...pairs.map((p) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: PalashCard(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        p['objectHindi'] ?? '',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        const Text(
+          'वस्तु को छूकर उसके सही प्राकृतिक रंग से मिलाएँ:',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left: Objects
+            Expanded(
+              child: Column(
+                children: List.generate(_pairs.length, (objIdx) {
+                  final pair = _pairs[objIdx];
+                  final isMatched = _matchedObjectIndices.contains(objIdx);
+                  final isSelected = _selectedObjectIdx == objIdx;
+
+                  Color bgColor = Colors.white;
+                  Color borderColor = AppColors.border;
+                  if (isMatched) {
+                    bgColor = AppColors.successContainer.withOpacity(0.5);
+                    borderColor = AppColors.success;
+                  } else if (isSelected) {
+                    bgColor = AppColors.primaryContainer;
+                    borderColor = AppColors.primary;
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: InkWell(
+                      onTap: isMatched
+                          ? null
+                          : () {
+                              setState(() {
+                                _selectedObjectIdx = objIdx;
+                                _checkConceptMatch();
+                              });
+                            },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: borderColor, width: isSelected || isMatched ? 2 : 1),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              pair['objectHindi'] ?? '',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: isMatched ? AppColors.success : AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              pair['objectSantali'] ?? '',
+                              style: const TextStyle(fontSize: 12, color: AppColors.secondary),
+                            ),
+                          ],
+                        ),
                       ),
-                      Text(
-                        p['objectSantali'] ?? '',
-                        style: const TextStyle(fontSize: 13, color: AppColors.secondary),
-                      ),
-                    ],
-                  ),
-                  const Icon(Icons.arrow_forward_rounded, color: AppColors.textMuted),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      '${p['colorHindi']} (${p['colorSantali']})',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                }),
               ),
             ),
-          );
-        }),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _showCompleteDialog,
-          child: const Text('गतिविधि पूरी हुई (Complete)'),
+            const SizedBox(width: 14),
+            // Right: Shuffled Colors
+            Expanded(
+              child: Column(
+                children: List.generate(_shuffledColors.length, (colIdx) {
+                  final colorStr = _shuffledColors[colIdx];
+                  final isMatched = _matchedColorIndices.contains(colIdx);
+                  final isSelected = _selectedColorIdx == colIdx;
+
+                  Color bgColor = Colors.white;
+                  Color borderColor = AppColors.border;
+                  if (isMatched) {
+                    bgColor = AppColors.successContainer.withOpacity(0.5);
+                    borderColor = AppColors.success;
+                  } else if (isSelected) {
+                    bgColor = AppColors.secondaryContainer;
+                    borderColor = AppColors.secondary;
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: InkWell(
+                      onTap: isMatched
+                          ? null
+                          : () {
+                              setState(() {
+                                _selectedColorIdx = colIdx;
+                                _checkConceptMatch();
+                              });
+                            },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: borderColor, width: isSelected || isMatched ? 2 : 1),
+                        ),
+                        child: Center(
+                          child: Text(
+                            colorStr,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isMatched ? AppColors.success : AppColors.secondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildArrangeObjects() {
-    final steps = (widget.activity.rawData['steps'] as List? ?? []);
+  void _checkConceptMatch() {
+    if (_selectedObjectIdx != null && _selectedColorIdx != null) {
+      final expectedColor =
+          '${_pairs[_selectedObjectIdx!]['colorHindi']} (${_pairs[_selectedObjectIdx!]['colorSantali']})';
+      final chosenColor = _shuffledColors[_selectedColorIdx!];
 
+      if (expectedColor == chosenColor) {
+        _matchedObjectIndices.add(_selectedObjectIdx!);
+        _matchedColorIndices.add(_selectedColorIdx!);
+        _selectedObjectIdx = null;
+        _selectedColorIdx = null;
+
+        if (_matchedObjectIndices.length == _pairs.length) {
+          _showCompleteDialog();
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            duration: Duration(milliseconds: 900),
+            content: Text('✗ रंग का मिलान सही नहीं है, पुनः प्रयास करें!'),
+          ),
+        );
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) {
+            setState(() {
+              _selectedObjectIdx = null;
+              _selectedColorIdx = null;
+            });
+          }
+        });
+      }
+    }
+  }
+
+  // 3. Interactive Arrange Objects Activity (e.g. arrange fruits by size)
+  Widget _buildArrangeObjects() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...steps.map((s) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: PalashCard(
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: AppColors.moduleActivities,
-                    child: Text(
-                      '${s['rank']}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+        const Text(
+          'फलों को छोटे से बड़े क्रम (१ से ३) में व्यवस्थित करने के लिए नीचे दिए गए फलों को सही क्रम में चुनें:',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+
+        // Arranged display container
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.moduleActivities, width: 1.5),
+          ),
+          child: _selectedStepOrder.isEmpty
+              ? const Center(
+                  child: Text(
+                    '[ नीचे दिए गए फलों को क्रम से चुनें ]',
+                    style: TextStyle(color: AppColors.textMuted),
+                  ),
+                )
+              : Column(
+                  children: List.generate(_selectedStepOrder.length, (orderIdx) {
+                    final itemIdx = _selectedStepOrder[orderIdx];
+                    final step = _arrangedSteps[itemIdx];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundColor: AppColors.moduleActivities,
+                            child: Text(
+                              '${orderIdx + 1}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              '${step['nameHindi']} (${step['nameSantali']})',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _selectedStepOrder.removeAt(orderIdx);
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          s['nameHindi'] ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                        Text(
-                          s['nameSantali'] ?? '',
-                          style: const TextStyle(fontSize: 13, color: AppColors.secondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                    );
+                  }),
+                ),
+        ),
+
+        const SizedBox(height: 18),
+
+        // Available items to pick
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: List.generate(_arrangedSteps.length, (index) {
+            final isUsed = _selectedStepOrder.contains(index);
+            final step = _arrangedSteps[index];
+
+            return ActionChip(
+              label: Text(
+                '${step['nameHindi']} (${step['nameSantali']})',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isUsed ? Colors.grey : AppColors.textPrimary,
+                ),
               ),
-            ),
-          );
-        }),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _showCompleteDialog,
-          child: const Text('गतिविधि पूरी हुई (Complete)'),
+              backgroundColor: isUsed ? Colors.grey.shade200 : Colors.white,
+              side: BorderSide(
+                color: isUsed ? Colors.transparent : AppColors.border,
+              ),
+              onPressed: isUsed
+                  ? null
+                  : () {
+                      setState(() {
+                        _selectedStepOrder.add(index);
+                      });
+
+                      if (_selectedStepOrder.length == _arrangedSteps.length) {
+                        bool isCorrectOrder = true;
+                        for (int i = 0; i < _selectedStepOrder.length; i++) {
+                          final stepRank = (_arrangedSteps[_selectedStepOrder[i]]['rank'] as int?) ?? (i + 1);
+                          if (stepRank != i + 1) {
+                            isCorrectOrder = false;
+                          }
+                        }
+
+                        if (isCorrectOrder) {
+                          _showCompleteDialog();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: AppColors.error,
+                              content: Text('✗ क्रम सही नहीं है, पुनः प्रयास करें!'),
+                            ),
+                          );
+                        }
+                      }
+                    },
+            );
+          }),
         ),
       ],
     );
   }
 }
+
