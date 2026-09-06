@@ -1,9 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uuid/uuid.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../models/translation_model.dart';
 import '../../../services/translation_service.dart';
+import '../../../database/app_database.dart';
 import '../../../widgets/bilingual_text.dart';
 import '../../../widgets/connection_status_badge.dart';
 import '../../../widgets/palash_card.dart';
@@ -17,14 +25,149 @@ class LiveTranslationScreen extends StatefulWidget {
 
 class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
   final _inputController = TextEditingController(text: 'आज हम सब मिलकर गणित का नया पाठ सीखेंगे');
+  final AudioRecorder _audioRecorder = AudioRecorder();
+
   TranslationResult? _currentResult;
   bool _isTranslating = false;
-  bool _isListening = false;
+  bool _isRecording = false;
+  bool _isSaving = false;
+  String? _recordedAudioPath;
 
   @override
   void dispose() {
+    _audioRecorder.dispose();
     _inputController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      // STOP RECORDING
+      try {
+        final path = await _audioRecorder.stop();
+        if (mounted) {
+          setState(() {
+            _isRecording = false;
+            _recordedAudioPath = path;
+          });
+          if (path != null && path.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                backgroundColor: AppColors.secondary,
+                content: Text('रिकॉर्डिंग समाप्त हुई। भेजने के लिए "भेजें / Send" बटन दबाएं।'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isRecording = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(backgroundColor: AppColors.error, content: Text('रिकॉर्डिंग रोकने में त्रुटि: $e')),
+          );
+        }
+      }
+    } else {
+      // START RECORDING
+      try {
+        final hasPermission = await _audioRecorder.hasPermission();
+        if (!hasPermission) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                backgroundColor: AppColors.error,
+                content: Text('ऑडियो रिकॉर्ड करने के लिए माइक्रोफ़ोन अनुमति आवश्यक है। / Microphone permission is required to record audio.'),
+              ),
+            );
+          }
+          return;
+        }
+
+        final tempDir = await getTemporaryDirectory();
+        final path = p.join(
+          tempDir.path,
+          'translation_rec_${DateTime.now().millisecondsSinceEpoch}.m4a',
+        );
+
+        await _audioRecorder.start(
+          const RecordConfig(),
+          path: path,
+        );
+
+        if (mounted) {
+          setState(() {
+            _isRecording = true;
+            _recordedAudioPath = null;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isRecording = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(backgroundColor: AppColors.error, content: Text('रिकॉर्डिंग शुरू करने में त्रुटि: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _handleSendRecording() async {
+    if (_recordedAudioPath == null || _recordedAudioPath!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: AppColors.warning,
+          content: Text('कोई रिकॉर्डिंग उपलब्ध नहीं है। कृपया पहले बोलकर रिकॉर्ड करें। / No recording available.'),
+        ),
+      );
+      return;
+    }
+
+    final file = File(_recordedAudioPath!);
+    if (!await file.exists()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text('ऑडियो फ़ाइल नहीं मिली। / Recording file not found.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final teacherId = FirebaseAuth.instance.currentUser?.uid ?? 'teacher';
+      final recording = TranslationRecording(
+        id: 'rec_${const Uuid().v4().substring(0, 8)}',
+        audioPath: _recordedAudioPath!,
+        teacherId: teacherId,
+      );
+
+      await AppDatabase.instance.insertTranslationRecording(recording);
+
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _recordedAudioPath = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.secondary,
+            content: Text('रिकॉर्डिंग सफलतापूर्वक सहेजी गई! / Recording saved successfully!'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('सहेजने में त्रुटि: $e'),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleTextTranslate() async {
@@ -52,34 +195,11 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
     }
   }
 
-  Future<void> _handleVoiceTranslate() async {
-    setState(() => _isListening = true);
-
-    // Simulate speech recording phase
-    await Future.delayed(const Duration(milliseconds: 1600));
-
-    final transSvc = Provider.of<TranslationService>(context, listen: false);
-    final voiceRes = await transSvc.translateVoice(_inputController.text.trim());
-
-    if (mounted) {
-      setState(() {
-        _isListening = false;
-        _inputController.text = voiceRes.transcribedHindi;
-        _currentResult = TranslationResult(
-          sourceText: voiceRes.transcribedHindi,
-          translatedSantali: voiceRes.translatedSantali,
-          translatedOlChiki: voiceRes.translatedOlChiki,
-          phoneticRoman: voiceRes.phoneticRoman,
-          confidence: voiceRes.confidence,
-        );
-      });
-    }
-  }
-
   void _handleClear() {
     setState(() {
       _inputController.clear();
       _currentResult = null;
+      _recordedAudioPath = null;
     });
   }
 
@@ -149,8 +269,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const Row(
                         children: [
                           Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 20),
                           SizedBox(width: 6),
@@ -164,7 +283,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                           ),
                         ],
                       ),
-                      if (_inputController.text.isNotEmpty)
+                      if (_inputController.text.isNotEmpty || _recordedAudioPath != null)
                         IconButton(
                           icon: const Icon(Icons.clear_rounded, size: 18),
                           onPressed: _handleClear,
@@ -177,7 +296,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                     controller: _inputController,
                     maxLines: 3,
                     decoration: const InputDecoration(
-                      hintText: 'शिक्षक का हिन्दी वाक्य लिखें या बोलें...',
+                      hintText: 'शिक्षक का हिन्दी वाक्य लिखें या बोलकर रिकॉर्ड करें...',
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -187,45 +306,101 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      // Voice Speaking Button
+                      // Voice Recording Button
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _isListening || _isTranslating ? null : _handleVoiceTranslate,
+                          onPressed: _isSaving || _isTranslating ? null : _toggleRecording,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _isListening ? AppColors.error : AppColors.primary,
+                            backgroundColor: _isRecording ? AppColors.error : AppColors.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           icon: Icon(
-                            _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                            _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
                             size: 20,
                           ),
                           label: Text(
-                            _isListening ? 'रिकॉर्डिंग हो रही है...' : 'बोलकर अनुवाद करें',
+                            _isRecording
+                                ? '⏹ रोकें (Stop)'
+                                : (_recordedAudioPath != null ? '🎙 नई रिकॉर्डिंग' : '🎙 रिकॉर्ड करें (Record)'),
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      // Text Translate Button
-                      IconButton.filled(
-                        onPressed: _isTranslating || _isListening ? null : _handleTextTranslate,
-                        icon: _isTranslating
+                      const SizedBox(width: 8),
+                      // Send Recording Button
+                      ElevatedButton.icon(
+                        onPressed: (_recordedAudioPath != null && !_isRecording && !_isSaving)
+                            ? _handleSendRecording
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                        ),
+                        icon: _isSaving
                             ? const SizedBox(
-                                width: 20,
-                                height: 20,
+                                width: 16,
+                                height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   color: Colors.white,
                                 ),
                               )
-                            : const Icon(Icons.send_rounded),
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
+                            : const Icon(Icons.send_rounded, size: 18),
+                        label: Text(
+                          _isSaving ? 'सहेज रहे...' : 'भेजें (Send)',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Text Translate Button
+                      IconButton.filled(
+                        onPressed: _isTranslating || _isRecording || _isSaving ? null : _handleTextTranslate,
+                        icon: _isTranslating
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.g_translate_rounded, size: 18),
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.moduleLanguage,
+                        ),
+                        tooltip: 'पाठ्य अनुवाद करें (Translate Text)',
                       ),
                     ],
                   ),
+                  if (_recordedAudioPath != null) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryContainer.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.audiotrack_rounded, color: AppColors.secondary, size: 18),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'ऑडियो रिकॉर्डिंग तैयार है (Recording Ready to Send)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -249,8 +424,8 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: 8),
-                        Flexible(
-                          child: const Text(
+                        const Flexible(
+                          child: Text(
                             'ᱥᱟᱱᱛᱟᱲᱤ ᱛᱚᱨᱡᱚᱢᱟ (Santali Output)',
                             style: TextStyle(
                               fontSize: 14,
@@ -260,9 +435,8 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        // Right side: confidence badge
                         Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 3,
                           ),

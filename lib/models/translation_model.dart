@@ -34,3 +34,38 @@ class VoiceTranslationResult {
     this.confidence = 0.92,
   });
 }
+
+/// Domain model for Teacher Live Translation audio recordings
+class TranslationRecording {
+  final String id;
+  final String audioPath;
+  final String teacherId;
+  final DateTime createdAt;
+
+  TranslationRecording({
+    required this.id,
+    required this.audioPath,
+    required this.teacherId,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'audioPath': audioPath,
+      'teacherId': teacherId,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory TranslationRecording.fromJson(Map<String, dynamic> json) {
+    return TranslationRecording(
+      id: json['id'] as String,
+      audioPath: json['audioPath'] as String,
+      teacherId: json['teacherId'] as String? ?? 'teacher',
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+    );
+  }
+}
