@@ -62,7 +62,11 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 color: AppColors.tertiaryContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.stars_rounded, color: AppColors.tertiary, size: 54),
+              child: const Icon(
+                Icons.stars_rounded,
+                color: AppColors.tertiary,
+                size: 54,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -73,7 +77,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
           ],
         ),
         content: Text(
-          messageSantali ?? 'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱟᱢ ᱠᱷᱮᱞᱚᱸᱰ ᱮᱢ ᱡᱤᱛᱠᱟᱹᱨ ᱮᱱᱟ (Great Victory!)',
+          messageSantali ??
+              'ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱟᱢ ᱠᱷᱮᱞᱚᱸᱰ ᱮᱢ ᱡᱤᱛᱠᱟᱹᱨ ᱮᱱᱟ (Great Victory!)',
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: AppColors.secondary,
@@ -89,7 +94,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             child: const Text('वापस जाएँ (Done)'),
           ),
@@ -148,8 +155,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
 
   // 1. Choose Image Game (e.g. Find the Cow / Find the Fruit)
   Widget _buildChooseImageGame() {
-    final promptHindi = widget.game.rawData['promptHindi'] ?? 'सही चित्र पहचानें:';
-    final promptSantali = widget.game.rawData['promptSantali'] ?? 'ᱴᱷᱤᱠ ᱪᱤᱛᱟᱹᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ:';
+    final promptHindi =
+        widget.game.rawData['promptHindi'] ?? 'सही चित्र पहचानें:';
+    final promptSantali =
+        widget.game.rawData['promptSantali'] ?? 'ᱴᱷᱤᱠ ᱪᱤᱛᱟᱹᱨ ᱵᱟᱪᱷᱟᱣ ᱢᱮ:';
     final options = (widget.game.rawData['options'] as List? ?? []);
 
     return Column(
@@ -204,7 +213,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 if (isCorrect) {
                   _showWinDialog(
                     messageHindi: '✓ सही उत्तर! यह ${opt['nameHindi']} है।',
-                    messageSantali: '✓ ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱱᱚᱣᱟ ᱫᱚ ${opt['nameSantali']} ᱠᱟᱱᱟ᱾',
+                    messageSantali:
+                        '✓ ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ! ᱱᱚᱣᱟ ᱫᱚ ${opt['nameSantali']} ᱠᱟᱱᱟ᱾',
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -221,7 +231,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: borderColor, width: isSelected ? 2.5 : 1.5),
+                  border: Border.all(
+                    color: borderColor,
+                    width: isSelected ? 2.5 : 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),
@@ -379,8 +392,11 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
 
   // 3. Arrange Sentence Game
   Widget _buildArrangeSentenceGame() {
-    final wordsHindi = (widget.game.rawData['wordsHindi'] as List? ?? ['जाता हूँ', 'मैं', 'स्कूल']);
-    final correctOrder = (widget.game.rawData['correctOrderHindi'] as List? ?? [1, 2, 0]);
+    final wordsHindi =
+        (widget.game.rawData['wordsHindi'] as List? ??
+        ['जाता हूँ', 'मैं', 'स्कूल']);
+    final correctOrder =
+        (widget.game.rawData['correctOrderHindi'] as List? ?? [1, 2, 0]);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,7 +462,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 ),
               ),
               backgroundColor: isUsed ? Colors.grey.shade200 : Colors.white,
-              side: BorderSide(color: isUsed ? Colors.transparent : AppColors.border),
+              side: BorderSide(
+                color: isUsed ? Colors.transparent : AppColors.border,
+              ),
               onPressed: isUsed
                   ? null
                   : () {
@@ -457,18 +475,23 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                       if (_selectedWordsOrder.length == correctOrder.length) {
                         bool correct = true;
                         for (int i = 0; i < correctOrder.length; i++) {
-                          if (_selectedWordsOrder[i] != correctOrder[i]) correct = false;
+                          if (_selectedWordsOrder[i] != correctOrder[i])
+                            correct = false;
                         }
                         if (correct) {
                           _showWinDialog(
-                            messageHindi: 'शाबाश! सही वाक्य: "${widget.game.rawData['sentenceHindi']}"',
-                            messageSantali: 'ᱥᱟᱱᱛᱟᱲᱤ: "${widget.game.rawData['sentenceSantali']}"',
+                            messageHindi:
+                                'शाबाश! सही वाक्य: "${widget.game.rawData['sentenceHindi']}"',
+                            messageSantali:
+                                'ᱥᱟᱱᱛᱟᱲᱤ: "${widget.game.rawData['sentenceSantali']}"',
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               backgroundColor: AppColors.error,
-                              content: Text('✗ क्रम सही नहीं है। पुनः प्रयास करें!'),
+                              content: Text(
+                                '✗ क्रम सही नहीं है। पुनः प्रयास करें!',
+                              ),
                             ),
                           );
                         }
@@ -495,7 +518,8 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
       itemCount: _memoryCards.length,
       itemBuilder: (context, index) {
         final card = _memoryCards[index];
-        final isFlipped = index == _firstFlippedIndex ||
+        final isFlipped =
+            index == _firstFlippedIndex ||
             index == _secondFlippedIndex ||
             _matchedIndices.contains(index);
 
@@ -517,7 +541,10 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 final secondCard = _memoryCards[_secondFlippedIndex!];
 
                 if (firstCard['pairId'] == secondCard['pairId']) {
-                  _matchedIndices.addAll([_firstFlippedIndex!, _secondFlippedIndex!]);
+                  _matchedIndices.addAll([
+                    _firstFlippedIndex!,
+                    _secondFlippedIndex!,
+                  ]);
                   _firstFlippedIndex = null;
                   _secondFlippedIndex = null;
 
@@ -547,10 +574,7 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                 width: 2,
               ),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8),
               ],
             ),
             child: isFlipped
@@ -566,16 +590,27 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                       const SizedBox(height: 4),
                       Text(
                         card['hindi'] ?? '',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                       Text(
                         card['santali'] ?? '',
-                        style: const TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   )
                 : const Center(
-                    child: Icon(Icons.help_outline_rounded, color: Colors.white, size: 36),
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
           ),
         );
@@ -597,19 +632,31 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     pair['hindi'] ?? '',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const Icon(Icons.swap_horiz_rounded, color: AppColors.textMuted),
+                const Icon(
+                  Icons.swap_horiz_rounded,
+                  color: AppColors.textMuted,
+                ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.secondaryContainer,
                     borderRadius: BorderRadius.circular(12),
@@ -661,7 +708,11 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                     santaliFontSize: 13,
                   ),
                 ),
-                const Icon(Icons.check_circle_rounded, color: AppColors.secondary, size: 26),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.secondary,
+                  size: 26,
+                ),
               ],
             ),
           ),

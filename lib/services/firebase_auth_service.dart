@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/auth_model.dart';
@@ -228,55 +229,46 @@ class FirebaseAuthService implements AuthService {
   @override
   Future<TeacherUser> signInWithGoogle() async {
     try {
-      // Initialize Google Sign-In only once.
-      //
-      // The Android google-services.json already contains the Web OAuth
-      // client ID, so we do not pass serverClientId here.
+      // Initialize GoogleSignIn singleton if not already done
       if (!_googleInitialized) {
         await GoogleSignIn.instance.initialize();
-
         _googleInitialized = true;
       }
-
-      // Open Google account selection/sign-in.
-      final GoogleSignInAccount googleUser =
-          await GoogleSignIn.instance.authenticate();
-
-      // Get authentication information from Google.
-      final GoogleSignInAuthentication googleAuth =
-          googleUser.authentication;
-
-      // Google ID token is required by Firebase Authentication.
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null || idToken.isEmpty) {
-        throw Exception(
-          'Google ID token नहीं मिला '
-          '(Google ID token was not received).',
-        );
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
+      if (googleUser == null) {
+        throw Exception('Google साइन-इन रद्द किया गया (Google sign-in cancelled).');
       }
 
-      // Convert Google ID token into Firebase credential.
+      final googleAuth = googleUser.authentication;
       final credential = fb.GoogleAuthProvider.credential(
-        idToken: idToken,
+        idToken: googleAuth.idToken,
       );
 
-      // Sign into Firebase using Google credential.
-      final userCredential =
-          await fb.FirebaseAuth.instance.signInWithCredential(
-        credential,
-      );
-
-      final fbUser = userCredential.user;
+      final authResult = await fb.FirebaseAuth.instance.signInWithCredential(credential);
+      final fbUser = authResult.user;
 
       if (fbUser == null) {
-        throw Exception(
-          'Google प्रमाणीकरण विफल '
-          '(Google authentication failed).',
-        );
+        throw Exception('प्रमाणीकरण विफल (Authentication failed).');
       }
 
-      // Check Firestore teacher profile and role.
+      // Ensure teacher profile exists. Create minimal profile if missing.
+      final teacherDocRef = FirebaseFirestore.instance.collection('teachers').doc(fbUser.uid);
+      final teacherDoc = await teacherDocRef.get();
+    debugPrint('FirebaseAuthService: teacherDoc exists=${teacherDoc.exists} for uid=${fbUser.uid}');
+
+      if (!teacherDoc.exists) {
+        await teacherDocRef.set({
+          'name': fbUser.displayName?.trim() ?? '',
+          'email': fbUser.email?.trim() ?? '',
+          'role': 'teacher',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        // After ensuring existence, read role for logging
+        final teacherDocAfter = await teacherDocRef.get();
+        debugPrint('FirebaseAuthService: after ensure, role=${teacherDocAfter.data()?['role']}');
+      }
+
+      // Retrieve teacher profile and validate role.
       final teacher = await _mapFirebaseUserToTeacher(fbUser);
 
       _currentUser = teacher;
@@ -286,21 +278,14 @@ class FirebaseAuthService implements AuthService {
       }
 
       return teacher;
-    } on GoogleSignInException catch (e) {
-      throw Exception(
-        _googleSignInErrorMessage(e),
-      );
     } on fb.FirebaseAuthException catch (e) {
-      throw Exception(
-        _firebaseErrorMessage(e),
-      );
+      throw Exception(_firebaseErrorMessage(e));
+    } on GoogleSignInException catch (e) {
+      throw Exception(_googleSignInErrorMessage(e));
     } catch (e) {
-      throw Exception(
-        e.toString(),
-      );
+      throw Exception(e.toString());
     }
   }
-
   // -------------------------------------------------------------------------
   // PASSWORD RESET
   // -------------------------------------------------------------------------
