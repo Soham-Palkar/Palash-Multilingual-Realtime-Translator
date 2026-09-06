@@ -149,7 +149,8 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Row(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 20),
                           SizedBox(width: 6),
@@ -241,28 +242,27 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.verified_rounded,
-                              color: AppColors.secondary,
-                              size: 20,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'ᱥᱟᱱᱛᱟᱲᱤ ᱛᱚᱨᱡᱚᱢᱟ (Santali Output)',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.secondary,
-                              ),
-                            ),
-                          ],
+                        const Icon(
+                          Icons.verified_rounded,
+                          color: AppColors.secondary,
+                          size: 20,
                         ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: const Text(
+                            'ᱥᱟᱱᱛᱟᱲᱤ ᱛᱚᱨᱡᱚᱢᱟ (Santali Output)',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.secondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        // Right side: confidence badge
                         Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 3,
                           ),
