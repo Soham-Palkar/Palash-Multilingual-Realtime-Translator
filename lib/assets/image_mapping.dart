@@ -1,7 +1,7 @@
 // GENERATED FILE: Mapping of image keys to asset paths
 
 const Map<String, String> imageAssetMap = {
-  // Animals
+  // Animals & Birds
   'cat': 'assets/default_content/images/animals/cat.png',
   'cow': 'assets/default_content/images/animals/cow.png',
   'dog': 'assets/default_content/images/animals/dog.png',
@@ -12,6 +12,23 @@ const Map<String, String> imageAssetMap = {
   'rabbit': 'assets/default_content/images/animals/rabbit.png',
   'tiger': 'assets/default_content/images/animals/tiger.png',
   'bird': 'assets/default_content/images/animals/bird.png',
+  'sheep': 'assets/default_content/images/animals/sheep.png',
+  'lion': 'assets/default_content/images/animals/lion.png',
+  'monkey': 'assets/default_content/images/animals/monkey.png',
+  'deer': 'assets/default_content/images/animals/deer.png',
+  'bear': 'assets/default_content/images/animals/bear.png',
+  'duck': 'assets/default_content/images/animals/duck.png',
+  'pigeon': 'assets/default_content/images/animals/pigeon.png',
+  'parrot': 'assets/default_content/images/animals/parrot.png',
+  'crow': 'assets/default_content/images/animals/crow.png',
+  'myna': 'assets/default_content/images/animals/myna.png',
+  'peacock': 'assets/default_content/images/animals/peacock.png',
+  'cuckoo': 'assets/default_content/images/animals/cuckoo.png',
+  'owl': 'assets/default_content/images/animals/owl.png',
+  'eagle': 'assets/default_content/images/animals/eagle.png',
+  'hawk': 'assets/default_content/images/animals/hawk.png',
+  'kite': 'assets/default_content/images/animals/kite.png',
+  'swan': 'assets/default_content/images/animals/swan.png',
 
   // Classroom
   'blackboard': 'assets/default_content/images/classroom/blackboard.png',
@@ -23,7 +40,6 @@ const Map<String, String> imageAssetMap = {
   'school_bag': 'assets/default_content/images/classroom/school_bag.png',
   'ruler': 'assets/default_content/images/classroom/ruler.png',
 
-
   // Fruits
   'apple': 'assets/default_content/images/fruits/apple.png',
   'banana': 'assets/default_content/images/fruits/banana.png',
@@ -34,6 +50,10 @@ const Map<String, String> imageAssetMap = {
   'papaya': 'assets/default_content/images/fruits/papaya.png',
   'pomegranate': 'assets/default_content/images/fruits/pomegranate.png',
   'watermelon': 'assets/default_content/images/fruits/watermelon.png',
+  'coconut': 'assets/default_content/images/fruits/coconut.png',
+  'pineapple': 'assets/default_content/images/fruits/pineapple.png',
+  'lemon': 'assets/default_content/images/fruits/lemon.png',
+  'lychee': 'assets/default_content/images/fruits/lychee.png',
 
   // Vegetables
   'brinjal': 'assets/default_content/images/vegetables/brinjal.png',
@@ -42,6 +62,9 @@ const Map<String, String> imageAssetMap = {
   'onion': 'assets/default_content/images/vegetables/onion.png',
   'potato': 'assets/default_content/images/vegetables/potato.png',
   'tomato': 'assets/default_content/images/vegetables/tomato.png',
+  'radish': 'assets/default_content/images/vegetables/radish.png',
+  'ladyfinger': 'assets/default_content/images/vegetables/ladyfinger.png',
+
   // Mathematics
   'number_1': 'assets/default_content/images/mathematics/number_1.png',
   'number_2': 'assets/default_content/images/mathematics/number_2.png',
@@ -64,6 +87,7 @@ const Map<String, String> imageAssetMap = {
   'minus': 'assets/default_content/images/mathematics/minus.png',
   'division': 'assets/default_content/images/mathematics/division.png',
   'multiply': 'assets/default_content/images/mathematics/multiply.png',
+
   // Colors
   'black': 'assets/default_content/images/colors/black.png',
   'blue': 'assets/default_content/images/colors/blue.png',
@@ -73,4 +97,6 @@ const Map<String, String> imageAssetMap = {
   'red': 'assets/default_content/images/colors/red.png',
   'white': 'assets/default_content/images/colors/white.png',
   'yellow': 'assets/default_content/images/colors/yellow.png',
+  'purple': 'assets/default_content/images/colors/purple.png',
+  'brown': 'assets/default_content/images/colors/brown.png',
 };

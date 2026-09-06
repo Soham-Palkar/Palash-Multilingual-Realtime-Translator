@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../core/constants/app_assets.dart';
 import '../data/master_santali_content.dart';
-import '../models/flashcard_model.dart';
+
 import '../models/curriculum_model.dart';
 import '../models/worksheet_model.dart';
 import '../models/game_model.dart';
@@ -14,7 +13,7 @@ import 'app_database.dart';
 
 /// Database Seeder: Seeds SQLite database on initial launch with bundled master content
 class DatabaseSeeder {
-  static const String _keySeeded = 'palash_database_seeded_v4';
+  static const String _keySeeded = 'palash_database_seeded_v5';
 
   static Future<void> seedDatabaseIfNeeded(AppDatabase db) async {
     final prefs = await SharedPreferences.getInstance();
@@ -43,25 +42,9 @@ class DatabaseSeeder {
       await db.insertFlashcard(fc);
     }
 
-    // 2. Also seed legacy default bundled json flashcards if available
-    try {
-      final files = [
-        AppAssets.jsonLanguageFlashcards,
-        AppAssets.jsonMathFlashcards,
-        AppAssets.jsonGkFlashcards,
-      ];
+// NOTE: Legacy JSON flashcard seeding has been disabled.
+// The master flashcards from MasterSantaliContent are now the sole source.
 
-      for (var file in files) {
-        final jsonStr = await rootBundle.loadString(file);
-        final list = jsonDecode(jsonStr) as List<dynamic>;
-        for (var item in list) {
-          final fc = FlashcardItem.fromJson(item as Map<String, dynamic>);
-          await db.insertFlashcard(fc);
-        }
-      }
-    } catch (_) {
-      // Ignore if legacy asset json files are absent
-    }
   }
 
   static Future<void> _seedCurriculum(AppDatabase db) async {

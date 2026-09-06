@@ -1,1 +1,37 @@
-/// Unified content model for various educational items\nenum ContentType {\n  flashcard,\n  note,\n  worksheet,\n  game,\n  activity,\n  story,\n  curriculum,\n}\n\n/// Base class that defines common fields for all content types.\nabstract class ContentBase {\n  final String id;\n  final ContentType type;\n  final bool isDraft;\n  final bool isPublished;\n  final DateTime createdAt;\n\n  const ContentBase({\n    required this.id,\n    required this.type,\n    this.isDraft = false,\n    this.isPublished = true,\n    DateTime? createdAt,\n  }) : createdAt = createdAt ?? DateTime.now();\n\n  Map<String, dynamic> toJson();\n}\n\n/// Helper mixin to add a title/description field for items that need it.\nmixin TitledContent on ContentBase {\n  String get title;\n  String get description;\n}\n
+/// Unified content model for various educational items
+library;
+
+enum ContentType {
+  flashcard,
+  note,
+  worksheet,
+  game,
+  activity,
+  story,
+  curriculum,
+}
+
+/// Base class that defines common fields for all content types.
+abstract class ContentBase {
+  final String id;
+  final ContentType type;
+  final bool isDraft;
+  final bool isPublished;
+  final DateTime createdAt;
+
+  ContentBase({
+    required this.id,
+    required this.type,
+    this.isDraft = false,
+    this.isPublished = true,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toJson();
+}
+
+/// Helper mixin to add a title/description field for items that need it.
+mixin TitledContent on ContentBase {
+  String get title;
+  String get description;
+}

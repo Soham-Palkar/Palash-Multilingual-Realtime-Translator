@@ -234,10 +234,7 @@ class FirebaseAuthService implements AuthService {
         await GoogleSignIn.instance.initialize();
         _googleInitialized = true;
       }
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
-      if (googleUser == null) {
-        throw Exception('Google साइन-इन रद्द किया गया (Google sign-in cancelled).');
-      }
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
 
       final googleAuth = googleUser.authentication;
       final credential = fb.GoogleAuthProvider.credential(

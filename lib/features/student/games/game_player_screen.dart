@@ -23,7 +23,6 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
 
   // State for choose_image
   String? _selectedImageId;
-  bool? _isImageCorrect;
 
   // State for memory_cards
   List<Map<String, dynamic>> _memoryCards = [];
@@ -207,7 +206,6 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
               onTap: () {
                 setState(() {
                   _selectedImageId = optId;
-                  _isImageCorrect = isCorrect;
                 });
 
                 if (isCorrect) {
@@ -475,8 +473,9 @@ class _GamePlayerScreenState extends State<GamePlayerScreen> {
                       if (_selectedWordsOrder.length == correctOrder.length) {
                         bool correct = true;
                         for (int i = 0; i < correctOrder.length; i++) {
-                          if (_selectedWordsOrder[i] != correctOrder[i])
+                          if (_selectedWordsOrder[i] != correctOrder[i]) {
                             correct = false;
+                          }
                         }
                         if (correct) {
                           _showWinDialog(

@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/note_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import '../../../repositories/teacher_repository.dart';
 
 class AddEditNoteScreen extends StatefulWidget {
@@ -165,7 +164,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
     }
   }
   // Save Draft handler
-  Future<void> _handleSave(bool _dummy) async {
+  Future<void> _handleSave(bool dummy) async {
     if (!_formKey.currentState!.validate()) return;
     final user = FirebaseAuth.instance.currentUser;
     debugPrint('========== FIREBASE AUTH DEBUG ==========');
@@ -182,11 +181,11 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
       }
       return;
     }
-    debugPrint('UID: ${user?.uid}');
-    debugPrint('Email: ${user?.email}');
-    debugPrint('Display Name: ${user?.displayName}');
-    debugPrint('Is Anonymous: ${user?.isAnonymous}');
-    debugPrint('Email Verified: ${user?.emailVerified}');
+    debugPrint('UID: ${user.uid}');
+    debugPrint('Email: ${user.email}');
+    debugPrint('Display Name: ${user.displayName}');
+    debugPrint('Is Anonymous: ${user.isAnonymous}');
+    debugPrint('Email Verified: ${user.emailVerified}');
     debugPrint('=========================================');
     final repo = Provider.of<TeacherRepository>(context, listen: false);
     final note = TeacherNote(

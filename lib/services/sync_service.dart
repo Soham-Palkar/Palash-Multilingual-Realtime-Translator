@@ -1,5 +1,7 @@
 /// Abstract Sync Service interface.
 /// Encapsulates synchronization between local SQLite/Drift and future Firebase Firestore / Cloud backend.
+library;
+
 import '../models/note_model.dart';
 import '../models/flashcard_model.dart';
 import '../models/ai_content_model.dart';

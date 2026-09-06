@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_assets.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../repositories/teacher_repository.dart';
 import '../../../widgets/bilingual_text.dart';

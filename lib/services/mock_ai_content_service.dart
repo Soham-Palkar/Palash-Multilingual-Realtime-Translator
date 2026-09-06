@@ -1,5 +1,4 @@
 import 'dart:math';
-import '../core/constants/app_assets.dart';
 import '../models/ai_content_model.dart';
 import '../models/flashcard_model.dart';
 import '../models/note_model.dart';
@@ -38,7 +37,6 @@ class MockAIContentService implements AIContentService {
           hindi: '${note.title} - मुख्य शब्द',
           santali: 'ᱢᱩᱬᱩᱛ ᱥᱟᱵᱟᱫ (Key Term)',
           santaliOlChiki: 'ᱢᱩᱬᱩᱛ ᱥᱟᱵᱟᱫ',
-          image: AppAssets.imgTree,
           isDefault: false,
           isTeacherCreated: false,
           isPublished: false,
@@ -51,7 +49,6 @@ class MockAIContentService implements AIContentService {
           hindi: 'उदाहरण: प्रकृति एवं परिवेश',
           santali: 'ᱫᱟᱹᱭᱠᱟᱹ : ᱫᱷᱟᱹᱨᱛᱤ ᱟᱨ ᱥᱩᱨ-ᱥᱩᱯᱩᱨ (Nature & Surroundings)',
           santaliOlChiki: 'ᱫᱟᱹᱭᱠᱟᱹ : ᱫᱷᱟᱹᱨᱛᱤ',
-          image: AppAssets.imgSun,
           isDefault: false,
           isTeacherCreated: false,
           isPublished: false,

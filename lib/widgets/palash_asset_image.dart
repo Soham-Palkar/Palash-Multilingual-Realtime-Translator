@@ -33,7 +33,7 @@ class PalashAssetImage extends StatelessWidget {
       resolvedPath = imageAssetMap[assetKey];
     }
     if ((resolvedPath == null || resolvedPath.isEmpty) && imagePath != null && imagePath!.isNotEmpty) {
-      resolvedPath = imagePath;
+      resolvedPath = imageAssetMap[imagePath] ?? imagePath;
     }
     if (resolvedPath != null && resolvedPath.isNotEmpty) {
       content = Image.asset(
