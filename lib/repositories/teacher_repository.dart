@@ -36,7 +36,9 @@ class TeacherRepository extends ChangeNotifier {
 
   // Approve note: set approved flag
   Future<void> approveNote(TeacherNote note) async {
-    final approved = note.copyWith(isApproved: true);
+    // When approving, the note must transition out of draft state.
+    // Firestore rules require isDraft = 0, isApproved = 1, isPublished = 0.
+    final approved = note.copyWith(isDraft: false, isApproved: true);
     await _db.updateNote(approved);
     await _syncService.uploadNote(approved);
     notifyListeners();

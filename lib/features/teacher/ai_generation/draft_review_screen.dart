@@ -86,25 +86,36 @@ class _DraftReviewScreenState extends State<DraftReviewScreen> {
   Future<void> _handleApprove() async {
     LoadingDialog.show(context, message: 'नोट स्वीकृत हो रहा है...');
     final repo = Provider.of<TeacherRepository>(context, listen: false);
-    if (widget.note != null) {
-      await repo.approveNote(widget.note!);
-      setState(() {
-        _content.state = ContentState.approved;
-      });
-    } else {
-      await repo.approveAIContent(_content.id);
-      setState(() {
-        _content.state = ContentState.approved;
-      });
+    try {
+      if (widget.note != null) {
+        await repo.approveNote(widget.note!);
+        setState(() {
+          _content.state = ContentState.approved;
+        });
+      } else {
+        await repo.approveAIContent(_content.id);
+        setState(() {
+          _content.state = ContentState.approved;
+        });
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: AppColors.info,
+          content: Text('✓ सामग्री स्वीकृत हुई (Content approved)'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text('Error approving note: $e'),
+        ),
+      );
+    } finally {
+      if (mounted) LoadingDialog.hide(context);
     }
-    if (!mounted) return;
-    LoadingDialog.hide(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: AppColors.info,
-        content: Text('✓ सामग्री स्वीकृत हुई (Content approved)'),
-      ),
-    );
   }
 
   Future<void> _handlePublish() async {
