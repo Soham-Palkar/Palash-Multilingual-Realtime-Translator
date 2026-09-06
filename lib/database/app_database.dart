@@ -6,10 +6,11 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import '../models/flashcard_model.dart';
+import '../data/master_santali_content.dart';
 import '../models/curriculum_model.dart';
-import '../models/note_model.dart';
+import '../models/flashcard_model.dart';
 import '../models/ai_content_model.dart';
+import '../models/note_model.dart';
 import '../models/worksheet_model.dart';
 import '../models/game_model.dart';
 import '../models/activity_model.dart';
@@ -31,7 +32,8 @@ class AppDatabase {
   }
 
   Future<Database> _initDatabase() async {
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    if (!kIsWeb &&
+        (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
@@ -45,12 +47,16 @@ class AppDatabase {
       dbPath = p.join(appDocDir.path, 'palash_app.db');
     }
 
-    return await openDatabase(
+    // Open the database and run temporary diagnostics
+    final db = await openDatabase(
       dbPath,
-      version: 3,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+    // DEBUG ONLY: Print database path, version, and sample flashcard info
+    await _debugPrintDatabaseInfo(db);
+    return db;
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -200,11 +206,51 @@ class AppDatabase {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       // Add isApproved column to notes table with default 0
-      await db.execute('ALTER TABLE notes ADD COLUMN isApproved INTEGER NOT NULL DEFAULT 0');
+      await db.execute(
+        'ALTER TABLE notes ADD COLUMN isApproved INTEGER NOT NULL DEFAULT 0',
+      );
     }
     if (oldVersion < 3) {
       // Version 3: Preserve existing data and ensure non-null constraint compliance
       // Safe no-op migration maintaining built-in default content & publication flags
+    }
+    if (oldVersion < 4) {
+      // Data repair: populate imagePath for master flashcards where missing
+      await _repairFlashcardImages(db);
+    }
+    if (oldVersion < 5) {
+      // Version 5: Ensure all master flashcards have imagePath populated (covers cases where DB was at version 4 without repair)
+      await _repairFlashcardImages(db);
+    }
+  }
+
+  // Helper to repair flashcard imagePath for master content
+  Future<void> _repairFlashcardImages(Database db) async {
+    // Iterate over master flashcards
+    for (var fc in MasterSantaliContent.masterFlashcards) {
+      // Fetch existing row
+      final rows = await db.query(
+        'flashcards',
+        where: 'id = ?',
+        whereArgs: [fc.id],
+      );
+      if (rows.isEmpty) continue;
+      final row = rows.first;
+      // Check if this row is teacher created; skip if true
+      final isTeacherCreated = (row['isTeacherCreated'] as int?) ?? 0;
+      if (isTeacherCreated == 1) continue;
+      final existingImage = row['imagePath'] as String?;
+      // Update only if imagePath is null/empty and master has a non-empty image
+      if ((existingImage == null || existingImage.isEmpty) &&
+          fc.image != null &&
+          fc.image!.isNotEmpty) {
+        await db.update(
+          'flashcards',
+          {'imagePath': fc.image},
+          where: 'id = ?',
+          whereArgs: [fc.id],
+        );
+      }
     }
   }
 
@@ -212,46 +258,46 @@ class AppDatabase {
   Future<List<FlashcardItem>> getAllFlashcards() async {
     final db = await database;
     final maps = await db.query('flashcards', orderBy: 'createdAt DESC');
-    return maps.map((m) => FlashcardItem(
-      id: m['id'] as String,
-      category: m['category'] as String,
-      subcategory: m['subcategory'] as String,
-      hindi: m['hindi'] as String,
-      santali: m['santali'] as String,
-      santaliOlChiki: m['santaliOlChiki'] as String?,
-      image: m['imagePath'] as String?,
-      iconName: m['iconName'] as String?,
-      pronunciation: m['pronunciation'] as String?,
-      linguistNote: m['linguistNote'] as String?,
-      isDefault: (m['isDefault'] as int) == 1,
-      isTeacherCreated: (m['isTeacherCreated'] as int) == 1,
-      isPublished: (m['isPublished'] as int) == 1,
-      createdAt: DateTime.parse(m['createdAt'] as String),
-    )).toList();
+    return maps
+        .map(
+          (m) => FlashcardItem(
+            id: m['id'] as String,
+            category: m['category'] as String,
+            subcategory: m['subcategory'] as String,
+            hindi: m['hindi'] as String,
+            santali: m['santali'] as String,
+            santaliOlChiki: m['santaliOlChiki'] as String?,
+            image: m['imagePath'] as String?,
+            iconName: m['iconName'] as String?,
+            pronunciation: m['pronunciation'] as String?,
+            linguistNote: m['linguistNote'] as String?,
+            isDefault: (m['isDefault'] as int) == 1,
+            isTeacherCreated: (m['isTeacherCreated'] as int) == 1,
+            isPublished: (m['isPublished'] as int) == 1,
+            createdAt: DateTime.parse(m['createdAt'] as String),
+          ),
+        )
+        .toList();
   }
 
   Future<void> insertFlashcard(FlashcardItem item) async {
     final db = await database;
-    await db.insert(
-      'flashcards',
-      {
-        'id': item.id,
-        'category': item.category,
-        'subcategory': item.subcategory,
-        'hindi': item.hindi,
-        'santali': item.santali,
-        'santaliOlChiki': item.santaliOlChiki,
-        'imagePath': item.image,
-        'iconName': item.iconName,
-        'pronunciation': item.pronunciation,
-        'linguistNote': item.linguistNote,
-        'isDefault': item.isDefault ? 1 : 0,
-        'isTeacherCreated': item.isTeacherCreated ? 1 : 0,
-        'isPublished': item.isPublished ? 1 : 0,
-        'createdAt': item.createdAt.toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('flashcards', {
+      'id': item.id,
+      'category': item.category,
+      'subcategory': item.subcategory,
+      'hindi': item.hindi,
+      'santali': item.santali,
+      'santaliOlChiki': item.santaliOlChiki,
+      'imagePath': item.image,
+      'iconName': item.iconName,
+      'pronunciation': item.pronunciation,
+      'linguistNote': item.linguistNote,
+      'isDefault': item.isDefault ? 1 : 0,
+      'isTeacherCreated': item.isTeacherCreated ? 1 : 0,
+      'isPublished': item.isPublished ? 1 : 0,
+      'createdAt': item.createdAt.toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> deleteFlashcard(String id) async {
@@ -301,18 +347,14 @@ class AppDatabase {
 
   Future<void> insertCurriculumLesson(CurriculumLesson lesson) async {
     final db = await database;
-    await db.insert(
-      'curriculum',
-      {
-        'id': lesson.id,
-        'gradeClass': lesson.gradeClass,
-        'subject': lesson.subject,
-        'titleHindi': lesson.titleHindi,
-        'titleSantali': lesson.titleSantali,
-        'description': lesson.description,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('curriculum', {
+      'id': lesson.id,
+      'gradeClass': lesson.gradeClass,
+      'subject': lesson.subject,
+      'titleHindi': lesson.titleHindi,
+      'titleSantali': lesson.titleSantali,
+      'description': lesson.description,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     for (var note in lesson.notes) {
       await insertNote(note);
@@ -323,66 +365,66 @@ class AppDatabase {
   Future<List<TeacherNote>> getAllNotes() async {
     final db = await database;
     final maps = await db.query('notes', orderBy: 'createdAt DESC');
-    return maps.map((m) => TeacherNote(
-      id: m['id'] as String,
-      lessonId: m['lessonId'] as String,
-      gradeClass: m['gradeClass'] as int,
-      subject: m['subject'] as String,
-      title: m['title'] as String,
-      hindiContent: m['hindiContent'] as String,
-      santaliContent: m['santaliContent'] as String,
-      santaliOlChiki: m['santaliOlChiki'] as String?,
-      author: m['author'] as String,
-      isDraft: (m['isDraft'] as int) == 1,
-      isApproved: (m['isApproved'] as int) == 1,
-      isPublished: (m['isPublished'] as int) == 1,
-      createdAt: DateTime.parse(m['createdAt'] as String),
-    )).toList();
+    return maps
+        .map(
+          (m) => TeacherNote(
+            id: m['id'] as String,
+            lessonId: m['lessonId'] as String,
+            gradeClass: m['gradeClass'] as int,
+            subject: m['subject'] as String,
+            title: m['title'] as String,
+            hindiContent: m['hindiContent'] as String,
+            santaliContent: m['santaliContent'] as String,
+            santaliOlChiki: m['santaliOlChiki'] as String?,
+            author: m['author'] as String,
+            isDraft: (m['isDraft'] as int) == 1,
+            isApproved: (m['isApproved'] as int) == 1,
+            isPublished: (m['isPublished'] as int) == 1,
+            createdAt: DateTime.parse(m['createdAt'] as String),
+          ),
+        )
+        .toList();
   }
 
   Future<void> insertNote(TeacherNote note) async {
     final db = await database;
-    await db.insert(
-        'notes',
-        {
-          'id': note.id,
-          'lessonId': note.lessonId,
-          'gradeClass': note.gradeClass,
-          'subject': note.subject,
-          'title': note.title,
-          'hindiContent': note.hindiContent,
-          'santaliContent': note.santaliContent,
-          'santaliOlChiki': note.santaliOlChiki,
-          'author': note.author,
-          'isDraft': note.isDraft ? 1 : 0,
-          'isApproved': note.isApproved ? 1 : 0,
-          'isPublished': note.isPublished ? 1 : 0,
-          'createdAt': note.createdAt.toIso8601String(),
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+    await db.insert('notes', {
+      'id': note.id,
+      'lessonId': note.lessonId,
+      'gradeClass': note.gradeClass,
+      'subject': note.subject,
+      'title': note.title,
+      'hindiContent': note.hindiContent,
+      'santaliContent': note.santaliContent,
+      'santaliOlChiki': note.santaliOlChiki,
+      'author': note.author,
+      'isDraft': note.isDraft ? 1 : 0,
+      'isApproved': note.isApproved ? 1 : 0,
+      'isPublished': note.isPublished ? 1 : 0,
+      'createdAt': note.createdAt.toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> updateNote(TeacherNote note) async {
     final db = await database;
     await db.update(
-        'notes',
-        {
-          'lessonId': note.lessonId,
-          'gradeClass': note.gradeClass,
-          'subject': note.subject,
-          'title': note.title,
-          'hindiContent': note.hindiContent,
-          'santaliContent': note.santaliContent,
-          'santaliOlChiki': note.santaliOlChiki,
-          'author': note.author,
-          'isDraft': note.isDraft ? 1 : 0,
-          'isApproved': note.isApproved ? 1 : 0,
-          'isPublished': note.isPublished ? 1 : 0,
-        },
-        where: 'id = ?',
-        whereArgs: [note.id],
-      );
+      'notes',
+      {
+        'lessonId': note.lessonId,
+        'gradeClass': note.gradeClass,
+        'subject': note.subject,
+        'title': note.title,
+        'hindiContent': note.hindiContent,
+        'santaliContent': note.santaliContent,
+        'santaliOlChiki': note.santaliOlChiki,
+        'author': note.author,
+        'isDraft': note.isDraft ? 1 : 0,
+        'isApproved': note.isApproved ? 1 : 0,
+        'isPublished': note.isPublished ? 1 : 0,
+      },
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
   }
 
   Future<void> deleteNote(String id) async {
@@ -400,8 +442,9 @@ class AppDatabase {
       if (stateStr == 'approved') state = ContentState.approved;
       if (stateStr == 'published') state = ContentState.published;
 
-      final payload = jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
-      
+      final payload =
+          jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
+
       List<FlashcardItem> fcs = [];
       if (payload['flashcards'] != null) {
         fcs = (payload['flashcards'] as List)
@@ -411,24 +454,36 @@ class AppDatabase {
 
       List<AIPracticeQuestion> questions = [];
       if (payload['practiceQuestions'] != null) {
-        questions = (payload['practiceQuestions'] as List).map((q) => AIPracticeQuestion(
-          questionHindi: q['questionHindi'] ?? '',
-          questionSantali: q['questionSantali'] ?? '',
-          optionsHindi: (q['optionsHindi'] as List? ?? []).map((e) => e.toString()).toList(),
-          optionsSantali: (q['optionsSantali'] as List? ?? []).map((e) => e.toString()).toList(),
-          correctIndex: q['correctIndex'] ?? 0,
-          explanation: q['explanation'] ?? '',
-        )).toList();
+        questions = (payload['practiceQuestions'] as List)
+            .map(
+              (q) => AIPracticeQuestion(
+                questionHindi: q['questionHindi'] ?? '',
+                questionSantali: q['questionSantali'] ?? '',
+                optionsHindi: (q['optionsHindi'] as List? ?? [])
+                    .map((e) => e.toString())
+                    .toList(),
+                optionsSantali: (q['optionsSantali'] as List? ?? [])
+                    .map((e) => e.toString())
+                    .toList(),
+                correctIndex: q['correctIndex'] ?? 0,
+                explanation: q['explanation'] ?? '',
+              ),
+            )
+            .toList();
       }
 
       List<AIActivityIdea> acts = [];
       if (payload['activities'] != null) {
-        acts = (payload['activities'] as List).map((a) => AIActivityIdea(
-          titleHindi: a['titleHindi'] ?? '',
-          titleSantali: a['titleSantali'] ?? '',
-          descriptionHindi: a['descriptionHindi'] ?? '',
-          descriptionSantali: a['descriptionSantali'] ?? '',
-        )).toList();
+        acts = (payload['activities'] as List)
+            .map(
+              (a) => AIActivityIdea(
+                titleHindi: a['titleHindi'] ?? '',
+                titleSantali: a['titleSantali'] ?? '',
+                descriptionHindi: a['descriptionHindi'] ?? '',
+                descriptionSantali: a['descriptionSantali'] ?? '',
+              ),
+            )
+            .toList();
       }
 
       return AIGeneratedContent(
@@ -451,37 +506,41 @@ class AppDatabase {
     final db = await database;
     final payload = {
       'flashcards': content.flashcards.map((f) => f.toJson()).toList(),
-      'practiceQuestions': content.practiceQuestions.map((q) => {
-        'questionHindi': q.questionHindi,
-        'questionSantali': q.questionSantali,
-        'optionsHindi': q.optionsHindi,
-        'optionsSantali': q.optionsSantali,
-        'correctIndex': q.correctIndex,
-        'explanation': q.explanation,
-      }).toList(),
-      'activities': content.activities.map((a) => {
-        'titleHindi': a.titleHindi,
-        'titleSantali': a.titleSantali,
-        'descriptionHindi': a.descriptionHindi,
-        'descriptionSantali': a.descriptionSantali,
-      }).toList(),
+      'practiceQuestions': content.practiceQuestions
+          .map(
+            (q) => {
+              'questionHindi': q.questionHindi,
+              'questionSantali': q.questionSantali,
+              'optionsHindi': q.optionsHindi,
+              'optionsSantali': q.optionsSantali,
+              'correctIndex': q.correctIndex,
+              'explanation': q.explanation,
+            },
+          )
+          .toList(),
+      'activities': content.activities
+          .map(
+            (a) => {
+              'titleHindi': a.titleHindi,
+              'titleSantali': a.titleSantali,
+              'descriptionHindi': a.descriptionHindi,
+              'descriptionSantali': a.descriptionSantali,
+            },
+          )
+          .toList(),
     };
 
-    await db.insert(
-      'ai_contents',
-      {
-        'id': content.id,
-        'noteId': content.noteId,
-        'noteTitle': content.noteTitle,
-        'explanationHindi': content.explanationHindi,
-        'explanationSantali': content.explanationSantali,
-        'translationSantali': content.translationSantali,
-        'payloadJson': jsonEncode(payload),
-        'state': content.state.name,
-        'createdAt': content.createdAt.toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('ai_contents', {
+      'id': content.id,
+      'noteId': content.noteId,
+      'noteTitle': content.noteTitle,
+      'explanationHindi': content.explanationHindi,
+      'explanationSantali': content.explanationSantali,
+      'translationSantali': content.translationSantali,
+      'payloadJson': jsonEncode(payload),
+      'state': content.state.name,
+      'createdAt': content.createdAt.toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> updateAIContentState(String id, ContentState state) async {
@@ -499,25 +558,22 @@ class AppDatabase {
     final db = await database;
     final maps = await db.query('worksheets');
     return maps.map((m) {
-      final payload = jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
+      final payload =
+          jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
       return WorksheetItem.fromJson(payload);
     }).toList();
   }
 
   Future<void> insertWorksheet(WorksheetItem item) async {
     final db = await database;
-    await db.insert(
-      'worksheets',
-      {
-        'id': item.id,
-        'gradeClass': item.gradeClass,
-        'subject': item.subject,
-        'titleHindi': item.titleHindi,
-        'titleSantali': item.titleSantali,
-        'payloadJson': jsonEncode(item.toJson()),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('worksheets', {
+      'id': item.id,
+      'gradeClass': item.gradeClass,
+      'subject': item.subject,
+      'titleHindi': item.titleHindi,
+      'titleSantali': item.titleSantali,
+      'payloadJson': jsonEncode(item.toJson()),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // Games CRUD
@@ -525,29 +581,26 @@ class AppDatabase {
     final db = await database;
     final maps = await db.query('games');
     return maps.map((m) {
-      final payload = jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
+      final payload =
+          jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
       return GameItem.fromJson(payload);
     }).toList();
   }
 
   Future<void> insertGame(GameItem item) async {
     final db = await database;
-    await db.insert(
-      'games',
-      {
-        'id': item.id,
-        'category': item.category,
-        'gameType': item.gameType,
-        'titleHindi': item.titleHindi,
-        'titleSantali': item.titleSantali,
-        'descriptionHindi': item.descriptionHindi,
-        'descriptionSantali': item.descriptionSantali,
-        'isAvailableOffline': item.isAvailableOffline ? 1 : 0,
-        'isComingSoon': item.isComingSoon ? 1 : 0,
-        'payloadJson': jsonEncode(item.rawData),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('games', {
+      'id': item.id,
+      'category': item.category,
+      'gameType': item.gameType,
+      'titleHindi': item.titleHindi,
+      'titleSantali': item.titleSantali,
+      'descriptionHindi': item.descriptionHindi,
+      'descriptionSantali': item.descriptionSantali,
+      'isAvailableOffline': item.isAvailableOffline ? 1 : 0,
+      'isComingSoon': item.isComingSoon ? 1 : 0,
+      'payloadJson': jsonEncode(item.rawData),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // Activities CRUD
@@ -555,27 +608,24 @@ class AppDatabase {
     final db = await database;
     final maps = await db.query('activities');
     return maps.map((m) {
-      final payload = jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
+      final payload =
+          jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
       return ActivityItem.fromJson(payload);
     }).toList();
   }
 
   Future<void> insertActivity(ActivityItem item) async {
     final db = await database;
-    await db.insert(
-      'activities',
-      {
-        'id': item.id,
-        'category': item.category,
-        'type': item.type,
-        'titleHindi': item.titleHindi,
-        'titleSantali': item.titleSantali,
-        'instructionsHindi': item.instructionsHindi,
-        'instructionsSantali': item.instructionsSantali,
-        'payloadJson': jsonEncode(item.rawData),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('activities', {
+      'id': item.id,
+      'category': item.category,
+      'type': item.type,
+      'titleHindi': item.titleHindi,
+      'titleSantali': item.titleSantali,
+      'instructionsHindi': item.instructionsHindi,
+      'instructionsSantali': item.instructionsSantali,
+      'payloadJson': jsonEncode(item.rawData),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // Stories CRUD
@@ -583,29 +633,28 @@ class AppDatabase {
     final db = await database;
     final maps = await db.query('stories');
     return maps.map((m) {
-      final payload = jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
+      final payload =
+          jsonDecode(m['payloadJson'] as String) as Map<String, dynamic>;
       return StoryItem.fromJson(payload);
     }).toList();
   }
 
   Future<void> insertStory(StoryItem item) async {
     final db = await database;
-    await db.insert(
-      'stories',
-      {
-        'id': item.id,
-        'titleHindi': item.titleHindi,
-        'titleSantali': item.titleSantali,
-        'coverImage': item.coverImage,
-        'author': item.author,
-        'payloadJson': jsonEncode(item.toJson()),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('stories', {
+      'id': item.id,
+      'titleHindi': item.titleHindi,
+      'titleSantali': item.titleSantali,
+      'coverImage': item.coverImage,
+      'author': item.author,
+      'payloadJson': jsonEncode(item.toJson()),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // Translation Recordings CRUD
-  Future<void> insertTranslationRecording(TranslationRecording recording) async {
+  Future<void> insertTranslationRecording(
+    TranslationRecording recording,
+  ) async {
     final db = await database;
     await db.execute('''
       CREATE TABLE IF NOT EXISTS translation_recordings (
@@ -615,16 +664,12 @@ class AppDatabase {
         createdAt TEXT NOT NULL
       )
     ''');
-    await db.insert(
-      'translation_recordings',
-      {
-        'id': recording.id,
-        'audioPath': recording.audioPath,
-        'teacherId': recording.teacherId,
-        'createdAt': recording.createdAt.toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('translation_recordings', {
+      'id': recording.id,
+      'audioPath': recording.audioPath,
+      'teacherId': recording.teacherId,
+      'createdAt': recording.createdAt.toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<TranslationRecording>> getAllTranslationRecordings() async {
@@ -637,12 +682,81 @@ class AppDatabase {
         createdAt TEXT NOT NULL
       )
     ''');
-    final maps = await db.query('translation_recordings', orderBy: 'createdAt DESC');
-    return maps.map((m) => TranslationRecording(
-      id: m['id'] as String,
-      audioPath: m['audioPath'] as String,
-      teacherId: m['teacherId'] as String,
-      createdAt: DateTime.parse(m['createdAt'] as String),
-    )).toList();
+    final maps = await db.query(
+      'translation_recordings',
+      orderBy: 'createdAt DESC',
+    );
+    return maps
+        .map(
+          (m) => TranslationRecording(
+            id: m['id'] as String,
+            audioPath: m['audioPath'] as String,
+            teacherId: m['teacherId'] as String,
+            createdAt: DateTime.parse(m['createdAt'] as String),
+          ),
+        )
+        .toList();
+  }
+  // DEBUG‑only diagnostic helper
+  Future<void> _debugPrintDatabaseInfo(Database db) async {
+    try {
+      // Database path
+      final dbPath = db.path;
+      // Schema version (user_version pragma)
+      final versionResult = await db.rawQuery('PRAGMA user_version');
+      final version = versionResult.isNotEmpty ? versionResult.first.values.first : 'unknown';
+      print('--- DEBUG DATABASE INFO ---');
+      print('Path: $dbPath');
+      print('Schema version: $version');
+
+      // Flashcard count
+      final countResult = await db.rawQuery('SELECT COUNT(*) as cnt FROM flashcards');
+      final count = countResult.isNotEmpty ? countResult.first['cnt'] : 0;
+      print('Flashcard count: $count');
+
+      // Sample flashcard IDs to inspect
+      final sampleIds = [
+        'gk_anim_elephant',
+        'gk_anim_tiger',
+        'gk_anim_lion',
+        'gk_anim_sheep',
+        'gk_anim_goat',
+        'gk_anim_horse',
+        'gk_anim_monkey',
+        'gk_fruit_mango',
+        'gk_bird_parrot',
+        'math_cnt_1',
+        'math_cnt_9',
+        'math_cnt_10',
+      ];
+      for (var id in sampleIds) {
+        final rows = await db.query(
+          'flashcards',
+          columns: ['id', 'imagePath', 'isTeacherCreated', 'isDefault'],
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+        if (rows.isNotEmpty) {
+          final r = rows.first;
+          print('--- Flashcard $id ---');
+          print('ID: ${r['id']}');
+          print('imagePath: ${r['imagePath']}');
+          print('isTeacherCreated: ${r['isTeacherCreated']}');
+          print('isDefault: ${r['isDefault']}');
+          // Corresponding master image key
+          String? masterImage;
+          try {
+            final master = MasterSantaliContent.masterFlashcards.firstWhere((fc) => fc.id == id);
+            masterImage = master.image;
+          } catch (_) {}
+          if (masterImage != null) {
+            print('Master image: $masterImage');
+          }
+        }
+      }
+      print('--- END DEBUG INFO ---');
+    } catch (e) {
+      print('DEBUG diagnostic failed: $e');
+    }
   }
 }
