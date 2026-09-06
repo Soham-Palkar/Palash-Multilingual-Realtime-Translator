@@ -25,7 +25,7 @@ class _ManualFlashcardCreatorState extends State<ManualFlashcardCreator> {
   late TextEditingController _subcategoryController;
 
   String _selectedCategory = 'Language';
-  String _selectedImage = AppAssets.imgElephant;
+  String _selectedImage = 'assets/default_content/images/animals/elephant.png';
   bool _isEditing = false;
 
   final List<String> _categories = [
@@ -35,10 +35,10 @@ class _ManualFlashcardCreatorState extends State<ManualFlashcardCreator> {
   ];
 
   final List<Map<String, String>> _availableImages = [
-    {'name': 'हाथी (Elephant)', 'path': AppAssets.imgElephant},
-    {'name': 'आम (Mango)', 'path': AppAssets.imgMango},
-    {'name': 'सूरज (Sun)', 'path': AppAssets.imgSun},
-    {'name': 'पेड़ (Tree)', 'path': AppAssets.imgTree},
+    {'name': 'हाथी (Elephant)', 'path': 'assets/default_content/images/animals/elephant.png'},
+    {'name': 'आम (Mango)', 'path': 'assets/default_content/images/fruits/mango.png'},
+    {'name': 'सूरज (Sun)', 'path': 'assets/default_content/images/common/sun.png'},
+    {'name': 'पेड़ (Tree)', 'path': 'assets/default_content/images/common/tree.png'},
   ];
 
   @override
@@ -48,7 +48,7 @@ class _ManualFlashcardCreatorState extends State<ManualFlashcardCreator> {
       _isEditing = true;
       final c = widget.initialCard!;
       _selectedCategory = c.category;
-      _selectedImage = c.image ?? AppAssets.imgElephant;
+      _selectedImage = c.image ?? 'assets/default_content/images/animals/elephant.png';
       _hindiController = TextEditingController(text: c.hindi);
       _santaliController = TextEditingController(text: c.santali);
       _olChikiController = TextEditingController(text: c.santaliOlChiki ?? '');

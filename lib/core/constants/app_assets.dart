@@ -17,13 +17,5 @@ class AppAssets {
   static const String jsonStories =
       'assets/default_content/data/stories/stories.json';
 
-  // Common sample images
-  static const String imgElephant =
-      'assets/default_content/images/animals/elephant.webp';
-  static const String imgMango =
-      'assets/default_content/images/fruits/mango.webp';
-  static const String imgSun =
-      'assets/default_content/images/common/sun.webp';
-  static const String imgTree =
-      'assets/default_content/images/common/tree.webp';
+
 }

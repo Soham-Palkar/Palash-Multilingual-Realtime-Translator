@@ -68,10 +68,8 @@ flutter:
     - assets/default_content/images/fruits/
     - assets/default_content/images/vegetables/
     - assets/default_content/images/colors/
-    - assets/default_content/images/family/
     - assets/default_content/images/classroom/
     - assets/default_content/images/mathematics/
-    - assets/default_content/images/common/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

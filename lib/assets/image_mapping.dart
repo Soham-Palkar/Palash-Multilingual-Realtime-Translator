@@ -23,15 +23,6 @@ const Map<String, String> imageAssetMap = {
   'school_bag': 'assets/default_content/images/classroom/school_bag.png',
   'ruler': 'assets/default_content/images/classroom/ruler.png',
 
-  // Family
-  'brother': 'assets/default_content/images/family/brother.webp',
-  'child': 'assets/default_content/images/family/child.webp',
-  'family': 'assets/default_content/images/family/family.webp',
-  'father': 'assets/default_content/images/family/father.webp',
-  'grandfather': 'assets/default_content/images/family/grandfather.webp',
-  'grandmother': 'assets/default_content/images/family/grandmother.webp',
-  'mother': 'assets/default_content/images/family/mother.webp',
-  'sister': 'assets/default_content/images/family/sister.webp',
 
   // Fruits
   'apple': 'assets/default_content/images/fruits/apple.png',
@@ -44,7 +35,42 @@ const Map<String, String> imageAssetMap = {
   'pomegranate': 'assets/default_content/images/fruits/pomegranate.png',
   'watermelon': 'assets/default_content/images/fruits/watermelon.png',
 
-  // Vegetables (verified)
+  // Vegetables
   'brinjal': 'assets/default_content/images/vegetables/brinjal.png',
+  'carrot': 'assets/default_content/images/vegetables/carrot.png',
+  'cauliflower': 'assets/default_content/images/vegetables/cauliflower.png',
+  'onion': 'assets/default_content/images/vegetables/onion.png',
   'potato': 'assets/default_content/images/vegetables/potato.png',
+  'tomato': 'assets/default_content/images/vegetables/tomato.png',
+  // Mathematics
+  'number_1': 'assets/default_content/images/mathematics/number_1.png',
+  'number_2': 'assets/default_content/images/mathematics/number_2.png',
+  'number_3': 'assets/default_content/images/mathematics/number_3.png',
+  'number_4': 'assets/default_content/images/mathematics/number_4.png',
+  'number_5': 'assets/default_content/images/mathematics/number_5.png',
+  'number_6': 'assets/default_content/images/mathematics/number_6.png',
+  'number_7': 'assets/default_content/images/mathematics/number_7.png',
+  'number_8': 'assets/default_content/images/mathematics/number_8.png',
+  'number_9': 'assets/default_content/images/mathematics/number_9.png',
+  'number_10': 'assets/default_content/images/mathematics/number_10.png',
+  'circle': 'assets/default_content/images/mathematics/circle.png',
+  'diamond': 'assets/default_content/images/mathematics/diamond.png',
+  'oval': 'assets/default_content/images/mathematics/oval.png',
+  'triangle': 'assets/default_content/images/mathematics/triangle.png',
+  'star': 'assets/default_content/images/mathematics/star.png',
+  'square': 'assets/default_content/images/mathematics/square.png',
+  'rectangle': 'assets/default_content/images/mathematics/rectangle.png',
+  'plus': 'assets/default_content/images/mathematics/plus.png',
+  'minus': 'assets/default_content/images/mathematics/minus.png',
+  'division': 'assets/default_content/images/mathematics/division.png',
+  'multiply': 'assets/default_content/images/mathematics/multiply.png',
+  // Colors
+  'black': 'assets/default_content/images/colors/black.png',
+  'blue': 'assets/default_content/images/colors/blue.png',
+  'green': 'assets/default_content/images/colors/green.png',
+  'orange_color': 'assets/default_content/images/colors/orange.png',
+  'pink': 'assets/default_content/images/colors/pink.png',
+  'red': 'assets/default_content/images/colors/red.png',
+  'white': 'assets/default_content/images/colors/white.png',
+  'yellow': 'assets/default_content/images/colors/yellow.png',
 };
