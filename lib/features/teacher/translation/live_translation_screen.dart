@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -329,28 +330,30 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                       ),
                       const SizedBox(width: 8),
                       // Send Recording Button
-                      ElevatedButton.icon(
-                        onPressed: (_recordedAudioPath != null && !_isRecording && !_isSaving)
-                            ? _handleSendRecording
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                        ),
-                        icon: _isSaving
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.send_rounded, size: 18),
-                        label: Text(
-                          _isSaving ? 'सहेज रहे...' : 'भेजें (Send)',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: (_recordedAudioPath != null && !_isRecording && !_isSaving)
+                              ? _handleSendRecording
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                          ),
+                          icon: _isSaving
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.send_rounded, size: 18),
+                          label: Text(
+                            _isSaving ? 'सहेज रहे...' : 'भेजें (Send)',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),

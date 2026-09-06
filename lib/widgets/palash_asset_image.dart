@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../assets/image_mapping.dart';
 import '../core/constants/app_colors.dart';
 
 /// Renders bundled asset image or rich contextual illustration
 class PalashAssetImage extends StatelessWidget {
   final String? imagePath;
+  final String? assetKey; // New logical key for centralized mapping
   final String? iconName;
   final double width;
   final double height;
@@ -13,6 +15,7 @@ class PalashAssetImage extends StatelessWidget {
   const PalashAssetImage({
     super.key,
     this.imagePath,
+    this.assetKey,
     this.iconName,
     this.width = 80,
     this.height = 80,
@@ -23,10 +26,19 @@ class PalashAssetImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content;
-
-    if (imagePath != null && imagePath!.isNotEmpty) {
+    // Resolve asset path: prefer assetKey mapping, fallback to imagePath
+    String? resolvedPath;
+    if (assetKey != null && assetKey!.isNotEmpty) {
+      // Import the mapping (added below) to resolve logical key
+      resolvedPath = imageAssetMap[assetKey];
+    }
+    if ((resolvedPath == null || resolvedPath.isEmpty) && imagePath != null && imagePath!.isNotEmpty) {
+      resolvedPath = imagePath;
+    }
+    if (resolvedPath != null && resolvedPath.isNotEmpty) {
       content = Image.asset(
-        imagePath!,
+        resolvedPath,
+
         width: width,
         height: height,
         fit: fit,
