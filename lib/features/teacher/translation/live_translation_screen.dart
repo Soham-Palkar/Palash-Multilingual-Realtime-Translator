@@ -1,18 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:record/record.dart';
-
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:uuid/uuid.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:speech_to_text/speech_recognition_result.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_strings.dart';
 import '../../../models/translation_model.dart';
 import '../../../services/translation_service.dart';
-import '../../../database/app_database.dart';
 import '../../../widgets/bilingual_text.dart';
 import '../../../widgets/connection_status_badge.dart';
 import '../../../widgets/palash_card.dart';
@@ -26,149 +19,92 @@ class LiveTranslationScreen extends StatefulWidget {
 
 class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
   final _inputController = TextEditingController(text: 'आज हम सब मिलकर गणित का नया पाठ सीखेंगे');
-  final AudioRecorder _audioRecorder = AudioRecorder();
+  final stt.SpeechToText _speech = stt.SpeechToText();
 
   TranslationResult? _currentResult;
   bool _isTranslating = false;
-  bool _isRecording = false;
-  bool _isSaving = false;
-  String? _recordedAudioPath;
+  bool _isListening = false;
+  bool _isSpeechAvailable = false;
+  String _lastWords = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initSpeech();
+  }
+
+  Future<void> _initSpeech() async {
+    try {
+      _isSpeechAvailable = await _speech.initialize(
+        onError: (val) => debugPrint('Speech Error: $val'),
+        onStatus: (val) => debugPrint('Speech Status: $val'),
+      );
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('Speech initialization failed: $e');
+    }
+  }
 
   @override
   void dispose() {
-    _audioRecorder.dispose();
+    _speech.stop();
     _inputController.dispose();
     super.dispose();
   }
 
-  Future<void> _toggleRecording() async {
-    if (_isRecording) {
-      // STOP RECORDING
-      try {
-        final path = await _audioRecorder.stop();
-        if (mounted) {
-          setState(() {
-            _isRecording = false;
-            _recordedAudioPath = path;
-          });
-          if (path != null && path.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                backgroundColor: AppColors.secondary,
-                content: Text('रिकॉर्डिंग समाप्त हुई। भेजने के लिए "भेजें / Send" बटन दबाएं।'),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() => _isRecording = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor: AppColors.error, content: Text('रिकॉर्डिंग रोकने में त्रुटि: $e')),
-          );
-        }
-      }
+  Future<void> _toggleListening() async {
+    if (_isListening) {
+      await _speech.stop();
+      setState(() => _isListening = false);
     } else {
-      // START RECORDING
-      try {
-        final hasPermission = await _audioRecorder.hasPermission();
-        if (!hasPermission) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                backgroundColor: AppColors.error,
-                content: Text('ऑडियो रिकॉर्ड करने के लिए माइक्रोफ़ोन अनुमति आवश्यक है। / Microphone permission is required to record audio.'),
-              ),
-            );
-          }
-          return;
-        }
-
-        final tempDir = await getTemporaryDirectory();
-        final path = p.join(
-          tempDir.path,
-          'translation_rec_${DateTime.now().millisecondsSinceEpoch}.m4a',
+      if (!_isSpeechAvailable) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('स्पीच रिकग्निशन उपलब्ध नहीं है। (Speech recognition not available.)'),
+          ),
         );
-
-        await _audioRecorder.start(
-          const RecordConfig(),
-          path: path,
-        );
-
-        if (mounted) {
-          setState(() {
-            _isRecording = true;
-            _recordedAudioPath = null;
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() => _isRecording = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor: AppColors.error, content: Text('रिकॉर्डिंग शुरू करने में त्रुटि: $e')),
-          );
-        }
+        return;
       }
+
+      final hasPermission = await _speech.hasPermission;
+      if (!hasPermission) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('माइक्रोफ़ोन अनुमति आवश्यक है। (Microphone permission required.)'),
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _isListening = true;
+        _lastWords = '';
+      });
+
+      await _speech.listen(
+        onResult: _onSpeechResult,
+        localeId: 'hi_IN', // Specifically for Hindi
+        cancelOnError: true,
+        listenMode: stt.ListenMode.confirmation,
+      );
     }
   }
 
-  Future<void> _handleSendRecording() async {
-    if (_recordedAudioPath == null || _recordedAudioPath!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: AppColors.warning,
-          content: Text('कोई रिकॉर्डिंग उपलब्ध नहीं है। कृपया पहले बोलकर रिकॉर्ड करें। / No recording available.'),
-        ),
-      );
-      return;
-    }
-
-    final file = File(_recordedAudioPath!);
-    if (!await file.exists()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: AppColors.error,
-          content: Text('ऑडियो फ़ाइल नहीं मिली। / Recording file not found.'),
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isSaving = true);
-
-    try {
-      final teacherId = FirebaseAuth.instance.currentUser?.uid ?? 'teacher';
-      final recording = TranslationRecording(
-        id: 'rec_${const Uuid().v4().substring(0, 8)}',
-        audioPath: _recordedAudioPath!,
-        teacherId: teacherId,
-      );
-
-      await AppDatabase.instance.insertTranslationRecording(recording);
-
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-          _recordedAudioPath = null;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: AppColors.secondary,
-            content: Text('रिकॉर्डिंग सफलतापूर्वक सहेजी गई! / Recording saved successfully!'),
-          ),
-        );
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      _lastWords = result.recognizedWords;
+      if (result.finalResult) {
+        _inputController.text = _lastWords;
+        _isListening = false;
+        // Optionally auto-translate on finish
+        _handleTextTranslate();
+      } else {
+        // Update text in real-time
+        _inputController.text = _lastWords;
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text('सहेजने में त्रुटि: $e'),
-          ),
-        );
-      }
-    }
+    });
   }
 
   Future<void> _handleTextTranslate() async {
@@ -200,7 +136,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
     setState(() {
       _inputController.clear();
       _currentResult = null;
-      _recordedAudioPath = null;
+      _lastWords = '';
     });
   }
 
@@ -233,7 +169,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Internet Connection Prototype Disclaimer
+            // Internet Connection Notice
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -247,7 +183,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      AppStrings.liveTranslationNotice,
+                      'लाइव अनुवाद के लिए इंटरनेट आवश्यक है। (Internet required for live translation.)',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -284,7 +220,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                           ),
                         ],
                       ),
-                      if (_inputController.text.isNotEmpty || _recordedAudioPath != null)
+                      if (_inputController.text.isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.clear_rounded, size: 18),
                           onPressed: _handleClear,
@@ -297,7 +233,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                     controller: _inputController,
                     maxLines: 3,
                     decoration: const InputDecoration(
-                      hintText: 'शिक्षक का हिन्दी वाक्य लिखें या बोलकर रिकॉर्ड करें...',
+                      hintText: 'हिन्दी में बोलें या यहाँ लिखें...',
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -307,51 +243,21 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      // Voice Recording Button
+                      // Voice Recognition Button
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _isSaving || _isTranslating ? null : _toggleRecording,
+                          onPressed: _isTranslating ? null : _toggleListening,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _isRecording ? AppColors.error : AppColors.primary,
+                            backgroundColor: _isListening ? AppColors.error : AppColors.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           icon: Icon(
-                            _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
+                            _isListening ? Icons.stop_rounded : Icons.mic_rounded,
                             size: 20,
                           ),
                           label: Text(
-                            _isRecording
-                                ? '⏹ रोकें (Stop)'
-                                : (_recordedAudioPath != null ? '🎙 नई रिकॉर्डिंग' : '🎙 रिकॉर्ड करें (Record)'),
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Send Recording Button
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: (_recordedAudioPath != null && !_isRecording && !_isSaving)
-                              ? _handleSendRecording
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                          ),
-                          icon: _isSaving
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.send_rounded, size: 18),
-                          label: Text(
-                            _isSaving ? 'सहेज रहे...' : 'भेजें (Send)',
+                            _isListening ? '⏹ रोकें (Stop)' : '🎙 बोलें (Speak Hindi)',
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -359,7 +265,7 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                       const SizedBox(width: 8),
                       // Text Translate Button
                       IconButton.filled(
-                        onPressed: _isTranslating || _isRecording || _isSaving ? null : _handleTextTranslate,
+                        onPressed: _isTranslating || _isListening ? null : _handleTextTranslate,
                         icon: _isTranslating
                             ? const SizedBox(
                                 width: 18,
@@ -373,37 +279,10 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.moduleLanguage,
                         ),
-                        tooltip: 'पाठ्य अनुवाद करें (Translate Text)',
+                        tooltip: 'अनुवाद करें (Translate)',
                       ),
                     ],
                   ),
-                  if (_recordedAudioPath != null) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryContainer.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.audiotrack_rounded, color: AppColors.secondary, size: 18),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'ऑडियो रिकॉर्डिंग तैयार है (Recording Ready to Send)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.secondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

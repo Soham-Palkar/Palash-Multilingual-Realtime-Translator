@@ -10,7 +10,7 @@ import '../services/auth_service.dart';
 import '../services/mock_ai_content_service.dart';
 import '../services/firebase_auth_service.dart';
 
-import '../services/mock_translation_service.dart';
+import '../services/online_translation_service.dart';
 import '../services/sync_service.dart';
 import '../services/firebase_sync_service.dart';
 import '../services/translation_service.dart';
@@ -29,10 +29,13 @@ class PalashApp extends StatelessWidget {
         // Connectivity State Service
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
 
-        // Concrete Service Implementations (Easily swappable with Firebase / FastAPI later)
+        // Concrete Service Implementations
         Provider<AuthService>(create: (_) => FirebaseAuthService()),
         Provider<AIContentService>(create: (_) => MockAIContentService()),
-        Provider<TranslationService>(create: (_) => MockTranslationService()),
+
+        // Use OnlineTranslationService for Live Translation feature
+        Provider<TranslationService>(create: (_) => OnlineTranslationService()),
+
         Provider<SyncService>(create: (_) => FirebaseSyncService()),
 
         // Repositories backed by SQLite/Drift Data-Access Layer
