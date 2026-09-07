@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -6,7 +7,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/translation_model.dart';
 import '../../../services/translation_service.dart';
-import '../../../widgets/bilingual_text.dart';
+import '../../../services/text_to_speech_service.dart';
 import '../../../widgets/connection_status_badge.dart';
 import '../../../widgets/palash_card.dart';
 
@@ -18,14 +19,25 @@ class LiveTranslationScreen extends StatefulWidget {
 }
 
 class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
-  final _inputController = TextEditingController(text: 'आज हम सब मिलकर गणित का नया पाठ सीखेंगे');
+  final _scrollController = ScrollController();
   final stt.SpeechToText _speech = stt.SpeechToText();
 
-  TranslationResult? _currentResult;
-  bool _isTranslating = false;
-  bool _isListening = false;
+  // Session State
+  bool _isSessionActive = false; // Main interpretation session toggle
   bool _isSpeechAvailable = false;
-  String _lastWords = '';
+  bool _isTranslating = false;
+
+  // Transcript Buffers
+  String _accumulatedText = ''; // Text from finished listening segments
+  String _currentSegmentText = ''; // Text from active listening segment
+  int _processedCharCount = 0; // Pointer for simultanous translation
+
+  // Constants
+  static const Duration _silenceThreshold = Duration(seconds: 5);
+  Timer? _silenceTimer;
+
+  // UI State History
+  final List<TranslationResult> _translationHistory = [];
 
   @override
   void initState() {
@@ -36,115 +48,189 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
   Future<void> _initSpeech() async {
     try {
       _isSpeechAvailable = await _speech.initialize(
-        onError: (val) => debugPrint('Speech Error: $val'),
-        onStatus: (val) => debugPrint('Speech Status: $val'),
+        onError: (val) => _onInternalSpeechError(val),
+        onStatus: (val) => _onInternalSpeechStatus(val),
       );
       if (mounted) setState(() {});
     } catch (e) {
-      debugPrint('Speech initialization failed: $e');
+      debugPrint('Speech engine initialization error: $e');
     }
+  }
+
+  /// Internal handler for STT engine status changes.
+  /// Used to ensure the microphone stays active even if the plugin stops.
+  void _onInternalSpeechStatus(String status) {
+    debugPrint('STT Engine Status: $status');
+    if (status == 'done' || status == 'notListening') {
+      if (_isSessionActive && mounted) {
+        _restartListeningSegment();
+      }
+    }
+  }
+
+  void _onInternalSpeechError(dynamic error) {
+    debugPrint('STT Engine Error: $error');
+    if (_isSessionActive && mounted) {
+      _restartListeningSegment();
+    }
+  }
+
+  /// Restarts the microphone while keeping the overall session active.
+  void _restartListeningSegment() {
+    setState(() {
+      _accumulatedText = '$_accumulatedText $_currentSegmentText'.trim();
+      _currentSegmentText = '';
+    });
+    // Brief cooldown to avoid immediate re-trigger errors
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _startMicrophone();
+    });
   }
 
   @override
   void dispose() {
+    _silenceTimer?.cancel();
     _speech.stop();
-    _inputController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  Future<void> _toggleListening() async {
-    if (_isListening) {
+  /// Main Session Start/Stop Toggle
+  Future<void> _toggleLiveSession() async {
+    if (_isSessionActive) {
+      // STOP SESSION
+      setState(() => _isSessionActive = false);
+      _silenceTimer?.cancel();
       await _speech.stop();
-      setState(() => _isListening = false);
+
+      // Finalize any remaining text immediately
+      _finalizeCurrentChunk();
     } else {
+      // START SESSION
       if (!_isSpeechAvailable) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text('स्पीच रिकग्निशन उपलब्ध नहीं है। (Speech recognition not available.)'),
-          ),
-        );
+        _showToast('स्पीच रिकग्निशन उपलब्ध नहीं है।');
         return;
       }
 
       final hasPermission = await _speech.hasPermission;
       if (!hasPermission) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text('माइक्रोफ़ोन अनुमति आवश्यक है। (Microphone permission required.)'),
-          ),
-        );
+        _showToast('माइक्रोफ़ोन अनुमति आवश्यक है।');
         return;
       }
 
       setState(() {
-        _isListening = true;
-        _lastWords = '';
+        _isSessionActive = true;
+        _accumulatedText = '';
+        _currentSegmentText = '';
+        _processedCharCount = 0;
+        _translationHistory.clear();
       });
 
-      await _speech.listen(
-        onResult: _onSpeechResult,
-        localeId: 'hi_IN', // Specifically for Hindi
-        cancelOnError: true,
-        listenMode: stt.ListenMode.confirmation,
-      );
+      _startMicrophone();
     }
   }
 
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    setState(() {
-      _lastWords = result.recognizedWords;
-      if (result.finalResult) {
-        _inputController.text = _lastWords;
-        _isListening = false;
-        // Optionally auto-translate on finish
-        _handleTextTranslate();
-      } else {
-        // Update text in real-time
-        _inputController.text = _lastWords;
-      }
-    });
-  }
-
-  Future<void> _handleTextTranslate() async {
-    final text = _inputController.text.trim();
-    if (text.isEmpty) return;
-
-    setState(() => _isTranslating = true);
-    final transSvc = Provider.of<TranslationService>(context, listen: false);
+  Future<void> _startMicrophone() async {
+    if (!mounted || !_isSessionActive || _speech.isListening) return;
 
     try {
-      final res = await transSvc.translateText(text);
-      if (mounted) {
-        setState(() {
-          _currentResult = res;
-          _isTranslating = false;
-        });
-      }
+      await _speech.listen(
+        onResult: _onSpeechUpdate,
+        localeId: 'hi_IN',
+        cancelOnError: false,
+        listenMode: stt.ListenMode.dictation, // Dictation for long-form speech
+        partialResults: true,
+      );
     } catch (e) {
-      if (mounted) {
-        setState(() => _isTranslating = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: AppColors.error, content: Text('त्रुटि: $e')),
-        );
-      }
+      debugPrint('STT listen error: $e');
     }
   }
 
-  void _handleClear() {
+  void _onSpeechUpdate(SpeechRecognitionResult result) {
+    // 1. Update Current Text
     setState(() {
-      _inputController.clear();
-      _currentResult = null;
-      _lastWords = '';
+      _currentSegmentText = result.recognizedWords;
     });
+
+    // 2. Reset Silence Timer
+    _silenceTimer?.cancel();
+    if (_isSessionActive) {
+      _silenceTimer = Timer(_silenceThreshold, () {
+        _finalizeCurrentChunk();
+      });
+    }
+  }
+
+  String get _fullTranscript => '$_accumulatedText $_currentSegmentText'.trim();
+
+  /// Finalizes the current speech chunk when 5 seconds of silence is detected.
+  void _finalizeCurrentChunk() {
+    final full = _fullTranscript;
+    if (full.length <= _processedCharCount) return;
+
+    // Extract only the new chunk since the last finalization
+    String newChunk = full.substring(_processedCharCount).trim();
+
+    // Ignore tiny noises
+    if (newChunk.length < 3) return;
+
+    _processedCharCount = full.length;
+    debugPrint('Finalizing Interpretation Chunk: $newChunk');
+
+    _translateAndPlay(newChunk);
+  }
+
+  /// Sends the finalized Hindi chunk for translation and sequential audio playback.
+  Future<void> _translateAndPlay(String text) async {
+    setState(() => _isTranslating = true);
+
+    final transSvc = Provider.of<TranslationService>(context, listen: false);
+    final ttsSvc = Provider.of<TextToSpeechService>(context, listen: false);
+
+    try {
+      final result = await transSvc.translateText(text);
+      if (mounted) {
+        setState(() {
+          _translationHistory.insert(0, result);
+          _isTranslating = false;
+        });
+
+        // Automated TTS playback (sequential queue handled inside service)
+        ttsSvc.speakSantali(result.translatedSantali);
+
+        // Auto-scroll to top of stream
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            0.0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Translation error: $e');
+      if (mounted) setState(() => _isTranslating = false);
+    }
+  }
+
+  void _handleClearAll() {
+    Provider.of<TextToSpeechService>(context, listen: false).stop();
+    setState(() {
+      _translationHistory.clear();
+      _accumulatedText = '';
+      _currentSegmentText = '';
+      _processedCharCount = 0;
+    });
+  }
+
+  void _showToast(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(backgroundColor: AppColors.error, content: Text(msg)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final transSvc = Provider.of<TranslationService>(context);
-    final history = transSvc.getSessionHistory();
-
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -152,275 +238,167 @@ class _LiveTranslationScreenState extends State<LiveTranslationScreen> {
             Icon(Icons.g_translate_rounded, color: AppColors.primary),
             SizedBox(width: 8),
             Text(
-              'लाइव अनुवाद स्टूडियो',
+              'निरंतर अनुवाद (Simultaneous)',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
             ),
           ],
         ),
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_sweep_rounded),
+            onPressed: _handleClearAll,
+            tooltip: 'सत्र साफ करें',
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: 12),
             child: ConnectionStatusBadge(),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
+      body: Column(
+        children: [
+          _buildSessionStatusIndicator(),
+          Expanded(
+            child: ListView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(18),
+              children: [
+                _buildLiveInputCard(),
+                const SizedBox(height: 24),
+                if (_translationHistory.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4, bottom: 12),
+                    child: Text(
+                      'अनुवाद प्रवाह (Interpretation Stream)',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  ..._translationHistory.map((item) => _buildStreamItem(item)),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.large(
+        onPressed: _toggleLiveSession,
+        backgroundColor: _isSessionActive ? AppColors.error : AppColors.primary,
+        child: Icon(
+          _isSessionActive ? Icons.stop_rounded : Icons.mic_rounded,
+          color: Colors.white,
+          size: 36,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildSessionStatusIndicator() {
+    String statusLabel = 'तैयार (Ready)';
+    Color statusColor = AppColors.info;
+
+    if (_isSessionActive) {
+      statusLabel = 'सुन रहे हैं... (Listening Simulatneously)';
+      statusColor = Colors.green;
+    }
+    if (_isTranslating) {
+      statusLabel = 'अनुवाद हो रहा है... (Translating...)';
+      statusColor = AppColors.moduleLanguage;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      color: statusColor.withOpacity(0.1),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.circle, size: 8, color: statusColor),
+          const SizedBox(width: 8),
+          Text(
+            statusLabel,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLiveInputCard() {
+    final displayTranscript = _fullTranscript;
+    return PalashCard(
+      elevation: 2,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.record_voice_over_rounded, color: AppColors.primary, size: 18),
+                  SizedBox(width: 8),
+                  Text('शिक्षक की आवाज (Live Hindi Stream)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              if (_isSessionActive)
+                const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            displayTranscript.isEmpty
+              ? (_isSessionActive ? 'बोलना शुरू करें...' : 'शुरू करने के लिए माइक दबाएं')
+              : displayTranscript,
+            style: TextStyle(
+              fontSize: 16,
+              color: displayTranscript.isEmpty ? AppColors.textMuted : AppColors.textPrimary,
+              fontStyle: displayTranscript.isEmpty ? FontStyle.italic : FontStyle.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStreamItem(TranslationResult item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: PalashCard(
+        backgroundColor: AppColors.secondaryContainer.withOpacity(0.3),
+        borderColor: AppColors.secondary.withOpacity(0.2),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Internet Connection Notice
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.infoContainer.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.info.withOpacity(0.3)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info_outline_rounded, color: AppColors.info, size: 20),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'लाइव अनुवाद के लिए इंटरनेट आवश्यक है। (Internet required for live translation.)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF01579B),
-                      ),
-                    ),
+            Row(
+              children: [
+                const Icon(Icons.check_circle_outline_rounded, size: 14, color: AppColors.textSecondary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    item.sourceText,
+                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 18),
-
-            // Hindi Input Card
-            PalashCard(
-              elevation: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 20),
-                          SizedBox(width: 6),
-                          Text(
-                            'हिन्दी इनपुट (Hindi Input)',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_inputController.text.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.clear_rounded, size: 18),
-                          onPressed: _handleClear,
-                          tooltip: 'हटाएं (Clear)',
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _inputController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      hintText: 'हिन्दी में बोलें या यहाँ लिखें...',
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                    ),
-                  ),
-                  const Divider(height: 1, color: AppColors.border),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      // Voice Recognition Button
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _isTranslating ? null : _toggleListening,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _isListening ? AppColors.error : AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          icon: Icon(
-                            _isListening ? Icons.stop_rounded : Icons.mic_rounded,
-                            size: 20,
-                          ),
-                          label: Text(
-                            _isListening ? '⏹ रोकें (Stop)' : '🎙 बोलें (Speak Hindi)',
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Text Translate Button
-                      IconButton.filled(
-                        onPressed: _isTranslating || _isListening ? null : _handleTextTranslate,
-                        icon: _isTranslating
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.g_translate_rounded, size: 18),
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.moduleLanguage,
-                        ),
-                        tooltip: 'अनुवाद करें (Translate)',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Translation Output Display
-            if (_currentResult != null) ...[
-              PalashCard(
-                backgroundColor: AppColors.secondaryContainer.withOpacity(0.4),
-                borderColor: AppColors.secondary.withOpacity(0.3),
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.verified_rounded,
-                          color: AppColors.secondary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Flexible(
-                          child: Text(
-                            'ᱥᱟᱱᱛᱟᱲᱤ ᱛᱚᱨᱡᱚᱢᱟ (Santali Output)',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.secondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
-                          ),
-                          child: Text(
-                            'Confidence: ${(_currentResult!.confidence * 100).toInt()}%',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      _currentResult!.translatedSantali,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        height: 1.4,
-                      ),
-                    ),
-                    if (_currentResult!.translatedOlChiki != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'ᱚᱞ ᱪᱤᱠᱤ: ${_currentResult!.translatedOlChiki}',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                    ],
-                    if (_currentResult!.phoneticRoman != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Phonetic: ${_currentResult!.phoneticRoman}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // Current Session Translation History
-            if (history.isNotEmpty) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'सत्र अनुवाद इतिहास (${history.length})',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      transSvc.clearHistory();
-                      setState(() {});
-                    },
-                    child: const Text('इतिहास साफ करें'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: history.length,
-                itemBuilder: (context, index) {
-                  final item = history[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: PalashCard(
-                      padding: const EdgeInsets.all(14),
-                      child: BilingualText(
-                        hindi: item.sourceText,
-                        santali: item.translatedSantali,
-                        santaliOlChiki: item.translatedOlChiki,
-                        hindiFontSize: 14,
-                        santaliFontSize: 13,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.volume_up_rounded, size: 18, color: AppColors.secondary),
+                  onPressed: () => Provider.of<TextToSpeechService>(context, listen: false).speakSantali(item.translatedSantali),
+                ),
+              ],
+            ),
+            const Divider(height: 16),
+            Text(
+              item.translatedSantali,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
           ],
         ),
       ),
